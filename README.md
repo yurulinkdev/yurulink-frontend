@@ -1,0 +1,7 @@
+# YuruLink Frontend
+
+バックエンドが生成した公開用JSONからHugoで静的サイトを構築し、Cloudflare Pagesにデプロイするフロントエンドです。
+
+旧Tohaサンプルサイトは移行せず、クリーンな構成から開始します。現時点では公開JSONの仕様、サイトテンプレート、デプロイ設定は未実装です。
+
+公開リポジトリにはGoogle Cloudの認証情報、非公開のGoogle Sheetsデータ、APIキーを含めないでください。
