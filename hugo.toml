@@ -1,0 +1,4 @@
+title = "YuruLink"
+defaultContentLanguage = "ja"
+disableKinds = ["taxonomy", "term", "RSS"]
+enableRobotsTXT = true
