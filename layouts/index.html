@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{{ .Site.Title }}</title>
+  <meta name="description" content="ゆる学徒コンテンツのリンク集">
+  <style>
+    :root { color-scheme: light; font-family: system-ui, sans-serif; }
+    body { max-width: 64rem; margin: 0 auto; padding: 2rem 1rem; color: #192b43; background: #f7f2e8; }
+    a { color: #7b2945; }
+    li { margin: .7rem 0; }
+  </style>
+</head>
+<body>
+  <main>
+    <h1>{{ .Site.Title }}</h1>
+    <p>ゆる学徒コンテンツのリンク集</p>
+    {{ with .Site.Data.public.videos }}
+      <ul>
+        {{ range .videos }}
+          <li><a href="{{ .url | safeURL }}">{{ .title }}</a></li>
+        {{ end }}
+      </ul>
+    {{ else }}
+      <p>公開データの連携準備中です。</p>
+    {{ end }}
+  </main>
+</body>
+</html>
