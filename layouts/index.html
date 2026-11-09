@@ -3,94 +3,81 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="ゆる学徒コンテンツのリンクを探すための非公式リンク集">
+  <meta name="description" content="ゆる学徒コンテンツの非公式リンク集">
   <title>{{ .Site.Title }}</title>
-  <style>
-    :root { font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; color: #172b45; background: #f8f3e9; }
-    * { box-sizing: border-box; }
-    body { margin: 0; }
-    header { background: #172b45; color: white; padding: 2.5rem max(1rem, calc((100vw - 70rem) / 2)); }
-    header h1 { margin: 0; font-size: clamp(2rem, 5vw, 3rem); }
-    header p { color: #e7d8ce; }
-    main { max-width: 70rem; padding: 2rem 1rem 4rem; margin: auto; }
-    .tools { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
-    input, select { font: inherit; padding: .75rem; border: 1px solid #9ca3af; border-radius: .5rem; background: white; color: #172b45; }
-    input { flex: 1 1 18rem; }
-    select { flex: 1 1 12rem; }
-    .count { color: #555; }
-    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 1rem; list-style: none; padding: 0; }
-    .card { background: white; border: 1px solid #e6dfd6; border-radius: .75rem; padding: 1.2rem; height: 100%; }
-    .card h2 { font-size: 1.1rem; line-height: 1.5; margin: .3rem 0 .7rem; overflow-wrap: anywhere; }
-    .card a { color: #792b47; }
-    .meta { font-size: .85rem; color: #565f6b; }
-    .empty { padding: 1.5rem; border: 1px dashed #aaa; border-radius: .5rem; }
-    [hidden] { display: none !important; }
-    a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #b35d7a; outline-offset: 2px; }
-  </style>
+  <script>
+    (() => {
+      let mode = 'auto';
+      try { mode = localStorage.getItem('yurulink-theme') || 'auto'; } catch {}
+      document.documentElement.dataset.theme =
+        mode === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : mode;
+    })();
+  </script>
+  <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
+  <script src="{{ "js/site.js" | relURL }}" defer></script>
 </head>
-<body>
-  <header>
-    <h1>{{ .Site.Title }}</h1>
-    <p>ゆる学徒コンテンツの非公式リンク集</p>
-  </header>
-  <main>
-    {{ $catalog := .Site.Data.public.videos }}
-    {{ if and $catalog $catalog.videos }}
-      <div class="tools" role="search" aria-label="リンクを絞り込む">
-        <input id="query" type="search" placeholder="タイトルを検索" aria-label="タイトルを検索">
-        <select id="source" aria-label="番組で絞り込む"><option value="">すべての番組</option></select>
+<body class="min-h-screen bg-page text-ink">
+  <div class="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+    <div id="drawer-backdrop" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden" aria-hidden="true"></div>
+    <aside id="category-drawer" aria-label="カテゴリー" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full overflow-y-auto border-r border-line bg-panel p-5 shadow-xl transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-auto lg:translate-x-0 lg:shadow-none">
+      <div class="mb-7 flex items-center justify-between">
+        <a href="{{ "" | relURL }}" class="text-xl font-bold tracking-tight">YuruLink</a>
+        <button id="close-categories" type="button" class="rounded-lg border border-line px-3 py-2 lg:hidden" aria-label="カテゴリーを閉じる">✕</button>
       </div>
-      <p id="count" class="count" aria-live="polite"></p>
-      <ul class="cards" id="catalog">
-        {{ range $catalog.videos }}
-          {{ if and .title .url }}
-            {{ $url := urls.Parse .url }}
-            {{ if in (slice "https" "http") $url.Scheme }}
-              <li class="item" data-title="{{ .title | lower }}" data-source="{{ .source | default "" }}">
-                <article class="card">
-                  {{ with .source }}<p class="meta">{{ . }}</p>{{ end }}
-                  <h2><a href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
-                  {{ with .published_at }}<p class="meta">公開日: {{ . }}</p>{{ end }}
-                </article>
-              </li>
+      <p class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">カテゴリー・番組</p>
+      <nav id="category-buttons" class="space-y-1" aria-label="番組一覧"></nav>
+      <p class="mt-6 text-xs leading-relaxed text-muted-ink">カテゴリー階層とプレイリストは、公開JSONの仕様確定後に接続します。</p>
+    </aside>
+    <main class="min-w-0">
+      <header class="sticky top-0 z-20 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur sm:px-7">
+        <div class="flex items-center gap-3">
+          <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">カテゴリーを開く</span></button>
+          <label class="relative min-w-0 flex-1">
+            <span class="sr-only">コンテンツを検索</span>
+            <input id="query" type="search" placeholder="タイトル・番組名で検索" class="w-full rounded-xl border border-line bg-page px-4 py-2.5 text-ink placeholder:text-muted-ink" autocomplete="off">
+          </label>
+          <label class="flex items-center gap-2">
+            <span class="sr-only">表示テーマ</span>
+            <select id="theme-select" aria-label="表示テーマ" class="rounded-lg border border-line bg-panel px-2 py-2.5 text-sm text-ink">
+              <option value="auto">自動</option>
+              <option value="light">ライト</option>
+              <option value="dark">ダーク</option>
+            </select>
+          </label>
+        </div>
+      </header>
+      <section class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
+        <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p class="mb-1 text-xs text-muted-ink">閲覧中のカテゴリー</p>
+            <h1 id="selected-category" class="text-xl font-semibold sm:text-2xl">すべてのコンテンツ</h1>
+          </div>
+          <p id="count" class="text-sm text-muted-ink" aria-live="polite"></p>
+        </div>
+        {{ $catalog := .Site.Data.public.videos }}
+        {{ if and $catalog $catalog.videos }}
+          <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
+            {{ range $catalog.videos }}
+              {{ if and .title .url }}
+                {{ $url := urls.Parse .url }}
+                {{ if in (slice "https" "http") $url.Scheme }}
+                  <li data-catalog-item data-search="{{ printf "%s %s" .title (.source | default "") }}" data-source="{{ .source | default "" }}">
+                    <article class="h-full rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
+                      {{ with .source }}<p class="mb-2 text-xs text-muted-ink">{{ . }}</p>{{ end }}
+                      <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
+                      {{ with .published_at }}<p class="mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
+                    </article>
+                  </li>
+                {{ end }}
+              {{ end }}
             {{ end }}
-          {{ end }}
+          </ul>
+          <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
+        {{ else }}
+          <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">公開データの連携準備中です。既存の本番サイトは引き続き稼働しています。</p>
         {{ end }}
-      </ul>
-      <p id="no-results" class="empty" hidden>該当するリンクがありません。</p>
-      <script>
-        (() => {
-          const items = [...document.querySelectorAll('.item')];
-          const query = document.getElementById('query');
-          const source = document.getElementById('source');
-          const count = document.getElementById('count');
-          const empty = document.getElementById('no-results');
-          const sources = [...new Set(items.map(x => x.dataset.source).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'));
-          for (const value of sources) {
-            const option = document.createElement('option');
-            option.value = value;
-            option.textContent = value;
-            source.append(option);
-          }
-          const filter = () => {
-            const q = query.value.trim().toLocaleLowerCase('ja');
-            let visible = 0;
-            for (const item of items) {
-              const match = item.dataset.title.includes(q) && (!source.value || item.dataset.source === source.value);
-              item.hidden = !match;
-              if (match) visible++;
-            }
-            count.textContent = visible + ' 件 / 全 ' + items.length + ' 件';
-            empty.hidden = visible !== 0;
-          };
-          query.addEventListener('input', filter);
-          source.addEventListener('change', filter);
-          filter();
-        })();
-      </script>
-    {{ else }}
-      <p class="empty">公開データの連携準備中です。現在、旧サイトからの切り替え作業を進めています。</p>
-    {{ end }}
-  </main>
+      </section>
+    </main>
+  </div>
 </body>
 </html>
