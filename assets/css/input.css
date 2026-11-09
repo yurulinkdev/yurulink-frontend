@@ -1,0 +1,42 @@
+@import "tailwindcss";
+@plugin "daisyui" {
+  themes: false;
+}
+@source "../../layouts/**/*.html";
+
+:root, [data-theme="light"] {
+  color-scheme: light;
+  --page: #f8fafc;
+  --panel: #ffffff;
+  --panel-muted: #f1f5f9;
+  --text: #1e293b;
+  --muted: #475569;
+  --line: #cbd5e1;
+  --accent: #334155;
+  --accent-text: #ffffff;
+}
+[data-theme="dark"] {
+  color-scheme: dark;
+  --page: #0f172a;
+  --panel: #1e293b;
+  --panel-muted: #334155;
+  --text: #f1f5f9;
+  --muted: #cbd5e1;
+  --line: #475569;
+  --accent: #cbd5e1;
+  --accent-text: #0f172a;
+}
+@theme inline {
+  --color-page: var(--page);
+  --color-panel: var(--panel);
+  --color-panel-muted: var(--panel-muted);
+  --color-ink: var(--text);
+  --color-muted-ink: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-text);
+}
+html { font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+body { background: var(--page); color: var(--text); }
+[hidden] { display: none !important; }
+:focus-visible { outline: 3px solid #0d9488; outline-offset: 2px; }
