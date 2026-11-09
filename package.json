@@ -1,0 +1,14 @@
+{
+  "name": "yurulink-frontend",
+  "private": true,
+  "scripts": {
+    "css:build": "tailwindcss -i ./assets/css/input.css -o ./static/css/site.css --minify",
+    "css:watch": "tailwindcss -i ./assets/css/input.css -o ./static/css/site.css --watch",
+    "build": "npm run css:build && hugo --minify"
+  },
+  "devDependencies": {
+    "@tailwindcss/cli": "^4.1.0",
+    "tailwindcss": "^4.1.0",
+    "daisyui": "^5.0.0"
+  }
+}
