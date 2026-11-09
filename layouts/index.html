@@ -3,27 +3,93 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="ゆる学徒コンテンツのリンクを探すための非公式リンク集">
   <title>{{ .Site.Title }}</title>
-  <meta name="description" content="ゆる学徒コンテンツのリンク集">
   <style>
-    :root { color-scheme: light; font-family: system-ui, sans-serif; }
-    body { max-width: 64rem; margin: 0 auto; padding: 2rem 1rem; color: #192b43; background: #f7f2e8; }
-    a { color: #7b2945; }
-    li { margin: .7rem 0; }
+    :root { font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", sans-serif; color: #172b45; background: #f8f3e9; }
+    * { box-sizing: border-box; }
+    body { margin: 0; }
+    header { background: #172b45; color: white; padding: 2.5rem max(1rem, calc((100vw - 70rem) / 2)); }
+    header h1 { margin: 0; font-size: clamp(2rem, 5vw, 3rem); }
+    header p { color: #e7d8ce; }
+    main { max-width: 70rem; padding: 2rem 1rem 4rem; margin: auto; }
+    .tools { display: flex; flex-wrap: wrap; gap: .75rem; margin-bottom: 1rem; }
+    input, select { font: inherit; padding: .75rem; border: 1px solid #9ca3af; border-radius: .5rem; background: white; color: #172b45; }
+    input { flex: 1 1 18rem; }
+    select { flex: 1 1 12rem; }
+    .count { color: #555; }
+    .cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 19rem), 1fr)); gap: 1rem; list-style: none; padding: 0; }
+    .card { background: white; border: 1px solid #e6dfd6; border-radius: .75rem; padding: 1.2rem; height: 100%; }
+    .card h2 { font-size: 1.1rem; line-height: 1.5; margin: .3rem 0 .7rem; overflow-wrap: anywhere; }
+    .card a { color: #792b47; }
+    .meta { font-size: .85rem; color: #565f6b; }
+    .empty { padding: 1.5rem; border: 1px dashed #aaa; border-radius: .5rem; }
+    [hidden] { display: none !important; }
+    a:focus-visible, input:focus-visible, select:focus-visible { outline: 3px solid #b35d7a; outline-offset: 2px; }
   </style>
 </head>
 <body>
-  <main>
+  <header>
     <h1>{{ .Site.Title }}</h1>
-    <p>ゆる学徒コンテンツのリンク集</p>
-    {{ with .Site.Data.public.videos }}
-      <ul>
-        {{ range .videos }}
-          <li><a href="{{ .url | safeURL }}">{{ .title }}</a></li>
+    <p>ゆる学徒コンテンツの非公式リンク集</p>
+  </header>
+  <main>
+    {{ $catalog := .Site.Data.public.videos }}
+    {{ if and $catalog $catalog.videos }}
+      <div class="tools" role="search" aria-label="リンクを絞り込む">
+        <input id="query" type="search" placeholder="タイトルを検索" aria-label="タイトルを検索">
+        <select id="source" aria-label="番組で絞り込む"><option value="">すべての番組</option></select>
+      </div>
+      <p id="count" class="count" aria-live="polite"></p>
+      <ul class="cards" id="catalog">
+        {{ range $catalog.videos }}
+          {{ if and .title .url }}
+            {{ $url := urls.Parse .url }}
+            {{ if in (slice "https" "http") $url.Scheme }}
+              <li class="item" data-title="{{ .title | lower }}" data-source="{{ .source | default "" }}">
+                <article class="card">
+                  {{ with .source }}<p class="meta">{{ . }}</p>{{ end }}
+                  <h2><a href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
+                  {{ with .published_at }}<p class="meta">公開日: {{ . }}</p>{{ end }}
+                </article>
+              </li>
+            {{ end }}
+          {{ end }}
         {{ end }}
       </ul>
+      <p id="no-results" class="empty" hidden>該当するリンクがありません。</p>
+      <script>
+        (() => {
+          const items = [...document.querySelectorAll('.item')];
+          const query = document.getElementById('query');
+          const source = document.getElementById('source');
+          const count = document.getElementById('count');
+          const empty = document.getElementById('no-results');
+          const sources = [...new Set(items.map(x => x.dataset.source).filter(Boolean))].sort((a, b) => a.localeCompare(b, 'ja'));
+          for (const value of sources) {
+            const option = document.createElement('option');
+            option.value = value;
+            option.textContent = value;
+            source.append(option);
+          }
+          const filter = () => {
+            const q = query.value.trim().toLocaleLowerCase('ja');
+            let visible = 0;
+            for (const item of items) {
+              const match = item.dataset.title.includes(q) && (!source.value || item.dataset.source === source.value);
+              item.hidden = !match;
+              if (match) visible++;
+            }
+            count.textContent = visible + ' 件 / 全 ' + items.length + ' 件';
+            empty.hidden = visible !== 0;
+          };
+          query.addEventListener('input', filter);
+          source.addEventListener('change', filter);
+          filter();
+        })();
+      </script>
     {{ else }}
-      <p>公開データの連携準備中です。</p>
+      <p class="empty">公開データの連携準備中です。現在、旧サイトからの切り替え作業を進めています。</p>
     {{ end }}
   </main>
 </body>
