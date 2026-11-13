@@ -18,6 +18,24 @@
   mq.addEventListener?.('change', apply);
   apply();
 
+  const catalog = document.getElementById('catalog');
+  const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
+  const viewKey = 'yurulink-catalog-view';
+  const applyView = (value) => {
+    const view = value === 'list' ? 'list' : 'grid';
+    catalog?.classList.toggle('catalog-list-view', view === 'list');
+    for (const button of viewButtons) {
+      button.setAttribute('aria-pressed', String(button.dataset.catalogView === view));
+    }
+  };
+  let initialView = 'grid';
+  try { initialView = localStorage.getItem(viewKey) || 'grid'; } catch { /* storage disabled */ }
+  applyView(initialView);
+  for (const button of viewButtons) button.addEventListener('click', () => {
+    const value = button.dataset.catalogView;
+    applyView(value);
+    try { localStorage.setItem(viewKey, value); } catch { /* storage disabled */ }
+  });
   const items = [...document.querySelectorAll('[data-catalog-item]')];
   const search = document.getElementById('query');
   const selected = document.getElementById('selected-category');
