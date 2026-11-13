@@ -1,0 +1,5 @@
+{{- /* Synchronous, tiny theme initialization before CSS paints; source lives in assets/js. */ -}}
+{{- with resources.Get "js/theme-init.js" -}}
+  {{- $init := . | minify -}}
+  <script>{{ $init.Content | safeJS }}</script>
+{{- end -}}
