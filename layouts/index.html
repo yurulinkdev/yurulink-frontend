@@ -26,7 +26,7 @@
       </div>
       <p class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">カテゴリー・番組</p>
       <nav id="category-buttons" class="space-y-1" aria-label="番組一覧"></nav>
-      <p class="mt-6 text-xs leading-relaxed text-muted-ink">カテゴリー階層とプレイリストは、公開JSONの仕様確定後に接続します。</p>
+      <p class="mt-6 text-xs leading-relaxed text-muted-ink">公開承認されたリンクのみを掲載します。投稿内容は審査後に反映されます。</p>
     </aside>
     <main class="min-w-0">
       <header class="sticky top-0 z-20 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur sm:px-7">
@@ -34,7 +34,7 @@
           <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">カテゴリーを開く</span></button>
           <label class="relative min-w-0 flex-1">
             <span class="sr-only">コンテンツを検索</span>
-            <input id="query" type="search" placeholder="タイトル・番組名で検索" class="w-full rounded-xl border border-line bg-page px-4 py-2.5 text-ink placeholder:text-muted-ink" autocomplete="off">
+            <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page px-4 py-2.5 text-ink placeholder:text-muted-ink" autocomplete="off">
           </label>
           <label class="flex items-center gap-2">
             <span class="sr-only">表示テーマ</span>
@@ -54,27 +54,56 @@
           </div>
           <p id="count" class="text-sm text-muted-ink" aria-live="polite"></p>
         </div>
-        {{ $catalog := .Site.Data.public.videos }}
-        {{ if and $catalog $catalog.videos }}
+        {{ $v2 := .Site.Data.public.catalog }}
+        {{ if and $v2 (eq (int ($v2.schema_version | default 0)) 2) }}
+          {{ $programs := dict }}
+          {{ range $v2.programs }}{{ $programs = merge $programs (dict .id .name) }}{{ end }}
+          {{ $tax := .Site.Data.taxonomy }}
+          {{ $categories := dict }}
+          {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
           <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
-            {{ range $catalog.videos }}
-              {{ if and .title .url }}
-                {{ $url := urls.Parse .url }}
-                {{ if in (slice "https" "http") $url.Scheme }}
-                  <li data-catalog-item data-search="{{ printf "%s %s" .title (.source | default "") }}" data-source="{{ .source | default "" }}">
-                    <article class="h-full rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
-                      {{ with .source }}<p class="mb-2 text-xs text-muted-ink">{{ . }}</p>{{ end }}
-                      <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
-                      {{ with .published_at }}<p class="mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
-                    </article>
-                  </li>
-                {{ end }}
+          {{ range $v2.items }}
+            {{ if and (eq .status "published") .title .url }}
+              {{ $url := urls.Parse .url }}
+              {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
+                {{ $cat := .category_id | default .kind }}
+                {{ $catLabel := index $categories $cat | default $cat }}
+                {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
+                <li data-catalog-item data-category="{{ $cat }}" data-category-label="{{ $catLabel }}" data-search="{{ $search }}">
+                  <article class="h-full rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
+                    <p class="mb-2 text-xs text-muted-ink">{{ $catLabel }}{{ with .platform }} · {{ . }}{{ end }}</p>
+                    <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
+                    {{ with .description }}<p class="mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}
+                    {{ with .published_at }}<p class="mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
+                  </article>
+                </li>
               {{ end }}
             {{ end }}
+          {{ end }}
           </ul>
           <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
         {{ else }}
-          <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">公開データの連携準備中です。既存の本番サイトは引き続き稼働しています。</p>
+          {{ $catalog := .Site.Data.public.videos }}
+          {{ if and $catalog $catalog.videos }}
+            <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
+              {{ range $catalog.videos }}
+                {{ if and .title .url }}
+                  {{ $url := urls.Parse .url }}
+                  {{ if and (eq $url.Scheme "https") $url.Host }}
+                    <li data-catalog-item data-category="{{ .source | default "video" }}" data-category-label="{{ .source | default "動画" }}" data-search="{{ printf "%s %s" .title (.source | default "") }}">
+                      <article class="h-full rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
+                        {{ with .source }}<p class="mb-2 text-xs text-muted-ink">{{ . }}</p>{{ end }}
+                        <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
+                      </article>
+                    </li>
+                  {{ end }}
+                {{ end }}
+              {{ end }}
+            </ul>
+            <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
+          {{ else }}
+            <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">公開データの連携準備中です。既存の本番サイトは引き続き稼働しています。</p>
+          {{ end }}
         {{ end }}
       </section>
     </main>
