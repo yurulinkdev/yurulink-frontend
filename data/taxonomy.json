@@ -1,0 +1,144 @@
+{
+  "schema_version": 1,
+  "policy": {
+    "primary_category": "exactly_one_leaf",
+    "uncategorized_id": "uncategorized",
+    "tags": "zero_or_more",
+    "submitted_classification": "suggestion_only",
+    "public_classification": "admin_approved_only"
+  },
+  "categories": [
+    {
+      "id": "web",
+      "label": "Webサイト・サービス",
+      "children": [
+        {
+          "id": "program_site",
+          "label": "番組・活動の公式サイト"
+        },
+        {
+          "id": "personal_site",
+          "label": "個人サイト・ブログ"
+        },
+        {
+          "id": "facility_site",
+          "label": "店舗・施設"
+        },
+        {
+          "id": "web_service",
+          "label": "Webサービス・便利ツール"
+        },
+        {
+          "id": "membership_service",
+          "label": "会員サービス"
+        }
+      ]
+    },
+    {
+      "id": "social",
+      "label": "SNS・コミュニティ",
+      "children": [
+        {
+          "id": "social_profile",
+          "label": "SNSプロフィール"
+        },
+        {
+          "id": "community",
+          "label": "コミュニティ・交流先"
+        }
+      ]
+    },
+    {
+      "id": "reading",
+      "label": "記事・書籍",
+      "children": [
+        {
+          "id": "article_collection",
+          "label": "記事・マガジン"
+        },
+        {
+          "id": "book_collection",
+          "label": "書籍・資料リスト"
+        },
+        {
+          "id": "article",
+          "label": "記事"
+        }
+      ]
+    },
+    {
+      "id": "event",
+      "label": "イベント・公演",
+      "children": [
+        {
+          "id": "event_information",
+          "label": "イベント案内"
+        },
+        {
+          "id": "event_ticket",
+          "label": "チケット・申込ページ"
+        }
+      ]
+    },
+    {
+      "id": "audio",
+      "label": "音声・ポッドキャスト",
+      "children": [
+        {
+          "id": "podcast",
+          "label": "ポッドキャスト番組"
+        },
+        {
+          "id": "podcast_episode",
+          "label": "音声エピソード"
+        }
+      ]
+    },
+    {
+      "id": "video",
+      "label": "動画",
+      "children": [
+        {
+          "id": "video_episode",
+          "label": "動画・配信"
+        },
+        {
+          "id": "video_playlist",
+          "label": "動画プレイリスト"
+        }
+      ]
+    },
+    {
+      "id": "uncategorized",
+      "label": "未分類・その他",
+      "children": []
+    }
+  ],
+  "tags": [
+    {
+      "id": "program_yurugengo",
+      "label": "ゆる言語学ラジオ",
+      "kind": "program"
+    },
+    {
+      "id": "program_yurucom",
+      "label": "ゆるコンピュータ科学ラジオ",
+      "kind": "program"
+    },
+    {
+      "id": "person_horimoto",
+      "label": "堀元見",
+      "kind": "person"
+    },
+    {
+      "id": "person_mizuno",
+      "label": "水野太貴",
+      "kind": "person"
+    },
+    {
+      "id": "place_yurugakuto_cafe",
+      "label": "ゆる学徒カフェ",
+      "kind": "place"
+    }
+  ]
+}
