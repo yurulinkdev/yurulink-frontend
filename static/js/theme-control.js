@@ -1,5 +1,20 @@
 (() => {
   const key = 'yurulink-theme';
+  const drawer = document.getElementById('category-drawer');
+  const backdrop = document.getElementById('drawer-backdrop');
+  const open = document.getElementById('open-categories');
+  const close = document.getElementById('close-categories');
+  const toggle = visible => {
+    drawer?.classList.toggle('-translate-x-full', !visible);
+    backdrop?.classList.toggle('hidden', !visible);
+    open?.setAttribute('aria-expanded', String(visible));
+    if (visible) close?.focus();
+    else if (document.activeElement === close) open?.focus();
+  };
+  open?.addEventListener('click', () => toggle(true));
+  close?.addEventListener('click', () => toggle(false));
+  backdrop?.addEventListener('click', () => toggle(false));
+  document.addEventListener('keydown', event => { if (event.key === 'Escape') toggle(false); });
   const select = document.getElementById('theme-select');
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   const read = () => {
