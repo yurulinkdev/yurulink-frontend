@@ -22,10 +22,6 @@
   const selected = document.getElementById('selected-category');
   const count = document.getElementById('count');
   const empty = document.getElementById('no-results');
-  const drawer = document.getElementById('category-drawer');
-  const backdrop = document.getElementById('drawer-backdrop');
-  const open = document.getElementById('open-categories');
-  const close = document.getElementById('close-categories');
   let category = new URL(location.href).searchParams.get('category') || '';
   const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [x.dataset.category, x.dataset.categoryLabel || x.dataset.category])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ja'));
   const buttons = document.getElementById('category-buttons');
@@ -35,22 +31,11 @@
     button.className = 'w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-panel-muted focus-visible:outline';
     button.textContent = label;
     button.dataset.category = value;
-    button.addEventListener('click', () => { category = value; update(); toggle(false); });
+    button.addEventListener('click', () => { category = value; update(); document.getElementById('close-categories')?.click(); });
     return button;
   };
   buttons?.append(makeButton('すべてのコンテンツ',''));
   for (const [id, label] of categories) buttons?.append(makeButton(label,id));
-  const toggle = visible => {
-    drawer?.classList.toggle('-translate-x-full',!visible);
-    backdrop?.classList.toggle('hidden',!visible);
-    open?.setAttribute('aria-expanded',String(visible));
-    if (visible) close?.focus();
-    else if (document.activeElement === close) open?.focus();
-  };
-  open?.addEventListener('click',()=>toggle(true));
-  close?.addEventListener('click',()=>toggle(false));
-  backdrop?.addEventListener('click',()=>toggle(false));
-  document.addEventListener('keydown',e=>{if(e.key==='Escape')toggle(false);});
   const update = () => {
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
     let visible = 0;
