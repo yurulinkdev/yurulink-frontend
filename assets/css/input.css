@@ -4,30 +4,8 @@
 }
 @source "../../layouts/**/*.html";
 
-:root, [data-theme="light"] {
-  color-scheme: light;
-  --page: #fbf9f6;
-  --panel: #ffffff;
-  --panel-muted: #f6eae4;
-  --text: #342b28;
-  --muted: #665750;
-  --line: #dfd0c8;
-  --accent: #a35b46;
-  --accent-text: #ffffff;
-  --focus: #85412f;
-}
-[data-theme="dark"] {
-  color-scheme: dark;
-  --page: #211b19;
-  --panel: #302724;
-  --panel-muted: #43342e;
-  --text: #f6eee9;
-  --muted: #d4c0b6;
-  --line: #68534a;
-  --accent: #efb49c;
-  --accent-text: #211b19;
-  --focus: #f5c4ad;
-}
+@import "./tokens.css";
+
 @theme inline {
   --color-page: var(--page);
   --color-panel: var(--panel);
