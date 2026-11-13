@@ -1,46 +1,4 @@
-<!doctype html>
-<html lang="ja">
-<head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="ゆる学徒コンテンツの非公式リンク集">
-  <title>{{ .Site.Title }}</title>
-  {{ partial "theme-init.html" . }}
-  <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
-  <script src="{{ "js/theme-control.js" | relURL }}" defer></script>
-  <script src="{{ "js/site.js" | relURL }}" defer></script>
-</head>
-<body class="min-h-screen bg-page text-ink">
-  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-panel focus:p-3">本文へ移動</a>
-  <div class="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
-    <div id="drawer-backdrop" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden" aria-hidden="true"></div>
-    <aside id="category-drawer" aria-label="カテゴリー" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full overflow-y-auto border-r border-line bg-panel p-5 shadow-xl transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-auto lg:translate-x-0 lg:shadow-none">
-      <div class="mb-7 flex items-center justify-between">
-        <a href="{{ "" | relURL }}" class="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-accent"><svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 5.5C9.4 3.8 6.4 3.6 3 4.6v13c3.3-1 6.4-.7 9 1.2 2.6-1.9 5.7-2.2 9-1.2v-13c-3.4-1-6.4-.8-9 .9Z"/><path d="M12 5.5v13.3"/></svg><span>YuruLink</span></a>
-        <button id="close-categories" type="button" class="rounded-lg border border-line px-3 py-2 lg:hidden" aria-label="カテゴリーを閉じる">✕</button>
-      </div>
-      <p class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">カテゴリー・番組</p>
-      <nav id="category-buttons" class="space-y-1" aria-label="番組一覧"></nav>
-      <p class="mt-6 text-xs leading-relaxed text-muted-ink">公開承認されたリンクのみを掲載します。投稿内容は審査後に反映されます。</p>
-    </aside>
-    <main id="main-content" class="min-w-0">
-      <header class="sticky top-0 z-20 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur sm:px-7">
-        <div class="flex items-center gap-3">
-          <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">カテゴリーを開く</span></button>
-          <label class="relative min-w-0 flex-1">
-            <span class="sr-only">コンテンツを検索</span>
-            <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page px-4 py-2.5 text-ink placeholder:text-muted-ink" autocomplete="off">
-          </label>
-          <label class="flex items-center gap-2">
-            <span class="sr-only">表示テーマ</span>
-            <select id="theme-select" aria-label="表示テーマ" class="rounded-lg border border-line bg-panel px-2 py-2.5 text-sm text-ink">
-              <option value="auto">自動</option>
-              <option value="light">ライト</option>
-              <option value="dark">ダーク</option>
-            </select>
-          </label>
-        </div>
-      </header>
+{{ define "main" }}
       <section class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
         <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -101,7 +59,4 @@
           {{ end }}
         {{ end }}
       </section>
-    </main>
-  </div>
-</body>
-</html>
+{{ end }}
