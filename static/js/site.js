@@ -1,23 +1,4 @@
 (() => {
-  const root = document.documentElement;
-  const key = 'yurulink-theme';
-  const mq = window.matchMedia('(prefers-color-scheme: dark)');
-  const select = document.getElementById('theme-select');
-  const getPreference = () => {
-    try { return localStorage.getItem(key) || 'auto'; } catch { return 'auto'; }
-  };
-  const apply = () => {
-    const pref = getPreference();
-    root.dataset.theme = pref === 'auto' ? (mq.matches ? 'dark' : 'light') : pref;
-    if (select) select.value = pref;
-  };
-  select?.addEventListener('change', () => {
-    try { localStorage.setItem(key, select.value); } catch { /* storage disabled */ }
-    apply();
-  });
-  mq.addEventListener?.('change', apply);
-  apply();
-
   const catalog = document.getElementById('catalog');
   const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
   const viewKey = 'yurulink-catalog-view';
