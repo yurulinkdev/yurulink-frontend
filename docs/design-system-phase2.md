@@ -1,6 +1,6 @@
 # YuruLink Design System — Phase 2 visual direction
 
-Status: proposal; four user choices confirmed on 2026-11-13. Palette, precise dimensions, and logo artwork remain unapproved. This document is not a deployment.
+Status: **visual direction approved** 2026-11-13; implementation in feature branch, not deployed. Final artwork and detailed a11y validation pending.
 
 ## Confirmed decisions
 - Visual mood: friendly knowledge library (親しみやすい知識ライブラリ).
@@ -9,12 +9,12 @@ Status: proposal; four user choices confirmed on 2026-11-13. Palette, precise di
 - Logo/icon: geometric symbol; avoid implying affiliation with the referenced shows.
 - Prior decision from Project.md: neutral base, light/dark/auto; do not automatically inherit old burgundy/navy/beige branding.
 
-## Palette explorations (illustrative; not approved)
+## Approved palette direction: C Warm Terracotta
 | Candidate | Accent | Background | Text | Character |
 | --- | --- | --- | --- | --- |
 | A Ink Blue | #355C7D | #F8F9FA | #202B36 | calm editorial |
-| B Forest Green | #327A68 | #FAFAF7 | #27332D | friendly discovery (provisional recommendation) |
-| C Warm Terracotta | #A35B46 | #FBF9F6 | #342B28 | cultural warmth |
+| B Forest Green | #327A68 | #FAFAF7 | #27332D | alternate (not selected) |
+| C Warm Terracotta | #A35B46 | #FBF9F6 | #342B28 | **selected** cultural warmth |
 
 Use semantic CSS variables, not raw color names in components: `--color-bg`, `--color-surface`, `--color-text`, `--color-text-muted`, `--color-border`, `--color-accent`, `--color-accent-contrast`, `--color-focus`, `--color-success`, `--color-danger`. Each candidate needs AA contrast checks and independently designed dark variants. Do not assume the candidate accent is readable on white at all sizes.
 
@@ -32,9 +32,9 @@ Use semantic CSS variables, not raw color names in components: `--color-bg`, `--
 - Card order: category/platform, title, description (clamped), optional published date; whole-card interaction only if keyboard and nested-link semantics remain valid.
 - Link catalog remains primary home; posts/news links visible in header/footer without crowding search.
 
-## Icon/brand concept options
+## Icon/brand concept options (decision: B open book)
 1. Two linked geometric loops (directly conveys linking).
-2. Connected book spines / stacked cards (knowledge library).
+2. **Selected: open book** (knowledge library), geometric linework; initial inline SVG is provisional.
 3. Intersecting nodes forming a Y (distinctive, scalable favicon).
 Prefer simple 24px grid SVG icons, stroke consistency and visible focus states. Avoid icon-only controls without labels. Logo should work at 16px favicon and monochrome.
 
@@ -59,12 +59,17 @@ Prefer simple 24px grid SVG icons, stroke consistency and visible focus states. 
 - GA4 disabled unless explicitly configured and privacy requirements checked.
 - Measure actual compiled Tailwind/daisyUI CSS before changing the framework.
 
-## User decisions pending
-1. Select or modify palette A/B/C.
-2. Pick logo motif (loops / books / geometric Y).
-3. Choose catalog card visual emphasis: thumbnail-first or text-first.
-4. Confirm home secondary section: posts/news preview below catalog or only navigation link.
-No implementation of visual identity or merge/deploy before decisions.
+## User-approved Phase 2 decisions
+1. **Palette C Warm Terracotta** (#A35B46 accent, #FBF9F6 background, #342B28 text), dark palette derived separately and subject to contrast testing.
+2. **Geometric open-book symbol**; provisional SVG, final logo artwork to be reviewed.
+3. **Switchable card presentation**: grid and compact list, user preference stored locally with safe fallback; no extra data fetching.
+4. Home remains catalog-first. Posts/news secondary placement is an implementation detail for later review.
+
+## Implementation notes
+- The switchable view uses one semantic catalog list and CSS class toggles, not duplicate HTML or duplicate content.
+- Grid remains responsive; list is text-dense and does not require OGP to exist.
+- Preserve accessible button pressed state and focus.
+- No production deployment until user review.
 
 ## References
 - Phase 1: docs/design-system-phase1.md
