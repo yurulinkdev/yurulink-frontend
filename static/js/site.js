@@ -28,7 +28,7 @@
   const open = document.getElementById('open-categories');
   const close = document.getElementById('close-categories');
   let category = new URL(location.href).searchParams.get('category') || '';
-  const categories = [...new Set(items.map(x => x.dataset.source).filter(Boolean))].sort((a,b)=>a.localeCompare(b,'ja'));
+  const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [x.dataset.category, x.dataset.categoryLabel || x.dataset.category])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ja'));
   const buttons = document.getElementById('category-buttons');
   const makeButton = (label,value) => {
     const button = document.createElement('button');
@@ -40,7 +40,7 @@
     return button;
   };
   buttons?.append(makeButton('すべてのコンテンツ',''));
-  for (const source of categories) buttons?.append(makeButton(source,source));
+  for (const [id, label] of categories) buttons?.append(makeButton(label,id));
   const toggle = visible => {
     drawer?.classList.toggle('-translate-x-full',!visible);
     backdrop?.classList.toggle('hidden',!visible);
@@ -56,14 +56,14 @@
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
     let visible = 0;
     for (const item of items) {
-      const match = (!category || item.dataset.source === category) &&
+      const match = (!category || item.dataset.category === category) &&
         (item.dataset.search || '').toLocaleLowerCase('ja').includes(q);
       item.hidden = !match;
       if (match) visible++;
     }
-    if (selected) selected.textContent = category || 'すべてのコンテンツ';
+    if (selected) selected.textContent = (categories.find(([id]) => id === category)?.[1]) || 'すべてのコンテンツ';
     if (count) count.textContent = visible + ' 件 / 全 ' + items.length + ' 件';
-    if (empty) empty.hidden = visible > 0;
+    if (empty) empty.hidden = visible > 0 || items.length === 0;
     for (const button of buttons?.querySelectorAll('button') || []) {
       button.setAttribute('aria-current', String(button.dataset.category === category));
       button.classList.toggle('bg-panel-muted',button.dataset.category === category);
