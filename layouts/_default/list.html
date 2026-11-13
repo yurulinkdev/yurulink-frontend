@@ -1,0 +1,22 @@
+{{ define "main" }}
+<section class="mx-auto max-w-5xl px-4 py-8 sm:px-7">
+  <h1 class="mb-3 text-2xl font-bold">{{ .Title }}</h1>
+  {{ with .Content }}<div class="article-prose mb-8">{{ . }}</div>{{ end }}
+  {{ $pages := .RegularPages.ByDate.Reverse }}
+  {{ if $pages }}
+    <ul class="grid list-none gap-4 p-0 sm:grid-cols-2">
+      {{ range $pages }}
+        <li class="rounded-xl border border-line bg-panel p-5">
+          <article>
+            <time class="text-sm text-muted-ink" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+            <h2 class="mt-2 text-lg font-semibold"><a class="text-accent hover:underline" href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+            {{ with .Description | default (.Summary | plainify | truncate 140) }}<p class="mt-2 text-sm text-muted-ink">{{ . }}</p>{{ end }}
+          </article>
+        </li>
+      {{ end }}
+    </ul>
+  {{ else }}
+    <p class="rounded-xl border border-line bg-panel p-5 text-muted-ink">まだ公開された記事はありません。</p>
+  {{ end }}
+</section>
+{{ end }}
