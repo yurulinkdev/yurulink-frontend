@@ -23,14 +23,16 @@
       return value === 'light' || value === 'dark' ? value : 'auto';
     } catch { return 'auto'; }
   };
+  let mode = read();
   const apply = () => {
-    const value = read();
+    const value = mode;
     document.documentElement.dataset.theme = value === 'auto' ? (mq.matches ? 'dark' : 'light') : value;
     if (select) select.value = value;
   };
   select?.addEventListener('change', () => {
     const value = select.value;
     if (!['auto', 'light', 'dark'].includes(value)) return;
+    mode = value;
     try { localStorage.setItem(key, value); } catch { /* storage disabled */ }
     apply();
   });
