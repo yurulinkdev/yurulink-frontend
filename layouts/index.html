@@ -5,15 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="ゆる学徒コンテンツの非公式リンク集">
   <title>{{ .Site.Title }}</title>
-  <script>
-    (() => {
-      let mode = 'auto';
-      try { mode = localStorage.getItem('yurulink-theme') || 'auto'; } catch {}
-      document.documentElement.dataset.theme =
-        mode === 'auto' ? (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light') : mode;
-    })();
-  </script>
+  {{ partial "theme-init.html" . }}
   <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
+  <script src="{{ "js/theme-control.js" | relURL }}" defer></script>
   <script src="{{ "js/site.js" | relURL }}" defer></script>
 </head>
 <body class="min-h-screen bg-page text-ink">
