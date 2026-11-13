@@ -20,7 +20,7 @@ npm run build
 for path in public/index.html public/posts/index.html public/news/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
-grep -q 'id="main-content"' public/index.html
+grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
 grep -q 'theme-select' public/index.html
 echo "::endgroup::"
 
@@ -39,7 +39,7 @@ npm run build
 test -s public/posts/smoke-ci/index.html
 grep -q 'Smoke CI 記事' public/posts/smoke-ci/index.html
 grep -q 'テスト見出し' public/posts/smoke-ci/index.html
-grep -q 'rel="canonical"' public/posts/smoke-ci/index.html
+grep -Eq 'rel=("canonical"|canonical)([ >])' public/posts/smoke-ci/index.html || { echo '::error::Missing canonical'; exit 1; }
 grep -q 'og:title' public/posts/smoke-ci/index.html
 echo "::endgroup::"
 
