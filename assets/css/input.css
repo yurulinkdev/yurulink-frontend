@@ -1,7 +1,4 @@
 @import "tailwindcss";
-@plugin "daisyui" {
-  themes: false;
-}
 @source "../../layouts/**/*.html";
 
 @import "./tokens.css";
