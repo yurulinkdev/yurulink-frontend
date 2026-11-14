@@ -1,20 +1,19 @@
-# Frontend simplification and v1 retirement gate
+# 統合形式への一本化とフロントエンド簡素化
 
-## Decisions (2026-11-14)
-- Target renderer: public catalog schema v2, `data/public/catalog.json`.
-- Legacy `data/public/videos.json` is transitional. **Do not remove its fallback until v2 export and staging QA are verified.**
-- CSS framework: Tailwind CSS v4 only; remove unused daisyUI plugin and package.
-- Keep existing HTML structure and semantic color tokens; avoid a full CSS rewrite.
+## 方針（2026-11-14）
+- YuruLinkは当初から動画・記事・Webサイト・SNS等を横断するリンク集を目指している。旧称「v2」は**統合形式**と呼ぶ。
+- 公開データは `data/public/catalog.json` に一本化。旧動画専用形式 `videos.json` の描画フォールバックは開発ブランチから削除済み。
+- `schema_version: 2` は機械的な互換性識別子として維持し、表示名称に使用しない。
+- CSSはTailwind CSS v4のみを使用し、daisyUI依存を削除。
 
-## Preconditions for deleting v1 renderer
-1. Backend v2 export exists and passes contract checks for status, URLs, IDs, and membership references.
-2. Frontend CI tests a representative v2 fixture (published, unlisted, invalid URL, missing optional fields).
-3. Staging renders real v2 data; category navigation, search, grid/list, mobile drawer, and theme selection are checked in a browser.
-4. Compare published item counts and representative links against the approved backend export.
-5. Obtain explicit approval before production migration or removal of fallback.
+## 本番反映前の検証条件
+1. バックエンドが統合形式の公開JSONを出力し、ID・参照整合性・公開状態・URLを検証できること。
+2. CIで統合形式の代表データ（公開・非公開・不正URL・任意項目欠落）をテストすること。
+3. Stagingで実データを表示し、検索・カテゴリー・表示切替・モバイルメニュー・テーマ切替を確認すること。
+4. 公開件数と代表的なリンクをバックエンドの承認済み出力と照合すること。
+5. 本番へのデプロイやmainへのマージはユーザーの承認を得ること。
 
-## Follow-up cleanup
-- Remove the v1 `else` branch from `layouts/index.html` only after gates 1–4.
-- Update `docs/public-catalog-contract-v2.md` implementation status after verification.
-- Consider merging overlapping CI workflows after checking required GitHub status checks.
-- Ensure package dependencies are reproducible (commit lockfile and use `npm ci` when ready).
+## 留意事項
+- 開発ブランチでは統合形式のJSONが存在しない場合、準備中表示となる。
+- Book2の元データとプレイリスト所属情報は削除しない。
+- CI統合とパッケージのロックファイル整備は別途検討する。
