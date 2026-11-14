@@ -22,7 +22,9 @@
   const selected = document.getElementById('selected-category');
   const count = document.getElementById('count');
   const empty = document.getElementById('no-results');
-  let category = new URL(location.href).searchParams.get('category') || '';
+  const initialParams = new URL(location.href).searchParams;
+  let category = initialParams.get('category') || '';
+  if (search) search.value = initialParams.get('q') || '';
   const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [x.dataset.category, x.dataset.categoryLabel || x.dataset.category])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ja'));
   const buttons = document.getElementById('category-buttons');
   const makeButton = (label,value) => {
@@ -55,8 +57,16 @@
     const url = new URL(location.href);
     if (category) url.searchParams.set('category',category);
     else url.searchParams.delete('category');
+    if (q) url.searchParams.set('q', q);
+    else url.searchParams.delete('q');
     history.replaceState(null,'',url);
   };
   search?.addEventListener('input',update);
+  window.addEventListener('popstate', () => {
+    const params = new URL(location.href).searchParams;
+    category = params.get('category') || '';
+    if (search) search.value = params.get('q') || '';
+    update();
+  });
   update();
 })();
