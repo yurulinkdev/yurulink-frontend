@@ -53,6 +53,6 @@ test -s public/index.html
 test -s public/posts/index.html
 test -s public/news/index.html
 test -s public/posts/smoke-ci/index.html
-grep -q '公開データの連携準備中' public/index.html
+grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
 echo "Smoke test passed."
