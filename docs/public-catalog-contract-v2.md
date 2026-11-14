@@ -1,6 +1,6 @@
-# YuruLink public catalog contract — proposal v2
+# YuruLink 公開カタログ契約 — 統合形式
 
-Status: **proposed, not yet implemented**. This supersedes the video-only schema v1 as the target model. Existing Hugo code still consumes `data/public/videos.json`; do not remove it until the renderer is migrated.
+Status: **統合形式を正式方針として採用。** フロントエンドの統合形式リーダーは開発ブランチに実装済み。バックエンド実データ連携とStaging QAは未完了。`schema_version: 2` は機械的な互換性識別子として維持する。
 
 ## Scope
 
@@ -49,7 +49,7 @@ Catalog links to official websites, fan-built tools and useful sites, blog artic
 6. Keep all existing Book2 rows and playlist memberships; Book4 normalization is additive until reconciliation succeeds.
 7. For the static frontend, generate individual search records (e.g. Pagefind custom records or detail pages); indexing one giant HTML page will not yield per-item search results.
 8. The backend writes a versioned JSON artifact with deterministic ordering and an atomic publishing step; validate counts, referential integrity and duplicate IDs before publishing.
-9. Frontend migration: implement v2 reader and navigation/search, then retire `videos.json` only after QA. No automatic production release from a raw user submission.
+9. Frontend: 統合形式のリーダーを使用する。旧動画専用形式のフォールバックは開発ブランチで削除済み。実データの検証と本番反映は別途承認を要する。 No automatic production release from a raw user submission.
 
 ## Open decisions
 
