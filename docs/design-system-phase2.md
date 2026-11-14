@@ -1,78 +1,56 @@
-# YuruLink Design System — Phase 2 visual direction
+# YuruLink デザイン仕様
 
-Status: **visual direction approved** 2026-11-13; implementation in feature branch, not deployed. Final artwork and detailed a11y validation pending.
+**状態：基本方針決定済み。** 最終ロゴ、詳細なアクセシビリティ検証、実データでの性能検証は未完了です。
 
-## Confirmed decisions
-- Visual mood: friendly knowledge library (親しみやすい知識ライブラリ).
-- Density: responsive hybrid; compact desktop browsing and readable mobile cards.
-- Homepage: catalog-first, search/category/list prominently featured.
-- Logo/icon: geometric symbol; avoid implying affiliation with the referenced shows.
-- Prior decision from Project.md: neutral base, light/dark/auto; do not automatically inherit old burgundy/navy/beige branding.
+## デザインの基本方針
 
-## Approved palette direction: C Warm Terracotta
-| Candidate | Accent | Background | Text | Character |
-| --- | --- | --- | --- | --- |
-| A Ink Blue | #355C7D | #F8F9FA | #202B36 | calm editorial |
-| B Forest Green | #327A68 | #FAFAF7 | #27332D | alternate (not selected) |
-| C Warm Terracotta | #A35B46 | #FBF9F6 | #342B28 | **selected** cultural warmth |
+- **親しみやすい知識ライブラリ**を目指す。
+- ホームページはリンク集を主役とし、検索・カテゴリー・表示切替を見つけやすくする。
+- PCは情報密度を高め、スマートフォンは読みやすさを優先する。
+- 既存サイトの配色をそのまま引き継がず、ニュートラルな基調と温かいアクセントを用いる。
 
-Use semantic CSS variables, not raw color names in components: `--color-bg`, `--color-surface`, `--color-text`, `--color-text-muted`, `--color-border`, `--color-accent`, `--color-accent-contrast`, `--color-focus`, `--color-success`, `--color-danger`. Each candidate needs AA contrast checks and independently designed dark variants. Do not assume the candidate accent is readable on white at all sizes.
+## 色とテーマ
 
-## Typography proposal
-- Japanese system UI stack first, no required remote font download.
-- Base body 16px, line-height 1.7; metadata 13–14px with contrast validation; heading scale ~1.25 modular ratio.
-- Responsive headings and line length (body prose ideally ~35–45 Japanese characters per line on wide layouts, with max-width).
-- Reserve tabular numerals for counts and dates.
-- Typography and spacing tokens implemented with CSS custom properties mapped to Tailwind v4 @theme where appropriate.
+採用する方向性は**ウォームテラコッタ**です。
 
-## Layout and cards
-- Mobile: single column, prominent search, filter drawer; title and short description, reserved thumbnail slot.
-- Tablet: 2-column catalog grid; desktop: 3-column or flexible density within content width; keep existing sidebar navigation.
-- Two visual card states: thumbnail present, image fallback. Preserve aspect ratio to avoid CLS.
-- Card order: category/platform, title, description (clamped), optional published date; whole-card interaction only if keyboard and nested-link semantics remain valid.
-- Link catalog remains primary home; posts/news links visible in header/footer without crowding search.
+| 用途 | 色 |
+| --- | --- |
+| アクセント | `#A35B46` |
+| 背景 | `#FBF9F6` |
+| 文字 | `#342B28` |
 
-## Icon/brand concept options (decision: B open book)
-1. Two linked geometric loops (directly conveys linking).
-2. **Selected: open book** (knowledge library), geometric linework; initial inline SVG is provisional.
-3. Intersecting nodes forming a Y (distinctive, scalable favicon).
-Prefer simple 24px grid SVG icons, stroke consistency and visible focus states. Avoid icon-only controls without labels. Logo should work at 16px favicon and monochrome.
+色はコンポーネントに直接埋め込まず、意味別のCSS変数で管理します。ライト／ダーク／OS自動追従を提供し、ダーク配色は独立して設計します。文字とUIのコントラストはWCAG 2.2 AAを目標に検証します。
 
-## Page skeleton
-- Global: skip link, header with wordmark + search, optional theme selector, responsive nav/drawer, main, footer with X and legal/about links.
-- Home: search -> featured categories -> catalog grid -> posts/news teaser.
-- Catalog: filters, URL-shareable state, result count, pagination or progressive rendering.
-- Posts/news: Hugo Markdown sections, list/single, dates, canonical, OG metadata; functional with catalog JSON absent.
-- Empty/error states: purposeful instructions and navigation rather than blank grids.
+## ロゴ・アイコン
 
-## Motion, responsiveness, accessibility
-- Respect prefers-reduced-motion; no gratuitous animated gradients.
-- Mobile minimum comfortable touch targets ~44px where practical.
-- WCAG 2.2 AA target, focus visible, keyboard drawer escape/return, heading hierarchy, alt text, and language=ja.
-- Responsive breakpoints based on content rather than device names; verify at 320px, 375px, 768px, 1280px.
+**幾何学的な開いた本**をシンボルの方向性として採用します。現在のSVGは暫定版です。番組公式との関係を誤認させないデザインとし、単色表示や小さなファビコンでも判別できる形を目指します。
 
-## Performance constraints
-- No mandatory external icon font or webfont.
-- Pre-generate/cached OGP thumbnails, WebP/AVIF variants when worthwhile, dimensions fixed, loading=lazy below fold; avoid downloading all image assets above the fold.
-- Do not render all 3,200 items on initial DOM; test pagination, static grouping, or Pagefind indexing before choosing.
-- X profile link in footer; X timeline embed disabled by default.
-- GA4 disabled unless explicitly configured and privacy requirements checked.
-- Measure actual compiled Tailwind/daisyUI CSS before changing the framework.
+## 文字・レイアウト
 
-## User-approved Phase 2 decisions
-1. **Palette C Warm Terracotta** (#A35B46 accent, #FBF9F6 background, #342B28 text), dark palette derived separately and subject to contrast testing.
-2. **Geometric open-book symbol**; provisional SVG, final logo artwork to be reviewed.
-3. **Switchable card presentation**: grid and compact list, user preference stored locally with safe fallback; no extra data fetching.
-4. Home remains catalog-first. Posts/news secondary placement is an implementation detail for later review.
+- 日本語のシステムフォントを優先し、必須の外部Webフォントは使用しません。
+- 本文の基準は16px、行間は約1.7。補足情報は13〜14pxを目安とします。
+- スマートフォンは1列、タブレットは2列、PCは3列または可変密度のカード表示を基本とします。
+- PCは左サイドバー、スマートフォンはドロワーを使用します。
+- カードにはカテゴリー／掲載先、タイトル、短い説明、任意の公開日・サムネイルを表示します。
+- **カード表示とコンパクトなリスト表示を切り替え可能**にし、選択をブラウザに保存します。
+- サムネイルの有無でレイアウトが崩れないよう表示領域を確保します。
 
-## Implementation notes
-- The switchable view uses one semantic catalog list and CSS class toggles, not duplicate HTML or duplicate content.
-- Grid remains responsive; list is text-dense and does not require OGP to exist.
-- Preserve accessible button pressed state and focus.
-- No production deployment until user review.
+## ページ構成
 
-## References
-- Phase 1: docs/design-system-phase1.md
-- WCAG 2.2 https://www.w3.org/TR/WCAG22/
-- Hugo https://gohugo.io/documentation/
-- Core Web Vitals https://web.dev/vitals/
+共通部分はスキップリンク、ヘッダー、ナビゲーション、本文、フッターです。ホームは検索・カテゴリー・リンク集を中心とし、記事／お知らせは補助的に配置します。HugoのMarkdown記事は公開カタログがない場合も表示可能とします。
+
+## アクセシビリティ・性能
+
+- キーボード操作、フォーカス表示、ドロワーのEscape操作、見出し階層、代替テキストを検証します。
+- `prefers-reduced-motion` を尊重し、過度なアニメーションを避けます。
+- 320px、375px、768px、1280pxを代表的な表示幅として確認します。
+- 外部アイコンフォントや埋め込みSNSタイムラインは必須にしません。Xは通常リンクで扱います。
+- 画像は遅延読み込み・寸法指定を基本とし、WebP/AVIFの利用を検討します。
+- 数千件を初期DOMへ一括描画せず、分割表示やPagefind等の検索方式を検証します。
+- GA4は明示設定とプライバシー要件の確認が完了するまで無効とします。
+
+## 参考
+
+- [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
+- [Hugo](https://gohugo.io/documentation/)
+- [Core Web Vitals](https://web.dev/vitals/)
