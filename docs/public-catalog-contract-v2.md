@@ -1,27 +1,33 @@
-# YuruLink public catalog contract — proposal v2
+# YuruLink 公開カタログ仕様 — 統合形式
 
-Status: **proposed, not yet implemented**. This supersedes the video-only schema v1 as the target model. Existing Hugo code still consumes `data/public/videos.json`; do not remove it until the renderer is migrated.
+**状態：統合形式を正式採用。** フロントエンドの読み込み処理は開発ブランチに実装済みです。バックエンドの実データ連携とStaging検証は未完了です。内部の `schema_version: 2` は機械的な識別子として維持します。
 
-## Scope
+## 対象と分類
 
-Catalog links to official websites, fan-built tools and useful sites, blog articles, X/Instagram and other social profiles, single videos, podcast episodes, and other related resources. A link's **kind** (what it is) must not be conflated with its **platform** (where it is hosted) or **provenance** (official/community/unknown).
+公式サイト、有志ツール、記事、SNSプロフィール、動画、ポッドキャストなどの関連リンクを扱います。**`kind`（何か）、`platform`（どこにあるか）、`provenance`（公式性）を混同しない**ことが重要です。
 
-## Canonical entities
+## データ構造
 
-- `items`: unique linked resources, independent of collections. Required: `id`, `title`, `url`, `kind`, `platform`, `provenance`, `status`. Optional: `description`, `published_at`, `updated_at`, `thumbnail_url`, `tags`.
-- `programs`: `id`, `name`, optional `description`, `parent_id`. A program is an editorial grouping, not a platform.
-- `collections`: `id`, `title`, `kind`, optional `program_id`, `parent_id`, `description`. Kinds initially `playlist`, `topic`, `curated`.
-- `memberships`: unique `item_id` + `collection_id` pairs. Optional `position`; one item can appear in many playlists without duplicating the item.
-- `item_programs`: unique `item_id` + `program_id` pairs. A link may be relevant to multiple programs.
+| 配列 | 内容 | 必須項目・関連 |
+| --- | --- | --- |
+| `items` | 重複しないリンク実体 | `id`, `title`, `url`, `kind`, `platform`, `provenance`, `status` |
+| `programs` | 番組・活動 | `id`, `name`。任意: `description`, `parent_id` |
+| `collections` | プレイリスト・テーマ・編集集合 | `id`, `title`, `kind`。任意: `program_id`, `parent_id`, `description` |
+| `memberships` | リンクと集合の多対多関係 | `item_id`, `collection_id`。任意: `position` |
+| `item_programs` | リンクと番組の多対多関係 | `item_id`, `program_id` |
 
-### Controlled vocabularies
+`items` の任意項目は `description`, `published_at`, `updated_at`, `thumbnail_url`, `tags` です。集合の `kind` は当面 `playlist`, `topic`, `curated` とします。番組は掲載プラットフォームとは別の編集上の分類です。
 
-- `kind`: `video`, `article`, `website`, `tool`, `social_profile`, `podcast_episode`, `other`.
-- `platform`: `youtube`, `x`, `instagram`, `spotify`, `web`, `other` (extend by additive versioned changes).
-- `provenance`: `official`, `community`, `unknown` (do not infer official status from the hostname alone).
-- `status`: `published`, `unlisted` (only published items may appear in the public artifact).
+### 列挙値
 
-### Illustrative JSON (synthetic data, not a real publication)
+- `kind`: `video`, `article`, `website`, `tool`, `social_profile`, `podcast_episode`, `other`
+- `platform`: `youtube`, `x`, `instagram`, `spotify`, `web`, `other`
+- `provenance`: `official`, `community`, `unknown`（ホスト名だけで公式と判定しない）
+- `status`: `published`, `unlisted`（公開JSONには `published` のみ）
+
+## JSON例
+
+以下は説明用の架空データであり、公開データではありません。
 
 ```json
 {
@@ -39,20 +45,20 @@ Catalog links to official websites, fan-built tools and useful sites, blog artic
 }
 ```
 
-## Publication and validation rules
+## 検証・公開ルール
 
-1. Reject non-HTTP(S) URLs; validate hosts for external media thumbnails and forbid unsafe URL schemes.
-2. Require unique IDs within each entity type and valid foreign keys. Enforce unique membership pairs; detect cycles in `parent_id` hierarchies.
-3. Use stable source-native IDs for YouTube resources; assign persistent internal public IDs for arbitrary links. Canonicalize URLs conservatively (strip tracking parameters, preserve identity-bearing parameters and paths). A changed URL must not silently change a stable ID.
-4. Never export private submissions, spreadsheet identifiers, email addresses, credentials, review notes, or unpublished records.
-5. Separate submitted links from approved public items. Attribution/provenance must be explicitly reviewed.
-6. Keep all existing Book2 rows and playlist memberships; Book4 normalization is additive until reconciliation succeeds.
-7. For the static frontend, generate individual search records (e.g. Pagefind custom records or detail pages); indexing one giant HTML page will not yield per-item search results.
-8. The backend writes a versioned JSON artifact with deterministic ordering and an atomic publishing step; validate counts, referential integrity and duplicate IDs before publishing.
-9. Frontend migration: implement v2 reader and navigation/search, then retire `videos.json` only after QA. No automatic production release from a raw user submission.
+1. URLはHTTP(S)のみ許可します。サムネイルの外部ホストも検証し、危険なURLスキームを拒否します。
+2. 種別ごとのID一意性、参照先の存在、所属関係の重複、`parent_id` の循環を検証します。
+3. YouTubeは安定したソースIDを利用し、一般リンクには永続的な公開IDを付与します。URL正規化では追跡パラメータだけを慎重に除去し、識別に必要なパスやパラメータを維持します。URL変更だけでIDを変えません。
+4. 未承認投稿、内部シートID、メールアドレス、認証情報、審査メモ、非公開レコードは出力しません。
+5. 投稿と公開承認を分離し、公式性の分類は明示的に審査します。
+6. Book2の動画とプレイリスト所属情報は保持し、照合が完了するまでBook4の正規化は追加的に実施します。
+7. リンク単位の検索結果を得るため、Pagefindのカスタムレコードや個別詳細ページを検討します。全件を単一HTMLに並べただけではリンク単位の検索になりません。
+8. バックエンドは決定的な順序のJSONを生成し、件数・参照整合性・重複を検証してから原子的に公開します。
+9. フロントエンドは `data/public/catalog.json` を読み込みます。旧動画専用形式へのフォールバックは使用しません。投稿を契機に本番へ自動公開しません。
 
-## Open decisions
+## 未決定事項
 
-- Whether `provenance` needs a third-party verified source or a per-link editorial approval flag.
-- Which Book3 form fields and Book4 columns map to `items` and which remain private.
-- Whether to publish external link preview thumbnails or use platform icons to avoid tracking and broken image dependencies.
+- `provenance` に外部の検証済み情報源やリンク単位の編集承認フラグが必要か。
+- Book3のどの項目を公開用 `items` に変換し、どの項目を非公開のまま保持するか。
+- 外部リンクのサムネイルを表示するか、追跡・画像切れを避けてプラットフォームアイコンを使うか。

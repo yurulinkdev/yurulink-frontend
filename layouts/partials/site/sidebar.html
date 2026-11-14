@@ -1,0 +1,17 @@
+<div id="drawer-backdrop" class="fixed inset-0 z-30 hidden bg-black/40 lg:hidden" aria-hidden="true"></div>
+<aside id="category-drawer" aria-label="サイトナビゲーション" class="fixed inset-y-0 left-0 z-40 w-72 -translate-x-full overflow-y-auto border-r border-line bg-panel p-5 shadow-xl transition-transform lg:sticky lg:top-0 lg:h-screen lg:w-auto lg:translate-x-0 lg:shadow-none">
+  <div class="mb-7 flex items-center justify-between">
+    <a href="{{ "" | relURL }}" class="inline-flex items-center gap-2 text-xl font-bold tracking-tight text-accent"><svg aria-hidden="true" viewBox="0 0 24 24" width="28" height="28" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"><path d="M12 5.5C9.4 3.8 6.4 3.6 3 4.6v13c3.3-1 6.4-.7 9 1.2 2.6-1.9 5.7-2.2 9-1.2v-13c-3.4-1-6.4-.8-9 .9Z"/><path d="M12 5.5v13.3"/></svg><span>YuruLink</span></a>
+    <button id="close-categories" type="button" class="rounded-lg border border-line px-3 py-2 lg:hidden" aria-label="メニューを閉じる">✕</button>
+  </div>
+  <nav aria-label="サイト内ページ" class="mb-6 space-y-2 text-sm">
+    <a class="block rounded-lg px-3 py-2 hover:bg-panel-muted" href="{{ "" | relURL }}">リンク集</a>
+    <a class="block rounded-lg px-3 py-2 hover:bg-panel-muted" href="{{ "posts/" | relURL }}">記事</a>
+    <a class="block rounded-lg px-3 py-2 hover:bg-panel-muted" href="{{ "news/" | relURL }}">お知らせ</a>
+  </nav>
+  {{ if .IsHome }}
+    <p class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">カテゴリー・番組</p>
+    <nav id="category-buttons" class="space-y-1" aria-label="番組一覧"></nav>
+    <p class="mt-6 text-xs leading-relaxed text-muted-ink">公開承認されたリンクのみを掲載します。投稿内容は審査後に反映されます。</p>
+  {{ end }}
+</aside>

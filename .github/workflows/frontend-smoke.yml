@@ -1,0 +1,28 @@
+name: Frontend smoke test
+
+on:
+  push:
+    branches: [main, staging, feat/catalog-v2-taxonomy-ui]
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  smoke:
+    runs-on: ubuntu-latest
+    timeout-minutes: 12
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.152.2'
+          extended: true
+      - name: Install frontend dependencies
+        run: npm install --no-audit --no-fund
+      - name: Build and smoke test
+        run: bash scripts/smoke-test.sh

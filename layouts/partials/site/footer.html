@@ -1,0 +1,9 @@
+<footer class="mx-auto mt-10 max-w-7xl border-t border-line px-4 py-6 text-sm text-muted-ink sm:px-7">
+  <nav aria-label="フッターナビゲーション" class="flex flex-wrap gap-4">
+    <a href="{{ "" | relURL }}" class="hover:underline">リンク集</a>
+    <a href="{{ "posts/" | relURL }}" class="hover:underline">記事</a>
+    <a href="{{ "news/" | relURL }}" class="hover:underline">お知らせ</a>
+    {{ with .Site.Params.social.x }}<a href="{{ . | safeURL }}" rel="noopener noreferrer" target="_blank" class="hover:underline">X</a>{{ end }}
+  </nav>
+  <p class="mt-3">YuruLink — 非公式リンク集</p>
+</footer>

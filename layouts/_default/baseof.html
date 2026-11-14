@@ -1,0 +1,23 @@
+<!doctype html>
+<html lang="{{ .Site.Language.Lang | default "ja" }}">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  {{ partial "head/meta.html" . }}
+  {{ partial "theme-init.html" . }}
+  <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
+  <script src="{{ "js/theme-control.js" | relURL }}" defer></script>
+  {{ if .IsHome }}<script src="{{ "js/site.js" | relURL }}" defer></script>{{ end }}
+</head>
+<body class="min-h-screen bg-page text-ink">
+  <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-panel focus:p-3">本文へ移動</a>
+  <div class="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
+    {{ partial "site/sidebar.html" . }}
+    <main id="main-content" class="min-w-0">
+      {{ partial "site/header.html" . }}
+      {{ block "main" . }}{{ end }}
+      {{ partial "site/footer.html" . }}
+    </main>
+  </div>
+</body>
+</html>
