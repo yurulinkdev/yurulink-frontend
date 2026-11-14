@@ -7,15 +7,15 @@
           </div>
           <div class="flex flex-wrap items-center gap-3"><p id="count" class="text-sm text-muted-ink" aria-live="polite"></p><div role="group" aria-label="リンク一覧の表示形式" class="inline-flex gap-1"><button type="button" data-catalog-view="grid" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="true">カード</button><button type="button" data-catalog-view="list" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="false">リスト</button></div></div>
         </div>
-        {{ $v2 := .Site.Data.public.catalog }}
-        {{ if and $v2 (eq (int ($v2.schema_version | default 0)) 2) }}
+        {{ $catalog := .Site.Data.public.catalog }}
+        {{ if and $catalog (eq (int ($catalog.schema_version | default 0)) 2) }}
           {{ $programs := dict }}
-          {{ range $v2.programs }}{{ $programs = merge $programs (dict .id .name) }}{{ end }}
+          {{ range $catalog.programs }}{{ $programs = merge $programs (dict .id .name) }}{{ end }}
           {{ $tax := .Site.Data.taxonomy }}
           {{ $categories := dict }}
           {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
           <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
-          {{ range $v2.items }}
+          {{ range $catalog.items }}
             {{ if and (eq .status "published") .title .url }}
               {{ $url := urls.Parse .url }}
               {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
@@ -36,27 +36,7 @@
           </ul>
           <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
         {{ else }}
-          {{ $catalog := .Site.Data.public.videos }}
-          {{ if and $catalog $catalog.videos }}
-            <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
-              {{ range $catalog.videos }}
-                {{ if and .title .url }}
-                  {{ $url := urls.Parse .url }}
-                  {{ if and (eq $url.Scheme "https") $url.Host }}
-                    <li data-catalog-item data-category="{{ .source | default "video" }}" data-category-label="{{ .source | default "動画" }}" data-search="{{ printf "%s %s" .title (.source | default "") }}">
-                      <article class="h-full rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
-                        {{ with .source }}<p class="mb-2 text-xs text-muted-ink">{{ . }}</p>{{ end }}
-                        <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
-                      </article>
-                    </li>
-                  {{ end }}
-                {{ end }}
-              {{ end }}
-            </ul>
-            <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
-          {{ else }}
-            <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">公開データの連携準備中です。既存の本番サイトは引き続き稼働しています。</p>
-          {{ end }}
+          <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">統合形式の公開カタログを準備中です。</p>
         {{ end }}
       </section>
 {{ end }}
