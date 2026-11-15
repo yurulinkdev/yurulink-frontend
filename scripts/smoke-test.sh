@@ -24,6 +24,10 @@ grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo ':
 grep -q 'theme-toggle' public/index.html
 grep -q 'page-size' public/index.html
 grep -q 'pagination' public/index.html
+# ドロワーのキーボード操作と非表示時のフォーカス抑止を静的検査
+grep -q "event.key === 'Escape'" static/js/theme-control.js
+grep -q "event.key !== 'Tab'" static/js/theme-control.js
+grep -q 'drawer.inert' static/js/theme-control.js
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
