@@ -59,14 +59,14 @@ html { line-height: 1.7; }
   -webkit-line-clamp: 2;
   overflow: hidden;
 }
-.catalog-list-view [data-catalog-item] article > div > p:first-child {
+.catalog-list-view .catalog-item-meta {
   margin-bottom: .125rem;
   font-size: .6875rem;
 }
-.catalog-list-view [data-catalog-item] article > div > p:nth-of-type(2) {
+.catalog-list-view .catalog-item-description {
   display: none;
 }
-.catalog-list-view [data-catalog-item] article > div > p:last-child:not(:first-child) {
+.catalog-list-view .catalog-item-date {
   margin-top: .125rem;
   font-size: .6875rem;
 }
