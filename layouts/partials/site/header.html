@@ -9,11 +9,6 @@
     {{ else }}
       <a class="min-w-0 flex-1 truncate font-semibold text-accent hover:underline" href="{{ "" | relURL }}">YuruLink</a>
     {{ end }}
-    <label class="flex items-center gap-2">
-      <span class="sr-only">表示テーマ</span>
-      <select id="theme-select" aria-label="表示テーマ" class="rounded-lg border border-line bg-panel px-2 py-2.5 text-sm text-ink">
-        <option value="auto">自動</option><option value="light">ライト</option><option value="dark">ダーク</option>
-      </select>
-    </label>
+    <button id="theme-toggle" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-panel text-ink" aria-label="表示テーマを切り替え" title="表示テーマを切り替え"><svg aria-hidden="true" viewBox="0 0 24 24" width="20" height="20" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M2 12h2m16 0h2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42m0-14.14-1.42 1.42M6.35 17.65l-1.42 1.42"/></svg></button>
   </div>
 </header>
