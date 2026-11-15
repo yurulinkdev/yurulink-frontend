@@ -1,0 +1,1515 @@
+{
+  "schema_version": 2,
+  "programs": [
+    {
+      "id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg",
+      "name": "ゆる言語学ラジオ"
+    }
+  ],
+  "collections": [],
+  "items": [
+    {
+      "id": "youtube:rrwNxNHR9iM",
+      "title": "なぜ報道番組は「らしい」と言わないのか？",
+      "url": "https://www.youtube.com/watch?v=rrwNxNHR9iM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/rrwNxNHR9iM/default.jpg",
+      "published_at": "2026-10-20T09:45:11Z"
+    },
+    {
+      "id": "youtube:JTY51LiXKLg",
+      "title": "AI時代に、日本語はどう変わるのか？",
+      "url": "https://www.youtube.com/watch?v=JTY51LiXKLg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/JTY51LiXKLg/default.jpg",
+      "published_at": "2026-10-27T09:45:05Z"
+    },
+    {
+      "id": "youtube:4peC5PQ7ZMw",
+      "title": "人間の本性は悪なのか？",
+      "url": "https://www.youtube.com/watch?v=4peC5PQ7ZMw",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/4peC5PQ7ZMw/default.jpg",
+      "published_at": "2026-09-22T09:45:34Z"
+    },
+    {
+      "id": "youtube:B4S9MY0BEgU",
+      "title": "ひろゆきから始める言語哲学",
+      "url": "https://www.youtube.com/watch?v=B4S9MY0BEgU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/B4S9MY0BEgU/default.jpg",
+      "published_at": "2026-09-29T09:45:23Z"
+    },
+    {
+      "id": "youtube:SS5vtxdWzkU",
+      "title": "吃音はなぜ起こるのか？",
+      "url": "https://www.youtube.com/watch?v=SS5vtxdWzkU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/SS5vtxdWzkU/default.jpg",
+      "published_at": "2026-08-18T09:45:09Z"
+    },
+    {
+      "id": "youtube:b6E3GkfX98A",
+      "title": "吃音はどう隠されるのか？",
+      "url": "https://www.youtube.com/watch?v=b6E3GkfX98A",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/b6E3GkfX98A/default.jpg",
+      "published_at": "2026-08-25T09:45:18Z"
+    },
+    {
+      "id": "youtube:AJuQ8J97dwQ",
+      "title": "「えーっと」が多いと面接で落ちる？",
+      "url": "https://www.youtube.com/watch?v=AJuQ8J97dwQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/AJuQ8J97dwQ/default.jpg",
+      "published_at": "2026-09-01T09:45:25Z"
+    },
+    {
+      "id": "youtube:_bOu5jwJZdk",
+      "title": "ラーメン二郎の言語学。「ニンニク入れますか？」を解剖する。",
+      "url": "https://www.youtube.com/watch?v=_bOu5jwJZdk",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/_bOu5jwJZdk/default.jpg",
+      "published_at": "2026-06-30T09:45:03Z"
+    },
+    {
+      "id": "youtube:it48QrP9KfY",
+      "title": "「日本語は遠回りに言う」。それ誤解です。",
+      "url": "https://www.youtube.com/watch?v=it48QrP9KfY",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/it48QrP9KfY/default.jpg",
+      "published_at": "2026-07-07T09:45:29Z"
+    },
+    {
+      "id": "youtube:VXYI0evVJjc",
+      "title": "おもしろい響きの単語を集めたよ！【ハネオツパイ】",
+      "url": "https://www.youtube.com/watch?v=VXYI0evVJjc",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/VXYI0evVJjc/default.jpg",
+      "published_at": "2026-06-09T09:45:26Z"
+    },
+    {
+      "id": "youtube:4K_gR9gyb9o",
+      "title": "「言語が思考を決定する」。サピア=ウォーフの仮説はなぜ生まれた？",
+      "url": "https://www.youtube.com/watch?v=4K_gR9gyb9o",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/4K_gR9gyb9o/default.jpg",
+      "published_at": "2026-03-17T09:45:01Z"
+    },
+    {
+      "id": "youtube:P4fjSMbv3o4",
+      "title": "言語学者が炎上した。なぜ？",
+      "url": "https://www.youtube.com/watch?v=P4fjSMbv3o4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/P4fjSMbv3o4/default.jpg",
+      "published_at": "2026-03-24T09:45:01Z"
+    },
+    {
+      "id": "youtube:Vxd7p4u3O_4",
+      "title": "言語学映画『メッセージ』にマジレスする動画",
+      "url": "https://www.youtube.com/watch?v=Vxd7p4u3O_4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/Vxd7p4u3O_4/default.jpg",
+      "published_at": "2026-03-31T09:45:02Z"
+    },
+    {
+      "id": "youtube:bncMHojUgWs",
+      "title": "エセ関西弁はなぜ嫌われるのか？",
+      "url": "https://www.youtube.com/watch?v=bncMHojUgWs",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/bncMHojUgWs/default.jpg",
+      "published_at": "2026-02-17T09:45:02Z"
+    },
+    {
+      "id": "youtube:H6tvHNaNWWQ",
+      "title": "関西弁の本質は「利他」だった。",
+      "url": "https://www.youtube.com/watch?v=H6tvHNaNWWQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/H6tvHNaNWWQ/default.jpg",
+      "published_at": "2026-02-24T09:45:02Z"
+    },
+    {
+      "id": "youtube:2HoWMgXI4II",
+      "title": "研究者の人生を変えた「どフェチ論文」を聞きました。",
+      "url": "https://www.youtube.com/watch?v=2HoWMgXI4II",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/2HoWMgXI4II/default.jpg",
+      "published_at": "2026-01-27T09:45:00Z"
+    },
+    {
+      "id": "youtube:srb5HwiC3gg",
+      "title": "「古代人は色が見えなかった」という衝撃の説",
+      "url": "https://www.youtube.com/watch?v=srb5HwiC3gg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/srb5HwiC3gg/default.jpg",
+      "published_at": "2026-01-13T09:45:05Z"
+    },
+    {
+      "id": "youtube:nui5zja3wQs",
+      "title": "世界中の色を調べたら、衝撃の事実が分かりました。",
+      "url": "https://www.youtube.com/watch?v=nui5zja3wQs",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/nui5zja3wQs/default.jpg",
+      "published_at": "2026-01-20T09:45:08Z"
+    },
+    {
+      "id": "youtube:sLGshNDA5Ko",
+      "title": "色の語彙が2個しかないと、世界はどう見える？",
+      "url": "https://www.youtube.com/watch?v=sLGshNDA5Ko",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/sLGshNDA5Ko/default.jpg",
+      "published_at": "2026-10-13T09:45:11Z"
+    },
+    {
+      "id": "youtube:qZyavCd6xBc",
+      "title": "ゆる言語学ラジオ本大賞2024、発表ライブ！",
+      "url": "https://www.youtube.com/watch?v=qZyavCd6xBc",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/qZyavCd6xBc/default.jpg",
+      "published_at": "2024-12-07T11:42:50Z"
+    },
+    {
+      "id": "youtube:B4DskRymyeM",
+      "title": "2025年ベスト本を語り尽くします。",
+      "url": "https://www.youtube.com/watch?v=B4DskRymyeM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/B4DskRymyeM/default.jpg",
+      "published_at": "2025-12-30T09:45:00Z"
+    },
+    {
+      "id": "youtube:X7JpfLAb1Xs",
+      "title": "専門家と「プロジェクション」を語り尽くす1時間",
+      "url": "https://www.youtube.com/watch?v=X7JpfLAb1Xs",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/X7JpfLAb1Xs/default.jpg",
+      "published_at": "2025-12-09T09:45:04Z"
+    },
+    {
+      "id": "youtube:2RK700azLzs",
+      "title": "地域に根付く「方言漢字」って何者？？？",
+      "url": "https://www.youtube.com/watch?v=2RK700azLzs",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/2RK700azLzs/default.jpg",
+      "published_at": "2025-10-28T09:45:00Z"
+    },
+    {
+      "id": "youtube:sEyd-dNuo5w",
+      "title": "世界中の電話を爆速にした、知られざる日本人研究者",
+      "url": "https://www.youtube.com/watch?v=sEyd-dNuo5w",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/sEyd-dNuo5w/default.jpg",
+      "published_at": "2025-11-02T00:45:08Z"
+    },
+    {
+      "id": "youtube:GAqZFncwndM",
+      "title": "貴重すぎる鹿児島方言の資料は、漂流から生まれた。",
+      "url": "https://www.youtube.com/watch?v=GAqZFncwndM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/GAqZFncwndM/default.jpg",
+      "published_at": "2025-11-25T09:45:02Z"
+    },
+    {
+      "id": "youtube:l2RkHuzECQ0",
+      "title": "激動の1年を振り返るライブ【全国ツアー後夜祭】",
+      "url": "https://www.youtube.com/watch?v=l2RkHuzECQ0",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/l2RkHuzECQ0/default.jpg",
+      "published_at": "2025-12-28T14:12:22Z"
+    },
+    {
+      "id": "youtube:h7tMEfZIhdU",
+      "title": "なぜ「世界記録が破れた」と言えないのか？",
+      "url": "https://www.youtube.com/watch?v=h7tMEfZIhdU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/h7tMEfZIhdU/default.jpg",
+      "published_at": "2026-01-06T09:45:09Z"
+    },
+    {
+      "id": "youtube:R7yBM31DbfM",
+      "title": "村を作っていた黒歴史に、決着がつきました",
+      "url": "https://www.youtube.com/watch?v=R7yBM31DbfM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/R7yBM31DbfM/default.jpg",
+      "published_at": "2026-01-10T00:45:02Z"
+    },
+    {
+      "id": "youtube:MR_gz2U7UvY",
+      "title": "「っす」は失礼じゃない。むしろ神。",
+      "url": "https://www.youtube.com/watch?v=MR_gz2U7UvY",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/MR_gz2U7UvY/default.jpg",
+      "published_at": "2025-10-07T09:45:02Z"
+    },
+    {
+      "id": "youtube:5VJA9V34iy4",
+      "title": "「ます」は死にかけている",
+      "url": "https://www.youtube.com/watch?v=5VJA9V34iy4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/5VJA9V34iy4/default.jpg",
+      "published_at": "2025-10-14T09:45:00Z"
+    },
+    {
+      "id": "youtube:7vNhgWgcuuo",
+      "title": "「タメ語でいいよ」は暴力になりうる",
+      "url": "https://www.youtube.com/watch?v=7vNhgWgcuuo",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/7vNhgWgcuuo/default.jpg",
+      "published_at": "2025-10-21T09:45:00Z"
+    },
+    {
+      "id": "youtube:bDVpBNIXXh4",
+      "title": "虹にはオス・メスがあるし、昔はマラリアを注射してた【うんちくしりとりパンクラチオン】#33",
+      "url": "https://www.youtube.com/watch?v=bDVpBNIXXh4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/bDVpBNIXXh4/default.jpg",
+      "published_at": "2021-06-29T09:45:03Z"
+    },
+    {
+      "id": "youtube:itCYrUONG5w",
+      "title": "動物の名前で争ったおもしろ判例「たぬき・むじな事件」【公開収録3】#162",
+      "url": "https://www.youtube.com/watch?v=itCYrUONG5w",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/itCYrUONG5w/default.jpg",
+      "published_at": "2022-09-24T00:45:01Z"
+    },
+    {
+      "id": "youtube:pWSf-2bez84",
+      "title": "うんちくをしりとりで繋いだら、歴史言語学者が強すぎた。",
+      "url": "https://www.youtube.com/watch?v=pWSf-2bez84",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/pWSf-2bez84/default.jpg",
+      "published_at": "2025-09-30T09:45:04Z"
+    },
+    {
+      "id": "youtube:GoGUaUHdrKQ",
+      "title": "聞こえる人も聞こえない人も、みんなが手話を使った島。",
+      "url": "https://www.youtube.com/watch?v=GoGUaUHdrKQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/GoGUaUHdrKQ/default.jpg",
+      "published_at": "2025-08-12T09:45:02Z"
+    },
+    {
+      "id": "youtube:T-jKleBEeM4",
+      "title": "聞こえない人の理想郷は、なぜ崩壊した？",
+      "url": "https://www.youtube.com/watch?v=T-jKleBEeM4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/T-jKleBEeM4/default.jpg",
+      "published_at": "2025-08-19T09:45:06Z"
+    },
+    {
+      "id": "youtube:Mda9QSd9G-s",
+      "title": "みんなが手話で話す村は、現代日本にもあった。",
+      "url": "https://www.youtube.com/watch?v=Mda9QSd9G-s",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/Mda9QSd9G-s/default.jpg",
+      "published_at": "2025-08-26T09:45:03Z"
+    },
+    {
+      "id": "youtube:OlMjMnpj_ig",
+      "title": "自己肯定感と自己評価は別物",
+      "url": "https://www.youtube.com/watch?v=OlMjMnpj_ig",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/OlMjMnpj_ig/default.jpg",
+      "published_at": "2025-05-06T09:45:03Z"
+    },
+    {
+      "id": "youtube:fb-OfzOVDow",
+      "title": "自分がない。社会に適合しすぎる男の悲劇。",
+      "url": "https://www.youtube.com/watch?v=fb-OfzOVDow",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/fb-OfzOVDow/default.jpg",
+      "published_at": "2025-05-13T09:45:04Z"
+    },
+    {
+      "id": "youtube:WmGSMBREiB8",
+      "title": "おっさんのセンスを読み切れ！ダジャレ命名クイズ！",
+      "url": "https://www.youtube.com/watch?v=WmGSMBREiB8",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/WmGSMBREiB8/default.jpg",
+      "published_at": "2025-04-22T09:45:04Z"
+    },
+    {
+      "id": "youtube:c8KS4Httk7s",
+      "title": "「はい」と「うん」の違いは、丁寧さではない。",
+      "url": "https://www.youtube.com/watch?v=c8KS4Httk7s",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/c8KS4Httk7s/default.jpg",
+      "published_at": "2025-03-25T09:45:04Z"
+    },
+    {
+      "id": "youtube:86acfeflqg4",
+      "title": "「はい」と「うん」の違いを徹底解説します。",
+      "url": "https://www.youtube.com/watch?v=86acfeflqg4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/86acfeflqg4/default.jpg",
+      "published_at": "2025-04-01T09:45:00Z"
+    },
+    {
+      "id": "youtube:WmVm81unxP4",
+      "title": "「論理的」は、地域によって違う #372",
+      "url": "https://www.youtube.com/watch?v=WmVm81unxP4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/WmVm81unxP4/default.jpg",
+      "published_at": "2024-10-05T00:45:01Z"
+    },
+    {
+      "id": "youtube:HmClYAes144",
+      "title": "徹底討論！ 「結論から喋る」は本当に正しいのか？ #373",
+      "url": "https://www.youtube.com/watch?v=HmClYAes144",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/HmClYAes144/default.jpg",
+      "published_at": "2024-10-08T09:45:00Z"
+    },
+    {
+      "id": "youtube:FOiAlndixJY",
+      "title": "1分ごとに使える文字が減るラジオ #356",
+      "url": "https://www.youtube.com/watch?v=FOiAlndixJY",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/FOiAlndixJY/default.jpg",
+      "published_at": "2024-08-10T00:45:00Z"
+    },
+    {
+      "id": "youtube:TUu-XVmAUSQ",
+      "title": "読書ガチ勢が、本を読むコツを教えます【◯◯を読んではいけない】#354",
+      "url": "https://www.youtube.com/watch?v=TUu-XVmAUSQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/TUu-XVmAUSQ/default.jpg",
+      "published_at": "2024-08-03T00:45:02Z"
+    },
+    {
+      "id": "youtube:Sxo5vpoJGnM",
+      "title": "読書で挫折しないコツ「ギャルになる」#355",
+      "url": "https://www.youtube.com/watch?v=Sxo5vpoJGnM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/Sxo5vpoJGnM/default.jpg",
+      "published_at": "2024-08-06T09:45:01Z"
+    },
+    {
+      "id": "youtube:gxcUdW9O-xo",
+      "title": "【群論病】世界中のヘンな単語を集めろ！【eisegesis】#352",
+      "url": "https://www.youtube.com/watch?v=gxcUdW9O-xo",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/gxcUdW9O-xo/default.jpg",
+      "published_at": "2024-07-27T00:45:01Z"
+    },
+    {
+      "id": "youtube:kTuz8V6Cznc",
+      "title": "韓国語の専門家と一緒に、おもしろ単語を堪能しよう！#387",
+      "url": "https://www.youtube.com/watch?v=kTuz8V6Cznc",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/kTuz8V6Cznc/default.jpg",
+      "published_at": "2025-01-07T09:45:01Z"
+    },
+    {
+      "id": "youtube:9cQl9w084Vg",
+      "title": "【名古屋弁講座】超便利な挨拶「ご無礼」の使い方は？ #3150",
+      "url": "https://www.youtube.com/watch?v=9cQl9w084Vg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/9cQl9w084Vg/default.jpg",
+      "published_at": "2024-04-01T09:45:00Z"
+    },
+    {
+      "id": "youtube:jDUH6DEl44E",
+      "title": "名古屋は関東か関西か？ 方言調査で分かります。【名古屋方言1】#346",
+      "url": "https://www.youtube.com/watch?v=jDUH6DEl44E",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/jDUH6DEl44E/default.jpg",
+      "published_at": "2024-07-06T00:45:04Z"
+    },
+    {
+      "id": "youtube:E40WEvpNFLw",
+      "title": "名古屋は、人工的に作られた。#347",
+      "url": "https://www.youtube.com/watch?v=E40WEvpNFLw",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/E40WEvpNFLw/default.jpg",
+      "published_at": "2024-07-09T09:45:00Z"
+    },
+    {
+      "id": "youtube:LHs90gDcLdo",
+      "title": "方言によって母音の数が全然違うってマジ？【名古屋方言3】#348",
+      "url": "https://www.youtube.com/watch?v=LHs90gDcLdo",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/LHs90gDcLdo/default.jpg",
+      "published_at": "2024-07-13T00:45:02Z"
+    },
+    {
+      "id": "youtube:QW9v7Yneuq0",
+      "title": "お互いの奇書を自慢したら最高にキショかった【キショ奇書自慢選手権】#101",
+      "url": "https://www.youtube.com/watch?v=QW9v7Yneuq0",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/QW9v7Yneuq0/default.jpg",
+      "published_at": "2022-02-22T10:16:25Z"
+    },
+    {
+      "id": "youtube:y1DL8L7Qx-w",
+      "title": "【サイバーセキュリティを忍者にたとえる】キショい奇書を持ち寄ろう！【キショ奇書自慢選手権2】#342",
+      "url": "https://www.youtube.com/watch?v=y1DL8L7Qx-w",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/y1DL8L7Qx-w/default.jpg",
+      "published_at": "2024-06-22T00:45:07Z"
+    },
+    {
+      "id": "youtube:JhwoM3kwW6A",
+      "title": "意味は、真理値を返す関数だった。【意味論勉強会】#336",
+      "url": "https://www.youtube.com/watch?v=JhwoM3kwW6A",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/JhwoM3kwW6A/default.jpg",
+      "published_at": "2024-06-01T00:45:02Z"
+    },
+    {
+      "id": "youtube:fe5kdBLS8wM",
+      "title": "ちょいガチ言語学ラジオ「意味論」#375",
+      "url": "https://www.youtube.com/watch?v=fe5kdBLS8wM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/fe5kdBLS8wM/default.jpg",
+      "published_at": "2024-10-15T09:45:02Z"
+    },
+    {
+      "id": "youtube:7MnHl-ixymQ",
+      "title": "言語哲学者が芸能人の発言を分析したら…？#376",
+      "url": "https://www.youtube.com/watch?v=7MnHl-ixymQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/7MnHl-ixymQ/default.jpg",
+      "published_at": "2024-10-22T09:45:00Z"
+    },
+    {
+      "id": "youtube:PGHCk87Zh54",
+      "title": "赤ちゃんの素敵な間違いを集めよう 【赤ちゃんミステイクアワード】#140",
+      "url": "https://www.youtube.com/watch?v=PGHCk87Zh54",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/PGHCk87Zh54/default.jpg",
+      "published_at": "2022-07-09T00:45:00Z"
+    },
+    {
+      "id": "youtube:ivG_fbmuV5M",
+      "title": "子どもの言い間違い「つめたまる」が素晴らしすぎる【赤ちゃんミステイクアワード2 with今井先生】#150",
+      "url": "https://www.youtube.com/watch?v=ivG_fbmuV5M",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/ivG_fbmuV5M/default.jpg",
+      "published_at": "2022-08-13T00:45:01Z"
+    },
+    {
+      "id": "youtube:i3I8hbNMjwg",
+      "title": "子どもはなぜ「き」を「ち」にする？ 音声学者と子どもの間違いを楽しむ回 #278",
+      "url": "https://www.youtube.com/watch?v=i3I8hbNMjwg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/i3I8hbNMjwg/default.jpg",
+      "published_at": "2023-11-04T00:45:01Z"
+    },
+    {
+      "id": "youtube:HWCDla2JPxc",
+      "title": "オジサンの間違いを集めよう！！！【オマール海老とロブスターは別物】#335",
+      "url": "https://www.youtube.com/watch?v=HWCDla2JPxc",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/HWCDla2JPxc/default.jpg",
+      "published_at": "2024-05-28T09:45:01Z"
+    },
+    {
+      "id": "youtube:_6SoIktBgX4",
+      "title": "子どもは墓で「ハッピーバースデー」と言う。なぜ？【赤ちゃんミステイクアワード】#353",
+      "url": "https://www.youtube.com/watch?v=_6SoIktBgX4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/_6SoIktBgX4/default.jpg",
+      "published_at": "2024-07-30T09:45:02Z"
+    },
+    {
+      "id": "youtube:8Wpli2n6wAE",
+      "title": "人のすれ違いは「スキーマ」から生まれる。【赤ちゃんミステイクアワード】　#363",
+      "url": "https://www.youtube.com/watch?v=8Wpli2n6wAE",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/8Wpli2n6wAE/default.jpg",
+      "published_at": "2024-09-03T09:45:00Z"
+    },
+    {
+      "id": "youtube:6wVg6uSAsm4",
+      "title": "子どもはなぜタコ大学に通いたがるのか？【赤ちゃんミステイク】",
+      "url": "https://www.youtube.com/watch?v=6wVg6uSAsm4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/6wVg6uSAsm4/default.jpg",
+      "published_at": "2026-09-15T09:45:24Z"
+    },
+    {
+      "id": "youtube:Q_1IRN9usDU",
+      "title": "「東北の人は失礼」ってホント？ データを元に分析した結果は…#332",
+      "url": "https://www.youtube.com/watch?v=Q_1IRN9usDU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/Q_1IRN9usDU/default.jpg",
+      "published_at": "2024-05-18T00:45:01Z"
+    },
+    {
+      "id": "youtube:3vr3mpwbEUY",
+      "title": "直接言う東北、婉曲に言う関西。言語行動が違いすぎてビビる #333",
+      "url": "https://www.youtube.com/watch?v=3vr3mpwbEUY",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/3vr3mpwbEUY/default.jpg",
+      "published_at": "2024-05-21T09:45:00Z"
+    },
+    {
+      "id": "youtube:4Q1CZr3rj-s",
+      "title": "古今東西のおもしろ単語を集めました#330",
+      "url": "https://www.youtube.com/watch?v=4Q1CZr3rj-s",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/4Q1CZr3rj-s/default.jpg",
+      "published_at": "2024-05-11T00:45:00Z"
+    },
+    {
+      "id": "youtube:k2wtazyfhHo",
+      "title": "巷にあふれるウソ学説を語れ！謬説ナイト！【雪を表す語彙が400以上】#329",
+      "url": "https://www.youtube.com/watch?v=k2wtazyfhHo",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/k2wtazyfhHo/default.jpg",
+      "published_at": "2024-05-07T09:45:02Z"
+    },
+    {
+      "id": "youtube:5NJ_tKtvjCs",
+      "title": "絵で物事を考える「視覚思考者」にはどんな世界が見えるのか？【ビジュアルシンカー1】#322",
+      "url": "https://www.youtube.com/watch?v=5NJ_tKtvjCs",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/5NJ_tKtvjCs/default.jpg",
+      "published_at": "2024-04-13T00:45:00Z"
+    },
+    {
+      "id": "youtube:TUNrSUq1IYw",
+      "title": "言語化に興奮するタイプの人間は、文章で惚れちゃう【ビジュアルシンカー2】#323",
+      "url": "https://www.youtube.com/watch?v=TUNrSUq1IYw",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/TUNrSUq1IYw/default.jpg",
+      "published_at": "2024-04-16T09:45:02Z"
+    },
+    {
+      "id": "youtube:Gjt52U9vMs4",
+      "title": "心は存在しない。【ビジュアルシンカー3】#324",
+      "url": "https://www.youtube.com/watch?v=Gjt52U9vMs4",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/Gjt52U9vMs4/default.jpg",
+      "published_at": "2024-04-20T00:45:02Z"
+    },
+    {
+      "id": "youtube:TQGekCftU1A",
+      "title": "視覚思考者の脳内を見せてもらいました。",
+      "url": "https://www.youtube.com/watch?v=TQGekCftU1A",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/TQGekCftU1A/default.jpg",
+      "published_at": "2025-07-22T09:45:02Z"
+    },
+    {
+      "id": "youtube:ceYj1Fa1t5A",
+      "title": "方言はなぜ存在するのか？トウモロコシで謎を解く。【言語地理学1】#311",
+      "url": "https://www.youtube.com/watch?v=ceYj1Fa1t5A",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/ceYj1Fa1t5A/default.jpg",
+      "published_at": "2024-03-02T00:45:01Z"
+    },
+    {
+      "id": "youtube:LxfVadD7WxU",
+      "title": "じゃがいもの呼称、知らんヤツまみれで絶望【言語地理学2】#312",
+      "url": "https://www.youtube.com/watch?v=LxfVadD7WxU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/LxfVadD7WxU/default.jpg",
+      "published_at": "2024-03-05T09:45:01Z"
+    },
+    {
+      "id": "youtube:gkttdIRIJbM",
+      "title": "山梨県だけ周囲と方言が異なる。その理由がエモすぎる…。【言語地理学3】#313",
+      "url": "https://www.youtube.com/watch?v=gkttdIRIJbM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/gkttdIRIJbM/default.jpg",
+      "published_at": "2024-03-09T00:45:02Z"
+    },
+    {
+      "id": "youtube:MgvRb5R70VQ",
+      "title": "儲け話は、方言を運ばない。商談で関西弁はうつらないらしい。【言語地理学4】#314",
+      "url": "https://www.youtube.com/watch?v=MgvRb5R70VQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/MgvRb5R70VQ/default.jpg",
+      "published_at": "2024-03-12T09:45:02Z"
+    },
+    {
+      "id": "youtube:60SQzKRdPDI",
+      "title": "データを分析し、言語を理解する。言語学版『ファクトフルネス』の世界【コーパス1】#293",
+      "url": "https://www.youtube.com/watch?v=60SQzKRdPDI",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/60SQzKRdPDI/default.jpg",
+      "published_at": "2023-12-30T00:45:00Z"
+    },
+    {
+      "id": "youtube:k2UwwyyGxZ8",
+      "title": "【650億文字を数えた】コーパス作りの過酷さを、制作者自身が語る【コーパス2】#294",
+      "url": "https://www.youtube.com/watch?v=k2UwwyyGxZ8",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/k2UwwyyGxZ8/default.jpg",
+      "published_at": "2024-01-02T09:45:02Z"
+    },
+    {
+      "id": "youtube:_CJf4iJmhAk",
+      "title": "日常会話で「うん」は最大何連続するのか？データに基づいて答えを出す。【コーパス3】#295",
+      "url": "https://www.youtube.com/watch?v=_CJf4iJmhAk",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/_CJf4iJmhAk/default.jpg",
+      "published_at": "2024-01-06T00:45:01Z"
+    },
+    {
+      "id": "youtube:QCDdVmqwZME",
+      "title": "あらゆる悩みがコーパスで解決します。【コーパス雑談回】#296",
+      "url": "https://www.youtube.com/watch?v=QCDdVmqwZME",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/QCDdVmqwZME/default.jpg",
+      "published_at": "2024-01-09T09:45:03Z"
+    },
+    {
+      "id": "youtube:UEqj3RRUlDA",
+      "title": "「パラッ」と「パラリ」はどう違う？オノマトペを部品で分析する【オノマトペ1】#284",
+      "url": "https://www.youtube.com/watch?v=UEqj3RRUlDA",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/UEqj3RRUlDA/default.jpg",
+      "published_at": "2023-11-25T00:45:00Z"
+    },
+    {
+      "id": "youtube:pWxaHAbAeNg",
+      "title": "オノマトペの挙動がバグってると思ったら、説明できる統一理論があった【オノマトペ2】#285",
+      "url": "https://www.youtube.com/watch?v=pWxaHAbAeNg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/pWxaHAbAeNg/default.jpg",
+      "published_at": "2023-11-28T09:45:03Z"
+    },
+    {
+      "id": "youtube:B73sEyA0wbs",
+      "title": "日本語の歴史が生んだ奇跡。「パリパリ」がオノマトペだと断定できるのはなぜ？【オノマトペ3】#286",
+      "url": "https://www.youtube.com/watch?v=B73sEyA0wbs",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/B73sEyA0wbs/default.jpg",
+      "published_at": "2023-12-02T00:45:00Z"
+    },
+    {
+      "id": "youtube:fRl6Jw5FWwY",
+      "title": "オノマトペは言語の◯◯。すべての伏線を回収する結論とは？【オノマトペ4】#287",
+      "url": "https://www.youtube.com/watch?v=fRl6Jw5FWwY",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/fRl6Jw5FWwY/default.jpg",
+      "published_at": "2023-12-05T09:45:01Z"
+    },
+    {
+      "id": "youtube:R5YRACWBEGM",
+      "title": "さよなら、オノマトペ。人はなぜオノマトペから離れ、一般語を学ぶのか？【オノマトペ5】#288",
+      "url": "https://www.youtube.com/watch?v=R5YRACWBEGM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/R5YRACWBEGM/default.jpg",
+      "published_at": "2023-12-09T00:45:00Z"
+    },
+    {
+      "id": "youtube:t4jeIxyKxZU",
+      "title": "かわいい小鳥「鵺」は、なぜ怪物に変わった？文学研究で分かった驚きの経緯【聞きなし1】#301",
+      "url": "https://www.youtube.com/watch?v=t4jeIxyKxZU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/t4jeIxyKxZU/default.jpg",
+      "published_at": "2024-01-27T00:45:04Z"
+    },
+    {
+      "id": "youtube:OzTm1x4NNoY",
+      "title": "平安時代の犬は「びよ」と鳴いていた。鳴き声が激変した理由は…？【聞きなし2】#302",
+      "url": "https://www.youtube.com/watch?v=OzTm1x4NNoY",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/OzTm1x4NNoY/default.jpg",
+      "published_at": "2024-01-30T09:45:01Z"
+    },
+    {
+      "id": "youtube:GTB5FzSLUio",
+      "title": "【オルマンジョルマン】知らないオノマトペの意味を当てろ！【もゆらに】#306",
+      "url": "https://www.youtube.com/watch?v=GTB5FzSLUio",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/GTB5FzSLUio/default.jpg",
+      "published_at": "2024-02-13T09:45:00Z"
+    },
+    {
+      "id": "youtube:rJaADPtSgcE",
+      "title": "方言オノマトペ研究は意外に役立つ。病院から製造業の現場まで。【方言オノマトペ1】#307",
+      "url": "https://www.youtube.com/watch?v=rJaADPtSgcE",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/rJaADPtSgcE/default.jpg",
+      "published_at": "2024-02-17T00:45:03Z"
+    },
+    {
+      "id": "youtube:SEAp77DqViM",
+      "title": "古語を知るために、方言を知る。方言周圏論とオノマトペ #308",
+      "url": "https://www.youtube.com/watch?v=SEAp77DqViM",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/SEAp77DqViM/default.jpg",
+      "published_at": "2024-02-20T09:45:01Z"
+    },
+    {
+      "id": "youtube:3X6yIlmJv-k",
+      "title": "明治時代の「わくわく」は「心が乱れる」だった。「めろめろ」は？#326",
+      "url": "https://www.youtube.com/watch?v=3X6yIlmJv-k",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/3X6yIlmJv-k/default.jpg",
+      "published_at": "2024-04-27T00:45:00Z"
+    },
+    {
+      "id": "youtube:WY_WR0vopcg",
+      "title": "【擬態語ミステリー】変な漢字 #328",
+      "url": "https://www.youtube.com/watch?v=WY_WR0vopcg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/WY_WR0vopcg/default.jpg",
+      "published_at": "2024-05-04T00:45:01Z"
+    },
+    {
+      "id": "youtube:Ysf00T50Jj8",
+      "title": "【ビッグバン】官能小説の巧みな比喩に大感動【なめくじ】#337",
+      "url": "https://www.youtube.com/watch?v=Ysf00T50Jj8",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/Ysf00T50Jj8/default.jpg",
+      "published_at": "2024-06-04T09:45:01Z"
+    },
+    {
+      "id": "youtube:3bA1CesZWes",
+      "title": "明治維新で楽器オノマトペが消えた。何があった？#343",
+      "url": "https://www.youtube.com/watch?v=3bA1CesZWes",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/3bA1CesZWes/default.jpg",
+      "published_at": "2024-06-25T09:45:00Z"
+    },
+    {
+      "id": "youtube:C-ppWQ9o5xA",
+      "title": "「野菜をコトコト煮込まない」はなぜキモいのか？#357",
+      "url": "https://www.youtube.com/watch?v=C-ppWQ9o5xA",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/C-ppWQ9o5xA/default.jpg",
+      "published_at": "2024-08-13T09:45:00Z"
+    },
+    {
+      "id": "youtube:JOPGCUbsADg",
+      "title": "オノマトペを使うだけで記憶力も筋力も上がるらしい【怪しくないよ】#358",
+      "url": "https://www.youtube.com/watch?v=JOPGCUbsADg",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/JOPGCUbsADg/default.jpg",
+      "published_at": "2024-08-17T00:45:00Z"
+    },
+    {
+      "id": "youtube:EsyYaoSHXvQ",
+      "title": "【3時間で全部学ぶ】音韻論の基礎から最適性理論まで【ちょいガチ言語学ラジオ】#275",
+      "url": "https://www.youtube.com/watch?v=EsyYaoSHXvQ",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/EsyYaoSHXvQ/default.jpg",
+      "published_at": "2023-10-24T09:45:00Z"
+    },
+    {
+      "id": "youtube:q5X-wVMQjFk",
+      "title": "「最適性理論」は、麻布高校の校則に似ている【ちょいガチ言語学の翻訳】#276",
+      "url": "https://www.youtube.com/watch?v=q5X-wVMQjFk",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/q5X-wVMQjFk/default.jpg",
+      "published_at": "2023-10-28T00:45:02Z"
+    },
+    {
+      "id": "youtube:UkI4XeiNsAU",
+      "title": "【ガチ】統語論の営みを概観する4時間半【樹形図まみれ】#304",
+      "url": "https://www.youtube.com/watch?v=UkI4XeiNsAU",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published",
+      "thumbnail_url": "https://i.ytimg.com/vi/UkI4XeiNsAU/default.jpg",
+      "published_at": "2024-02-06T09:45:01Z"
+    }
+  ],
+  "memberships": [],
+  "item_programs": [
+    {
+      "item_id": "youtube:rrwNxNHR9iM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:JTY51LiXKLg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:4peC5PQ7ZMw",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:B4S9MY0BEgU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:SS5vtxdWzkU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:b6E3GkfX98A",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:AJuQ8J97dwQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:_bOu5jwJZdk",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:it48QrP9KfY",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:VXYI0evVJjc",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:4K_gR9gyb9o",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:P4fjSMbv3o4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:Vxd7p4u3O_4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:bncMHojUgWs",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:H6tvHNaNWWQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:2HoWMgXI4II",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:srb5HwiC3gg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:nui5zja3wQs",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:sLGshNDA5Ko",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:qZyavCd6xBc",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:B4DskRymyeM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:X7JpfLAb1Xs",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:2RK700azLzs",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:sEyd-dNuo5w",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:GAqZFncwndM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:l2RkHuzECQ0",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:h7tMEfZIhdU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:R7yBM31DbfM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:MR_gz2U7UvY",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:5VJA9V34iy4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:7vNhgWgcuuo",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:bDVpBNIXXh4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:itCYrUONG5w",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:pWSf-2bez84",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:GoGUaUHdrKQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:T-jKleBEeM4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:Mda9QSd9G-s",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:OlMjMnpj_ig",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:fb-OfzOVDow",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:WmGSMBREiB8",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:c8KS4Httk7s",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:86acfeflqg4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:WmVm81unxP4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:HmClYAes144",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:FOiAlndixJY",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:TUu-XVmAUSQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:Sxo5vpoJGnM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:gxcUdW9O-xo",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:kTuz8V6Cznc",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:9cQl9w084Vg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:jDUH6DEl44E",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:E40WEvpNFLw",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:LHs90gDcLdo",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:QW9v7Yneuq0",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:y1DL8L7Qx-w",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:JhwoM3kwW6A",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:fe5kdBLS8wM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:7MnHl-ixymQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:PGHCk87Zh54",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:ivG_fbmuV5M",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:i3I8hbNMjwg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:HWCDla2JPxc",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:_6SoIktBgX4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:8Wpli2n6wAE",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:6wVg6uSAsm4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:Q_1IRN9usDU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:3vr3mpwbEUY",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:4Q1CZr3rj-s",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:k2wtazyfhHo",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:5NJ_tKtvjCs",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:TUNrSUq1IYw",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:Gjt52U9vMs4",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:TQGekCftU1A",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:ceYj1Fa1t5A",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:LxfVadD7WxU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:gkttdIRIJbM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:MgvRb5R70VQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:60SQzKRdPDI",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:k2UwwyyGxZ8",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:_CJf4iJmhAk",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:QCDdVmqwZME",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:UEqj3RRUlDA",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:pWxaHAbAeNg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:B73sEyA0wbs",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:fRl6Jw5FWwY",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:R5YRACWBEGM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:t4jeIxyKxZU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:OzTm1x4NNoY",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:GTB5FzSLUio",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:rJaADPtSgcE",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:SEAp77DqViM",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:3X6yIlmJv-k",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:WY_WR0vopcg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:Ysf00T50Jj8",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:3bA1CesZWes",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:C-ppWQ9o5xA",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:JOPGCUbsADg",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:EsyYaoSHXvQ",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:q5X-wVMQjFk",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    },
+    {
+      "item_id": "youtube:UkI4XeiNsAU",
+      "program_id": "youtube-channel:UCmpkIzF3xFzhPez7gXOyhVg"
+    }
+  ]
+}
