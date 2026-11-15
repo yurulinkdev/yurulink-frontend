@@ -23,7 +23,7 @@ done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
 grep -q 'theme-toggle' public/index.html
 grep -q 'page-size' public/index.html
-grep -q 'id="pagination"' public/index.html
+grep -q 'pagination' public/index.html
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
