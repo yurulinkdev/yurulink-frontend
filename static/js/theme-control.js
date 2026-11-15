@@ -4,17 +4,43 @@
   const backdrop = document.getElementById('drawer-backdrop');
   const open = document.getElementById('open-categories');
   const close = document.getElementById('close-categories');
+  let drawerOpen = false;
+  let restoreFocus = null;
+  const isMobile = () => window.matchMedia('(max-width: 1023px)').matches;
+  const focusables = () => [...(drawer?.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])') || [])].filter(element => element.getClientRects().length > 0);
   const toggle = visible => {
+    if (!isMobile() && visible) return;
+    if (drawerOpen === visible) return;
+    drawerOpen = visible;
+    if (visible) restoreFocus = document.activeElement;
     drawer?.classList.toggle('-translate-x-full', !visible);
     backdrop?.classList.toggle('hidden', !visible);
+    if (visible) drawer?.setAttribute('aria-modal', 'true');
+    else drawer?.removeAttribute('aria-modal');
     open?.setAttribute('aria-expanded', String(visible));
+    document.body.classList.toggle('overflow-hidden', visible);
     if (visible) close?.focus();
-    else if (document.activeElement === close) open?.focus();
+    else if (restoreFocus?.isConnected) restoreFocus.focus();
   };
   open?.addEventListener('click', () => toggle(true));
   close?.addEventListener('click', () => toggle(false));
   backdrop?.addEventListener('click', () => toggle(false));
-  document.addEventListener('keydown', event => { if (event.key === 'Escape') toggle(false); });
+  document.addEventListener('keydown', event => {
+    if (!drawerOpen) return;
+    if (event.key === 'Escape') { event.preventDefault(); toggle(false); return; }
+    if (event.key !== 'Tab') return;
+    const elements = focusables();
+    if (!elements.length) { event.preventDefault(); return; }
+    const first = elements[0], last = elements[elements.length - 1];
+    if (event.shiftKey && (document.activeElement === first || !drawer.contains(document.activeElement))) {
+      event.preventDefault(); last.focus();
+    } else if (!event.shiftKey && (document.activeElement === last || !drawer.contains(document.activeElement))) {
+      event.preventDefault(); first.focus();
+    }
+  });
+  window.matchMedia('(min-width: 1024px)').addEventListener?.('change', event => {
+    if (event.matches && drawerOpen) toggle(false);
+  });
   const button = document.getElementById('theme-toggle');
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   const read = () => {
