@@ -18,9 +18,70 @@ body { background: var(--page); color: var(--text); }
 [hidden] { display: none !important; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 html { line-height: 1.7; }
-.catalog-list-view { grid-template-columns: minmax(0, 1fr) !important; }
-.catalog-list-view [data-catalog-item] article { padding: .85rem 1rem; }
-.catalog-list-view [data-catalog-item] h2 { line-height: 1.5; }
+/* リスト表示はカードの縦積みではなく、サムネイル＋テキストの高密度な行にする */
+.catalog-list-view {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: .375rem;
+}
+.catalog-list-view [data-catalog-item] article {
+  display: grid;
+  grid-template-columns: 112px minmax(0, 1fr);
+  align-items: center;
+  min-height: 74px;
+  border-radius: .5rem;
+  box-shadow: none;
+}
+.catalog-list-view [data-catalog-item] article > a {
+  width: 112px;
+  align-self: stretch;
+  overflow: hidden;
+}
+.catalog-list-view [data-catalog-item] article > a img {
+  display: block;
+  width: 112px;
+  height: 100%;
+  min-height: 74px;
+  aspect-ratio: auto;
+  object-fit: cover;
+}
+.catalog-list-view [data-catalog-item] article > div {
+  min-width: 0;
+  padding: .375rem .75rem;
+}
+.catalog-list-view [data-catalog-item] article:not(:has(> a)) > div {
+  grid-column: 1 / -1;
+}
+.catalog-list-view [data-catalog-item] h2 {
+  font-size: .875rem;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.catalog-list-view [data-catalog-item] article > div > p:first-child {
+  margin-bottom: .125rem;
+  font-size: .6875rem;
+}
+.catalog-list-view [data-catalog-item] article > div > p:nth-of-type(2) {
+  display: none;
+}
+.catalog-list-view [data-catalog-item] article > div > p:last-child:not(:first-child) {
+  margin-top: .125rem;
+  font-size: .6875rem;
+}
+@media (max-width: 639px) {
+  .catalog-list-view [data-catalog-item] article {
+    grid-template-columns: 88px minmax(0, 1fr);
+    min-height: 64px;
+  }
+  .catalog-list-view [data-catalog-item] article > a { width: 88px; }
+  .catalog-list-view [data-catalog-item] article > a img {
+    width: 88px;
+    min-height: 64px;
+  }
+  .catalog-list-view [data-catalog-item] article > div { padding: .3rem .5rem; }
+}
 .catalog-view-button[aria-pressed="true"] { background: var(--panel-muted); color: var(--text); border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 
