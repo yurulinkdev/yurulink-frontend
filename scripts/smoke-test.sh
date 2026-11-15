@@ -65,3 +65,9 @@ test -s public/posts/smoke-ci/index.html
 grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
 echo "Smoke test passed."
+
+# リスト表示の高密度化がビルド後のCSSにも含まれることを検査
+grep -q 'catalog-list-view' public/css/site.css
+grep -q 'grid-template-columns:112px' public/css/site.css
+grep -q 'catalog-item-description' public/css/site.css
+grep -q 'catalog-item-date' public/index.html
