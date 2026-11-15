@@ -45,6 +45,8 @@
     if (drawer) drawer.inert = !event.matches && !drawerOpen;
   });
   const button = document.getElementById('theme-toggle');
+  const autoButton = document.getElementById('theme-auto');
+  const icon = document.getElementById('theme-icon');
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
   const read = () => {
     try {
@@ -54,22 +56,32 @@
   };
   let mode = read();
   const apply = () => {
-    const value = mode;
-    document.documentElement.dataset.theme = value === 'auto' ? (mq.matches ? 'dark' : 'light') : value;
+    const effective = mode === 'auto' ? (mq.matches ? 'dark' : 'light') : mode;
+    document.documentElement.dataset.theme = effective;
+    if (icon) icon.textContent = effective === 'dark' ? '☾' : '☀';
     if (button) {
-      const next = value === 'auto' ? 'light' : value === 'light' ? 'dark' : 'auto';
-      const names = { auto: 'OS設定に追従', light: 'ライト', dark: 'ダーク' };
-      button.setAttribute('aria-label', '表示テーマ: ' + names[value] + '。クリックで' + names[next] + 'に変更');
-      button.title = '表示テーマ: ' + names[value];
-      const icon = value === 'auto' ? '◐' : value === 'light' ? '☀' : '☾';
-      button.textContent = icon;
+      const next = effective === 'dark' ? 'ライト' : 'ダーク';
+      button.setAttribute('aria-label', next + 'テーマに切り替え');
+      button.title = next + 'テーマに切り替え';
+    }
+    if (autoButton) {
+      autoButton.setAttribute('aria-pressed', String(mode === 'auto'));
+      autoButton.title = mode === 'auto' ? 'OS設定に追従中' : 'OS設定に追従';
     }
   };
-  button?.addEventListener('click', () => {
-    mode = mode === 'auto' ? 'light' : mode === 'light' ? 'dark' : 'auto';
-    try { localStorage.setItem(key, mode); } catch { /* storage disabled */ }
+  const setMode = value => {
+    mode = value;
+    try {
+      if (value === 'auto') localStorage.removeItem(key);
+      else localStorage.setItem(key, value);
+    } catch { /* storage disabled */ }
     apply();
+  };
+  button?.addEventListener('click', () => {
+    const effective = document.documentElement.dataset.theme;
+    setMode(effective === 'dark' ? 'light' : 'dark');
   });
+  autoButton?.addEventListener('click', () => setMode('auto'));
   mq.addEventListener?.('change', apply);
   apply();
 })();
