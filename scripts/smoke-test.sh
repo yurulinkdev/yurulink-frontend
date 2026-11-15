@@ -21,7 +21,9 @@ for path in public/index.html public/posts/index.html public/news/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
-grep -q 'theme-select' public/index.html
+grep -q 'theme-toggle' public/index.html
+grep -q 'page-size' public/index.html
+grep -q 'id="pagination"' public/index.html
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
