@@ -15,13 +15,15 @@
     if (visible) restoreFocus = document.activeElement;
     drawer?.classList.toggle('-translate-x-full', !visible);
     backdrop?.classList.toggle('hidden', !visible);
-    if (visible) drawer?.setAttribute('aria-modal', 'true');
-    else drawer?.removeAttribute('aria-modal');
+    if (visible) { drawer?.setAttribute('role', 'dialog'); drawer?.setAttribute('aria-modal', 'true'); }
+    else { drawer?.removeAttribute('role'); drawer?.removeAttribute('aria-modal'); }
+    if (drawer) drawer.inert = !visible && isMobile();
     open?.setAttribute('aria-expanded', String(visible));
     document.body.classList.toggle('overflow-hidden', visible);
     if (visible) close?.focus();
     else if (restoreFocus?.isConnected) restoreFocus.focus();
   };
+  if (drawer) drawer.inert = isMobile();
   open?.addEventListener('click', () => toggle(true));
   close?.addEventListener('click', () => toggle(false));
   backdrop?.addEventListener('click', () => toggle(false));
@@ -40,6 +42,7 @@
   });
   window.matchMedia('(min-width: 1024px)').addEventListener?.('change', event => {
     if (event.matches && drawerOpen) toggle(false);
+    if (drawer) drawer.inert = !event.matches && !drawerOpen;
   });
   const button = document.getElementById('theme-toggle');
   const mq = window.matchMedia('(prefers-color-scheme: dark)');
