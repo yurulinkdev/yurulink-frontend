@@ -55,9 +55,10 @@
     group.append(summary);
     const children = document.createElement('div');
     children.className = 'ml-3 border-l border-line pl-2';
-    categories.forEach(([id,label]) => children.append(makeButton(label,id)));
+    categories.filter(([id]) => id.startsWith('youtube-channel:')).forEach(([id,label]) => children.append(makeButton(label,id)));
     group.append(children);
-    buttons?.append(group);
+    if (children.childElementCount) buttons?.append(group);
+    categories.filter(([id]) => !id.startsWith('youtube-channel:')).forEach(([id,label]) => buttons?.append(makeButton(label,id)));
   }
   const renderPagination = pages => {
     if (!pagination) return;
