@@ -20,7 +20,7 @@
               {{ $url := urls.Parse .url }}
               {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
                 {{ $cat := .category_id | default .kind }}
-                {{ $catLabel := index $categories $cat | default $cat }}
+                {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
                 <li data-catalog-item data-category="{{ $cat }}" data-category-label="{{ $catLabel }}" data-search="{{ $search }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
