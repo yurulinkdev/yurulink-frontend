@@ -22,6 +22,9 @@ for path in public/index.html public/posts/index.html public/news/index.html; do
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
 grep -q 'theme-toggle' public/index.html
+grep -q 'theme-auto' public/index.html
+grep -q 'prefers-color-scheme: dark' assets/css/tokens.css
+grep -q "localStorage.removeItem(key)" static/js/theme-control.js
 grep -q 'page-size' public/index.html
 grep -q 'pagination' public/index.html
 # ドロワーのキーボード操作と非表示時のフォーカス抑止を静的検査
