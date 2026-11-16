@@ -22,3 +22,19 @@
   --accent-text: #211b19;
   --focus: #f5c4ad;
 }
+
+/* OSテーマをCSSの既定値とし、初期化JSが無効でも追従する */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) {
+    color-scheme: dark;
+    --page: #211b19;
+    --panel: #302724;
+    --panel-muted: #43342e;
+    --text: #f6eee9;
+    --muted: #d4c0b6;
+    --line: #68534a;
+    --accent: #efb49c;
+    --accent-text: #211b19;
+    --focus: #f5c4ad;
+  }
+}

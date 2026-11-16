@@ -21,7 +21,16 @@ for path in public/index.html public/posts/index.html public/news/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
-grep -q 'theme-select' public/index.html
+grep -q 'theme-toggle' public/index.html
+grep -q 'theme-auto' public/index.html
+grep -q 'prefers-color-scheme: dark' assets/css/tokens.css
+grep -q "localStorage.removeItem(key)" static/js/theme-control.js
+grep -q 'page-size' public/index.html
+grep -q 'pagination' public/index.html
+# ドロワーのキーボード操作と非表示時のフォーカス抑止を静的検査
+grep -q "event.key === 'Escape'" static/js/theme-control.js
+grep -q "event.key !== 'Tab'" static/js/theme-control.js
+grep -q 'drawer.inert' static/js/theme-control.js
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
@@ -55,4 +64,6 @@ test -s public/news/index.html
 test -s public/posts/smoke-ci/index.html
 grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
+grep -q "catalog-list-view" assets/css/input.css
+grep -q "catalog-item-date" layouts/index.html
 echo "Smoke test passed."
