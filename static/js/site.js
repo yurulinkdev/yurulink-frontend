@@ -6,7 +6,10 @@
   const selected = document.getElementById('selected-category');
   const count = document.getElementById('count');
   const empty = document.getElementById('no-results');
-  const pagination = document.getElementById('pagination');
+  const paginations = [document.getElementById('pagination-top'), document.getElementById('pagination')].filter(Boolean);
+  const sortSelect = document.getElementById('sort-order');
+  const validSorts = ['newest','oldest','title-asc','title-desc'];
+  let sort = validSorts.includes(new URL(location.href).searchParams.get('sort')) ? new URL(location.href).searchParams.get('sort') : 'newest';
   const pageSizeSelect = document.getElementById('page-size');
   const buttons = document.getElementById('category-buttons');
   const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
@@ -15,6 +18,7 @@
   let page = Math.max(1, Number.parseInt(params.get('page'), 10) || 1);
   let pageSize = [20,50,100].includes(Number(params.get('size'))) ? Number(params.get('size')) : 20;
   if (search) search.value = params.get('q') || '';
+  if (sortSelect) sortSelect.value = sort;
   if (pageSizeSelect) pageSizeSelect.value = String(pageSize);
   const viewKey = 'yurulink-catalog-view';
   const applyView = value => {
@@ -61,37 +65,55 @@
     categories.filter(([id]) => !id.startsWith('youtube-channel:')).forEach(([id,label]) => buttons?.append(makeButton(label,id)));
   }
   const renderPagination = pages => {
-    if (!pagination) return;
-    pagination.replaceChildren();
-    if (pages <= 1) return;
-    const add = (label, target, disabled = false, current = false) => {
-      const button = document.createElement('button');
-      button.type = 'button';
-      button.textContent = label;
-      button.disabled = disabled;
-      button.className = 'rounded-lg border border-line px-3 py-1.5 text-sm disabled:opacity-40';
-      if (current) button.setAttribute('aria-current', 'page');
-      button.addEventListener('click', () => { page = target; update(); catalog.scrollIntoView({block:'start',behavior:'instant'}); });
-      pagination.append(button);
-    };
-    add('前へ', page - 1, page === 1);
-    const visible = new Set([1,pages,page-2,page-1,page,page+1,page+2].filter(n=>n>=1&&n<=pages));
-    let previous = 0;
-    for (const n of [...visible].sort((a,b)=>a-b)) {
-      if (n > previous + 1) {
-        const dots = document.createElement('span');
-        dots.textContent = '…';
-        dots.setAttribute('aria-hidden','true');
-        pagination.append(dots);
+    for (const pagination of paginations) {
+      pagination.replaceChildren();
+      if (pages <= 1) continue;
+      const add = (label, target, disabled = false, current = false) => {
+        const button = document.createElement('button');
+        button.type = 'button';
+        button.textContent = label;
+        button.disabled = disabled;
+        button.className = 'rounded-lg border border-line px-3 py-1.5 text-sm disabled:opacity-40';
+        if (current) button.setAttribute('aria-current', 'page');
+        button.addEventListener('click', () => { page = target; update(); catalog.scrollIntoView({block:'start',behavior:'instant'}); });
+        pagination.append(button);
+      };
+      add('前へ', page - 1, page === 1);
+      const visible = new Set([1,pages,page-2,page-1,page,page+1,page+2].filter(n=>n>=1&&n<=pages));
+      let previous = 0;
+      for (const n of [...visible].sort((a,b)=>a-b)) {
+        if (n > previous + 1) {
+          const dots = document.createElement('span');
+          dots.textContent = '…';
+          dots.setAttribute('aria-hidden','true');
+          pagination.append(dots);
+        }
+        add(String(n),n,false,n===page);
+        previous=n;
       }
-      add(String(n),n,false,n===page);
-      previous=n;
+      add('次へ', page + 1, page === pages);
     }
-    add('次へ', page + 1, page === pages);
+  };
+  const timestamp = item => {
+    const raw = item.dataset.publishedAt || '';
+    const ms = Date.parse(raw);
+    return Number.isFinite(ms) ? ms : null;
+  };
+  const compareItems = (a,b) => {
+    if (sort.startsWith('title-')) {
+      const result = (a.dataset.title || '').localeCompare(b.dataset.title || '', 'ja');
+      return sort === 'title-asc' ? result : -result;
+    }
+    const left = timestamp(a), right = timestamp(b);
+    if (left === null && right === null) return 0;
+    if (left === null) return 1;
+    if (right === null) return -1;
+    return sort === 'oldest' ? left - right : right - left;
   };
   const update = () => {
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = items.filter(item => (!category || item.dataset.category === category) && (item.dataset.search || '').toLocaleLowerCase('ja').includes(q));
+    const matching = items.filter(item => (!category || item.dataset.category === category) && (item.dataset.search || '').toLocaleLowerCase('ja').includes(q)).sort(compareItems);
+    matching.forEach(item => catalog.append(item));
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
     const visible = new Set(matching.slice((page-1)*pageSize,page*pageSize));
@@ -105,17 +127,20 @@
     });
     renderPagination(pages);
     const url = new URL(location.href);
-    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)]]) {
+    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort]]) {
       if (value) url.searchParams.set(key,value);
       else url.searchParams.delete(key);
     }
     history.replaceState(null,'',url);
   };
+  sortSelect?.addEventListener('change',()=>{sort=sortSelect.value;page=1;update();});
   search?.addEventListener('input',()=>{page=1;update();});
   pageSizeSelect?.addEventListener('change',()=>{pageSize=Number(pageSizeSelect.value);page=1;update();});
   window.addEventListener('popstate',()=>{
     const p = new URL(location.href).searchParams;
     category=p.get('category')||'';
+    sort=validSorts.includes(p.get('sort')) ? p.get('sort') : 'newest';
+    if (sortSelect) sortSelect.value=sort;
     if (search) search.value=p.get('q')||'';
     page=Math.max(1,Number.parseInt(p.get('page'),10)||1);
     pageSize=[20,50,100].includes(Number(p.get('size'))) ? Number(p.get('size')) : 20;
