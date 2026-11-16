@@ -1,0 +1,41 @@
+name: Staging browser verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [staging]
+
+permissions:
+  contents: read
+
+concurrency:
+  group: staging-browser
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      STAGING_URL: https://yurulink-frontend-staging.pages.dev/
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-audit --no-fund @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Verify staging in Chromium
+        run: npx playwright test --config=playwright.config.mjs
+      - name: Upload screenshots, HTML and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: staging-browser-evidence
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
