@@ -49,31 +49,15 @@ jobs:
       - name: Install Wrangler
         run: npm install --no-save --no-audit --no-fund wrangler@4
       - name: List Pages projects with Wrangler
-        run: npx wrangler pages project list
-      - name: Retrieve sanitized Pages configuration
         shell: bash
         run: |
           set -euo pipefail
           mkdir -p inventory
-          curl --fail --silent --show-error --retry 2 \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?per_page=100" \
-            > inventory/raw.json
-          jq -e '.success == true' inventory/raw.json >/dev/null
-          jq '[.result[] | {
-            name, subdomain, production_branch,
-            source_type: .source.type,
-            source_repo: .source.config.repo_name,
-            build_command: .build_config.build_command,
-            destination_dir: .build_config.destination_dir,
-            domains
-          }]' inventory/raw.json > inventory/projects-summary.json
-          rm inventory/raw.json
-          jq . inventory/projects-summary.json
+          npx wrangler pages project list | tee inventory/projects-summary.txt
       - name: Upload inventory
         uses: actions/upload-artifact@v4
         with:
           name: cloudflare-pages-inventory-request
-          path: inventory/projects-summary.json
+          path: inventory/projects-summary.txt
           retention-days: 7
           if-no-files-found: error
