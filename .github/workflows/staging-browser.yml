@@ -1,15 +1,15 @@
-name: Staging browser verification
+name: Frontend browser verification
 
 on:
   workflow_dispatch:
   push:
-    branches: [staging]
+    branches: [staging, main]
 
 permissions:
   contents: read
 
 concurrency:
-  group: staging-browser
+  group: browser-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
@@ -17,7 +17,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 15
     env:
-      STAGING_URL: https://yurulink-frontend-staging.pages.dev/
+      STAGING_URL: ${{ github.ref_name == 'main' && 'https://yurulink-frontend.pages.dev/' || 'https://yurulink-frontend-staging.pages.dev/' }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -27,13 +27,13 @@ jobs:
         run: |
           npm install --no-save --no-audit --no-fund @playwright/test
           npx playwright install --with-deps chromium
-      - name: Verify staging in Chromium
+      - name: Verify deployed site in Chromium
         run: npx playwright test --config=playwright.config.mjs
       - name: Upload screenshots, HTML and test report
         if: always()
         uses: actions/upload-artifact@v4
         with:
-          name: staging-browser-evidence
+          name: browser-evidence-${{ github.ref_name }}
           path: |
             test-results/
             playwright-report/
