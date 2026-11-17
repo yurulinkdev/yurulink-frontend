@@ -10,7 +10,21 @@
         {{ $catalog := .Site.Data.public.catalog }}
         {{ if and $catalog (eq (int ($catalog.schema_version | default 0)) 2) }}
           {{ $programs := dict }}
-          {{ range $catalog.programs }}{{ $programs = merge $programs (dict .id .name) }}{{ end }}
+          {{ $categoryOrder := dict }}
+          {{ range $index, $program := $catalog.programs }}
+            {{ $programs = merge $programs (dict $program.id $program.name) }}
+            {{ $order := $program.order | default (add (mul $index 10) 10) }}
+            {{ $categoryOrder = merge $categoryOrder (dict $program.id $order) }}
+          {{ end }}
+          {{ range $index, $collection := $catalog.collections }}
+            {{ $label := $collection.title }}
+            {{ if and (eq $collection.kind "playlist") $collection.channel_name }}
+              {{ $label = printf "%s[%s]" $collection.title $collection.channel_name }}
+            {{ end }}
+            {{ $programs = merge $programs (dict $collection.id $label) }}
+            {{ $order := $collection.order | default (add (mul (add $index (len $catalog.programs)) 10) 10) }}
+            {{ $categoryOrder = merge $categoryOrder (dict $collection.id $order) }}
+          {{ end }}
           {{ $tax := .Site.Data.taxonomy }}
           {{ $categories := dict }}
           {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
@@ -21,8 +35,9 @@
               {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
                 {{ $cat := .category_id | default .kind }}
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
+                {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-label="{{ $catLabel }}" data-search="{{ $search }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-search="{{ $search }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ with .thumbnail_url }}
                       {{ $thumbnail := urls.Parse . }}
