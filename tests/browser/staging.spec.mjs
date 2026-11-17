@@ -159,3 +159,27 @@ test('catalog interactions: sorting, search, and bottom pagination', async ({ pa
   await expect(page.locator('#pagination-top button[aria-current="page"]')).toHaveText('2');
   await expect(page.locator('#pagination button[aria-current="page"]')).toHaveText('2');
 });
+
+
+test('multiple category memberships: playlist and channel both filter the same item', async ({ page }) => {
+  await page.goto('/');
+  await page.setContent(`
+    <input id="query"><span id="selected-category"></span><span id="count"></span>
+    <div id="category-definitions" hidden>
+      <span data-category-definition="youtube-channel:one" data-label="番組A" data-order="10"></span>
+      <span data-category-definition="youtube-playlist:pl1" data-label="特集[番組A]" data-order="20"></span>
+    </div>
+    <div id="category-buttons"></div><div id="catalog">
+      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one youtube-playlist:pl1" data-category-label="番組A" data-category-order="10" data-title="動画A" data-search="動画A"></div>
+      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one" data-category-label="番組A" data-category-order="10" data-title="動画B" data-search="動画B"></div>
+    </div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
+  `);
+  await page.addScriptTag({ url: '/js/site.js' });
+  await expect(page.locator('#category-buttons button[data-category="youtube-playlist:pl1"]')).toHaveText('特集[番組A]');
+  await page.locator('#category-buttons button[data-category="youtube-playlist:pl1"]').click();
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '動画A');
+  await expect(page).toHaveURL(/category=youtube-playlist/);
+  await page.locator('#category-buttons button[data-category="youtube-channel:one"]').click();
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(2);
+});
