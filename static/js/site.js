@@ -33,7 +33,13 @@
     applyView(button.dataset.catalogView);
     try { localStorage.setItem(viewKey, button.dataset.catalogView); } catch { /* storage disabled */ }
   }));
-  const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [x.dataset.category, x.dataset.categoryLabel || x.dataset.category])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ja'));
+  const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [
+    x.dataset.category,
+    { label: x.dataset.categoryLabel || x.dataset.category,
+      order: x.dataset.categoryOrder !== '' && Number.isFinite(Number(x.dataset.categoryOrder))
+        ? Number(x.dataset.categoryOrder) : Number.MAX_SAFE_INTEGER }
+  ])).entries()].sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'))
+    .map(([id, meta]) => [id, meta.label]);
   const makeButton = (label, value) => {
     const button = document.createElement('button');
     button.type = 'button';
