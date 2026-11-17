@@ -26,6 +26,24 @@
             {{ $order := $collection.order | default (add (mul (add $index (len $catalog.programs)) 10) 10) }}
             {{ $categoryOrder = merge $categoryOrder (dict $collection.id $order) }}
           {{ end }}
+          {{/* Build many-to-many category membership once, retaining legacy primary category. */}}
+          {{ $itemCategories := dict }}
+          {{ range $catalog.item_programs }}
+            {{ $existing := index $itemCategories .item_id | default (slice) }}
+            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append $existing .program_id))) }}
+          {{ end }}
+          {{ range $catalog.memberships }}
+            {{ $existing := index $itemCategories .item_id | default (slice) }}
+            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append $existing .collection_id))) }}
+          {{ end }}
+          <div id="category-definitions" hidden>
+            {{ range $catalog.programs }}
+              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}"></span>
+            {{ end }}
+            {{ range $catalog.collections }}
+              <span data-category-definition="{{ .id }}" data-label="{{ index $programs .id }}" data-order="{{ index $categoryOrder .id }}"></span>
+            {{ end }}
+          </div>
           {{ $tax := .Site.Data.taxonomy }}
           {{ $categories := dict }}
           {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
@@ -35,10 +53,12 @@
               {{ $url := urls.Parse .url }}
               {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
                 {{ $cat := .category_id | default .kind }}
+                {{ $related := index $itemCategories .id | default (slice) }}
+                {{ $allCategories := uniq (append $related $cat) }}
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ with .thumbnail_url }}
                       {{ $thumbnail := urls.Parse . }}
