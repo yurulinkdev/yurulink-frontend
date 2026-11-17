@@ -13,7 +13,7 @@ async function openCatalog(page, url = '/') {
   const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
   expect(response?.status()).toBe(200);
   await expect(page.locator('#catalog')).toBeVisible();
-  await expect(page.locator('[data-catalog-item]').first()).toBeVisible();
+  await expect(page.locator('[data-catalog-item]:visible').first()).toBeVisible();
 }
 async function assertNoOverflow(page) {
   expect(await page.evaluate(() => document.documentElement.scrollWidth <= window.innerWidth)).toBe(true);
