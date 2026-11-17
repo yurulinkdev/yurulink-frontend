@@ -81,7 +81,14 @@
         button.disabled = disabled;
         button.className = 'rounded-lg border border-line px-3 py-1.5 text-sm disabled:opacity-40';
         if (current) button.setAttribute('aria-current', 'page');
-        button.addEventListener('click', () => { page = target; update(); catalog.scrollIntoView({block:'start',behavior:'instant'}); });
+        button.addEventListener('click', () => {
+          page = target;
+          update();
+          // Keep the top pagination in view; scroll only when navigating from the bottom.
+          if (pagination.id === 'pagination') {
+            document.getElementById('pagination-top')?.scrollIntoView({ block: 'start', behavior: 'instant' });
+          }
+        });
         pagination.append(button);
       };
       add('前へ', page - 1, page === 1);
