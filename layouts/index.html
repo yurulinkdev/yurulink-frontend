@@ -30,11 +30,11 @@
           {{ $itemCategories := dict }}
           {{ range $catalog.item_programs }}
             {{ $existing := index $itemCategories .item_id | default (slice) }}
-            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append $existing .program_id))) }}
+            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append .program_id $existing))) }}
           {{ end }}
           {{ range $catalog.memberships }}
             {{ $existing := index $itemCategories .item_id | default (slice) }}
-            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append $existing .collection_id))) }}
+            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append .collection_id $existing))) }}
           {{ end }}
           <div id="category-definitions" hidden>
             {{ range $catalog.programs }}
@@ -54,7 +54,7 @@
               {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
                 {{ $cat := .category_id | default .kind }}
                 {{ $related := index $itemCategories .id | default (slice) }}
-                {{ $allCategories := uniq (append $related $cat) }}
+                {{ $allCategories := uniq (append $cat $related) }}
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
