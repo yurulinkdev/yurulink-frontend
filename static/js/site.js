@@ -33,7 +33,7 @@
     applyView(button.dataset.catalogView);
     try { localStorage.setItem(viewKey, button.dataset.catalogView); } catch { /* storage disabled */ }
   }));
-  const categoryIds = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\\s+/).filter(Boolean);
+  const categoryIds = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\s+/).filter(Boolean);
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
     { label: node.dataset.label || node.dataset.categoryDefinition,
