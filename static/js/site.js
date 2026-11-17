@@ -25,7 +25,13 @@
   const initialParams = new URL(location.href).searchParams;
   let category = initialParams.get('category') || '';
   if (search) search.value = initialParams.get('q') || '';
-  const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [x.dataset.category, x.dataset.categoryLabel || x.dataset.category])).entries()].sort((a,b)=>a[1].localeCompare(b[1],'ja'));
+  const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [
+    x.dataset.category,
+    { label: x.dataset.categoryLabel || x.dataset.category,
+      order: Number.isFinite(Number(x.dataset.categoryOrder)) && x.dataset.categoryOrder !== ''
+        ? Number(x.dataset.categoryOrder) : Number.MAX_SAFE_INTEGER }
+  ])).entries()].sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'))
+    .map(([id, meta]) => [id, meta.label]);
   const buttons = document.getElementById('category-buttons');
   const makeButton = (label,value) => {
     const button = document.createElement('button');
