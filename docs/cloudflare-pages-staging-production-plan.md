@@ -33,3 +33,9 @@
 - `yurulink-frontend-staging`: GitHub連携、Production branch=`staging`、build/outputは同じ。
 - 両者の現在のドメインはそれぞれの `.pages.dev`。現状の構成ではStagingは独立したPagesプロジェクトのProduction環境。
 - 次に、本番PagesプロジェクトのPreview deploymentに`staging`が存在するかを読み取り専用で検証する。既存プロジェクトの削除やDNS変更は行わない。
+
+## 2026-11-17 Preview実証テスト
+- Pages両プロジェクトのデプロイ履歴APIはHTTP 200。取得時点の本番プロジェクト直近20件はすべて`main`のProduction。
+- 旧Stagingプロジェクトでは`main`がPreviewとして記録され、Pagesの環境区分は動作している。
+- `staging`ブランチに表示影響のないマーカー `ops/requests/staging-preview-smoke-20261117.md` をコミット（`e5e49c6a3502345f38fadb1cbdeb46e05c970164`）。本番プロジェクトのPreviewに同SHAが現れるかを検証する。
+- 検証結果を確認するまで、旧Stagingプロジェクトは削除せず、CloudflareのProduction branch設定も変更しない。
