@@ -31,7 +31,7 @@ def main():
     url = ("https://api.cloudflare.com/client/v4/accounts/"
            + urllib.parse.quote(account, safe="")
            + "/pages/projects/" + urllib.parse.quote(args.project, safe="")
-           + "/deployments?per_page=100")
+           + "/deployments")
     deadline = time.monotonic() + args.timeout
     attempt = 0
     while True:
