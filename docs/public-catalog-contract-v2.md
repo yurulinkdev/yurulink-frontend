@@ -11,8 +11,8 @@
 | 配列 | 内容 | 必須項目・関連 |
 | --- | --- | --- |
 | `items` | 重複しないリンク実体 | `id`, `title`, `url`, `kind`, `platform`, `provenance`, `status` |
-| `programs` | 番組・活動 | `id`, `name`。任意: `description`, `parent_id` |
-| `collections` | プレイリスト・テーマ・編集集合 | `id`, `title`, `kind`。任意: `program_id`, `parent_id`, `description` |
+| `programs` | 番組・活動 | `id`, `name`。任意: `description`, `parent_id`, `order` |
+| `collections` | プレイリスト・テーマ・編集集合 | `id`, `title`, `kind`。任意: `program_id`, `parent_id`, `description`, `order`, `channel_name` |
 | `memberships` | リンクと集合の多対多関係 | `item_id`, `collection_id`。任意: `position` |
 | `item_programs` | リンクと番組の多対多関係 | `item_id`, `program_id` |
 
@@ -62,3 +62,12 @@
 - `provenance` に外部の検証済み情報源やリンク単位の編集承認フラグが必要か。
 - Book3のどの項目を公開用 `items` に変換し、どの項目を非公開のまま保持するか。
 - 外部リンクのサムネイルを表示するか、追跡・画像切れを避けてプラットフォームアイコンを使うか。
+
+## 左側カテゴリー表示の並び順とプレイリスト名
+
+- Book1の管理対象行順を優先し、公開カタログ生成時に `programs[].order` / `collections[].order` へ昇順の数値を付与する。例: 10, 20, 30。行順を変更したら再生成で反映する。順序の正本はSheets、Frontendではない。
+- `order` が欠ける古いJSONでは配列の順番を代用する。カテゴリ表示は `order` の昇順で、同値なら名称順。
+- YouTubeチャンネルの表示名は `programs[].name` をそのまま使う。
+- プレイリストは `collections[].title` と `collections[].channel_name` から `プレイリスト名[チャンネル名]` を表示する。チャンネル名が未解決の場合はプレイリスト名のみとし、架空のチャンネル名を補わない。
+- `channel_name` はYouTube側の所属チャンネルを示す表示用属性で、`program_id`（番組の編集分類）と混同しない。
+- 現行のBook1→Book4生成処理は、この順序と所属チャンネル名をまだ出力していない。Frontend側は受け入れ対応済みだが、Sheets連動にはBackendの改修が必要。
