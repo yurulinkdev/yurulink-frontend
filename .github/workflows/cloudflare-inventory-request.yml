@@ -89,6 +89,8 @@ jobs:
             inventory/projects-details.json
           retention-days: 7
           if-no-files-found: error
+      - name: Validate Discord event routes
+        run: node ops/notifications/validate-routes.js
       - name: Notify Discord (optional)
         if: always()
         continue-on-error: true
