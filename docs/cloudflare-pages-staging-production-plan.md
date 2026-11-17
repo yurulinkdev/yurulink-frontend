@@ -46,3 +46,9 @@
 - `.github/workflows/cloudflare-preview-verify.yml`: `staging`へのPushをトリガーとして、対象コミットのPreview反映を待機。手動実行では任意のフルSHAを指定可能。読み取り専用。
 - ブラウザテストは別途失敗しており、Cloudflareデプロイ成功とアプリ機能の合格を区別する。
 - 旧Stagingプロジェクトの停止・削除は未実施。切替後のアクセスURL・ブラウザテスト・運用手順の確認を残す。
+
+## 2026-11-17 検証完了と運用切替
+- `staging` SHA `d45de61ad6e15b9ae53a734933fa4eb4d8e652b5`: Frontend smoke test `44041615638` 成功、Preview検証 `44041615724` 成功、Playwright `44041615658` 成功。
+- `staging`の `.github/workflows/staging-browser.yml` を更新し、旧Staging URLではなく、対象SHAのPreviewデプロイ完了を待って取得したデプロイ固有URLをPlaywrightで検査する運用へ移行済み。
+- `docs/environments.md` の検証環境を単一PagesプロジェクトのPreviewへ変更。旧プロジェクトは残置。
+- 未完了: 本番へのアプリ変更マージ（別途承認）、ブランチエイリアスURLの疎通検証、旧Stagingプロジェクトの停止・削除（別途承認）。
