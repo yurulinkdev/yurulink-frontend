@@ -87,3 +87,36 @@ test('category URLs: direct access, filtering, pagination and screenshots', asyn
     }
   }
 });
+
+
+test('catalog metadata: category order and playlist channel labels', async ({ page }) => {
+  await openCatalog(page);
+  const metadata = await page.locator('[data-catalog-item]').evaluateAll(items => {
+    const categories = new Map();
+    for (const item of items) {
+      if (!item.dataset.category || categories.has(item.dataset.category)) continue;
+      categories.set(item.dataset.category, {
+        label: item.dataset.categoryLabel,
+        order: Number(item.dataset.categoryOrder)
+      });
+    }
+    return [...categories].map(([id, meta]) => ({ id, ...meta }));
+  });
+  expect(metadata.length).toBeGreaterThan(0);
+  expect(metadata.every(x => Number.isFinite(x.order))).toBe(true);
+  await page.locator('#category-buttons').evaluate(element => {
+    const buttons = [...element.querySelectorAll('button[data-category]')].filter(x => x.dataset.category);
+    const metadata = [...document.querySelectorAll('[data-catalog-item]')].reduce((map, item) => {
+      if (item.dataset.category && !map.has(item.dataset.category)) map.set(item.dataset.category, {
+        label: item.dataset.categoryLabel,
+        order: Number(item.dataset.categoryOrder)
+      });
+      return map;
+    }, new Map());
+    const groups = buttons.filter(x => x.dataset.category.startsWith('youtube-channel:'));
+    const actual = groups.map(x => x.dataset.category);
+    const expected = [...actual].sort((a,b) => metadata.get(a).order - metadata.get(b).order ||
+      metadata.get(a).label.localeCompare(metadata.get(b).label,'ja'));
+    if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('Channel category order differs from catalog order');
+  });
+});
