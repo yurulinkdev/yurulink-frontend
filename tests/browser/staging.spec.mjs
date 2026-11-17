@@ -120,3 +120,17 @@ test('catalog metadata: category order and playlist channel labels', async ({ pa
     if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('Channel category order differs from catalog order');
   });
 });
+
+
+test('top pagination changes page without forcing scroll to catalog', async ({ page }) => {
+  await page.setViewportSize({ width: 1280, height: 720 });
+  await openCatalog(page, '/?size=50');
+  await expect(page.locator('#pagination-top button', { hasText: '2' }).first()).toBeVisible();
+  await page.locator('#pagination-top').scrollIntoViewIfNeeded();
+  const before = await page.evaluate(() => window.scrollY);
+  await page.locator('#pagination-top button', { hasText: '2' }).first().click();
+  await expect(page).toHaveURL(/page=2/);
+  const after = await page.evaluate(() => window.scrollY);
+  expect(Math.abs(after - before)).toBeLessThanOrEqual(5);
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(50);
+});
