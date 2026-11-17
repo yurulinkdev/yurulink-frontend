@@ -33,12 +33,21 @@
     applyView(button.dataset.catalogView);
     try { localStorage.setItem(viewKey, button.dataset.catalogView); } catch { /* storage disabled */ }
   }));
-  const categories = [...new Map(items.filter(x => x.dataset.category).map(x => [
-    x.dataset.category,
-    { label: x.dataset.categoryLabel || x.dataset.category,
-      order: x.dataset.categoryOrder !== '' && Number.isFinite(Number(x.dataset.categoryOrder))
-        ? Number(x.dataset.categoryOrder) : Number.MAX_SAFE_INTEGER }
-  ])).entries()].sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'))
+  const categoryIds = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\\s+/).filter(Boolean);
+  const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
+    node.dataset.categoryDefinition,
+    { label: node.dataset.label || node.dataset.categoryDefinition,
+      order: Number.isFinite(Number(node.dataset.order)) ? Number(node.dataset.order) : Number.MAX_SAFE_INTEGER }
+  ]));
+  const categories = [...new Set(items.flatMap(categoryIds))].map(id => {
+    const fallback = items.find(item => item.dataset.category === id);
+    const meta = categoryMetadata.get(id) || {
+      label: fallback?.dataset.categoryLabel || id,
+      order: fallback?.dataset.categoryOrder !== '' && Number.isFinite(Number(fallback?.dataset.categoryOrder))
+        ? Number(fallback.dataset.categoryOrder) : Number.MAX_SAFE_INTEGER
+    };
+    return [id, meta];
+  }).sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'))
     .map(([id, meta]) => [id, meta.label]);
   const makeButton = (label, value) => {
     const button = document.createElement('button');
@@ -125,7 +134,7 @@
   };
   const update = () => {
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = items.filter(item => (!category || item.dataset.category === category) && (item.dataset.search || '').toLocaleLowerCase('ja').includes(q)).sort(compareItems);
+    const matching = items.filter(item => (!category || categoryIds(item).includes(category)) && (item.dataset.search || '').toLocaleLowerCase('ja').includes(q)).sort(compareItems);
     matching.forEach(item => catalog.append(item));
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
