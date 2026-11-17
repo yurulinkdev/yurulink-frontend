@@ -134,3 +134,28 @@ test('top pagination changes page without forcing scroll to catalog', async ({ p
   expect(Math.abs(after - before)).toBeLessThanOrEqual(5);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(50);
 });
+
+
+test('catalog interactions: sorting, search, and bottom pagination', async ({ page }) => {
+  await openCatalog(page, '/?size=20');
+  const visible = page.locator('[data-catalog-item]:visible');
+  await page.locator('#sort-order').selectOption('title-asc');
+  await expect(page).toHaveURL(/sort=title-asc/);
+  const titlesAscending = await visible.evaluateAll(elements => elements.map(x => x.dataset.title || ''));
+  expect(titlesAscending).toEqual([...titlesAscending].sort((a,b) => a.localeCompare(b,'ja')));
+  await page.locator('#sort-order').selectOption('title-desc');
+  const titlesDescending = await visible.evaluateAll(elements => elements.map(x => x.dataset.title || ''));
+  expect(titlesDescending).toEqual([...titlesDescending].sort((a,b) => b.localeCompare(a,'ja')));
+
+  const firstTitle = titlesDescending[0];
+  expect(firstTitle.length).toBeGreaterThan(0);
+  await page.locator('#query').fill(firstTitle);
+  await expect(page.locator('[data-catalog-item]:visible').first()).toHaveAttribute('data-title', firstTitle);
+  await expect(page).toHaveURL(/q=/);
+  await page.locator('#query').fill('');
+  await expect(page.locator('#pagination button', { hasText: '2', exact: true })).toBeVisible();
+  await page.locator('#pagination button', { hasText: '2', exact: true }).click();
+  await expect(page).toHaveURL(/page=2/);
+  await expect(page.locator('#pagination-top button[aria-current="page"]')).toHaveText('2');
+  await expect(page.locator('#pagination button[aria-current="page"]')).toHaveText('2');
+});
