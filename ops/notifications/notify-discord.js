@@ -22,10 +22,10 @@ async function main() {
     console.log('Discord notification skipped: thread ID is not configured for ' + code);
     return;
   }
-  if (!/^\\d{15,22}$/.test(String(route.thread_id))) throw new Error('Invalid Discord thread ID');
+  if (!/^\d{15,22}$/.test(String(route.thread_id))) throw new Error('Invalid Discord thread ID');
   const url = new URL(webhook);
   if (url.protocol !== 'https:' || !['discord.com', 'discordapp.com'].includes(url.hostname) ||
-      !/^\\/api\\/webhooks\\/\\d+\\/[^/]+\\/?$/.test(url.pathname)) {
+      !/^\/api\/webhooks\/\d+\/[^/]+\/?$/.test(url.pathname)) {
     throw new Error('Invalid Discord webhook URL');
   }
   url.searchParams.set('thread_id', String(route.thread_id));
@@ -33,7 +33,7 @@ async function main() {
   const icon = status === 'success' ? '✅' : status === 'failure' ? '❌' : 'ℹ️';
   const runUrl = [process.env.GITHUB_SERVER_URL, process.env.GITHUB_REPOSITORY,
     'actions/runs', process.env.GITHUB_RUN_ID].join('/');
-  const content = icon + ' YuruLink ' + code + ' / ' + status + '\\n' + runUrl;
+  const content = icon + ' YuruLink ' + code + ' / ' + status + '\n' + runUrl;
   const body = JSON.stringify({content, allowed_mentions:{parse:[]}});
   for (let attempt = 0; attempt < 3; attempt++) {
     const response = await fetch(url, {
