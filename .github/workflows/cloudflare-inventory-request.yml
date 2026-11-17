@@ -109,6 +109,28 @@ jobs:
             echo "::warning::No detailed Pages configuration retrieved"
             exit 1
           fi
+      - name: Inspect deployment branches (read only)
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in yurulink-frontend yurulink-frontend-staging; do
+            status=$(curl --silent --show-error -o inventory/deployments-response.json -w '%{http_code}' \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$project/deployments?per_page=20")
+            if [ "$status" != 200 ]; then
+              echo "::warning::Deployment inventory for $project: HTTP $status"
+              continue
+            fi
+            jq '[.result[] | {
+              id, environment, url, created_on,
+              branch: .deployment_trigger.metadata.branch,
+              commit_hash: .deployment_trigger.metadata.commit_hash,
+              latest_stage: (.stages[-1].status // null)
+            }]' inventory/deployments-response.json > "inventory/$project-deployments.json"
+            echo "$project: deployment inventory retrieved"
+          done
+          rm -f inventory/deployments-response.json
       - name: Upload inventory
         uses: actions/upload-artifact@v4
         with:
@@ -118,6 +140,8 @@ jobs:
             inventory/projects-details.json
             inventory/production-project.json
             inventory/legacy-staging-project.json
+            inventory/yurulink-frontend-deployments.json
+            inventory/yurulink-frontend-staging-deployments.json
           retention-days: 7
           if-no-files-found: error
       - name: Validate Discord event routes
