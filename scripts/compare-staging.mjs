@@ -35,3 +35,5 @@ await browser.close();
 writeFileSync('comparison-report.json',JSON.stringify(report,null,2));
 console.log(JSON.stringify(report,null,2));
 if (Object.values(report).some(x=>x.error || x.status!==200)) process.exitCode=1;
+
+// Compare both publicly accessible environments after deployment.
