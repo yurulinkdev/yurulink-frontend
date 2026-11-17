@@ -54,32 +54,61 @@ jobs:
           set -euo pipefail
           mkdir -p inventory
           npx wrangler pages project list | tee inventory/projects-summary.txt
-      - name: Inspect Pages details via REST API (diagnostic)
+      - name: Diagnose Pages REST endpoints (read only)
         id: rest_inventory
         continue-on-error: true
         shell: bash
         run: |
           set -euo pipefail
-          status=$(curl --silent --show-error --retry 2 -o inventory/api-response.json -w '%{http_code}' \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?per_page=25")
-          if [ "$status" != 200 ]; then
-            echo "::warning::Cloudflare Pages REST API HTTP $status"
-            jq -r '[.errors[]? | .code] | "Cloudflare error codes: " + (map(tostring) | join(","))' inventory/api-response.json || true
-            rm -f inventory/api-response.json
+          ok=0
+          for endpoint in \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID" \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects" \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend" \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend-staging"; do
+            case "$endpoint" in
+              */pages/projects) name="projects-list";;
+              */pages/projects/yurulink-frontend) name="production-project";;
+              */pages/projects/yurulink-frontend-staging) name="legacy-staging-project";;
+              *) name="account";;
+            esac
+            status=$(curl --silent --show-error --retry 2 -o inventory/api-response.json -w '%{http_code}' \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/$endpoint")
+            if [ "$status" != 200 ] || ! jq -e '.success == true' inventory/api-response.json >/dev/null; then
+              codes=$(jq -r '[.errors[]? | .code] | map(tostring) | join(",")' inventory/api-response.json 2>/dev/null || true)
+              echo "::warning::$name: HTTP $status, error codes: $codes"
+              continue
+            fi
+            echo "$name: HTTP 200"
+            if [ "$name" = "projects-list" ]; then
+              jq '[.result[] | {
+                name, subdomain, production_branch,
+                source_type: .source.type,
+                source_repo: .source.config.repo_name,
+                source_branch: .source.config.production_branch,
+                build_command: .build_config.build_command,
+                destination_dir: .build_config.destination_dir,
+                domains
+              }]' inventory/api-response.json > inventory/projects-details.json
+              ok=1
+            elif [ "$name" = "production-project" ] || [ "$name" = "legacy-staging-project" ]; then
+              jq '{name: .result.name, subdomain: .result.subdomain,
+                production_branch: .result.production_branch,
+                source_type: .result.source.type,
+                source_repo: .result.source.config.repo_name,
+                source_branch: .result.source.config.production_branch,
+                build_command: .result.build_config.build_command,
+                destination_dir: .result.build_config.destination_dir,
+                domains: .result.domains}' inventory/api-response.json > "inventory/$name.json"
+              ok=1
+            fi
+          done
+          rm -f inventory/api-response.json
+          if [ "$ok" -ne 1 ]; then
+            echo "::warning::No detailed Pages configuration retrieved"
             exit 1
           fi
-          jq -e '.success == true and (.result | type == "array")' inventory/api-response.json >/dev/null
-          jq '[.result[] | {
-            name, subdomain, production_branch,
-            source_type: .source.type,
-            source_repo: .source.config.repo_name,
-            build_command: .build_config.build_command,
-            destination_dir: .build_config.destination_dir,
-            domains
-          }]' inventory/api-response.json > inventory/projects-details.json
-          rm -f inventory/api-response.json
-          jq . inventory/projects-details.json
       - name: Upload inventory
         uses: actions/upload-artifact@v4
         with:
@@ -87,6 +116,8 @@ jobs:
           path: |
             inventory/projects-summary.txt
             inventory/projects-details.json
+            inventory/production-project.json
+            inventory/legacy-staging-project.json
           retention-days: 7
           if-no-files-found: error
       - name: Validate Discord event routes
