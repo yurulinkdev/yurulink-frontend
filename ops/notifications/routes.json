@@ -1,0 +1,31 @@
+{
+  "schema_version": 1,
+  "webhook_secret": "DISCORD_WEBHOOK_URL",
+  "events": {
+    "ops.cloudflare.inventory.completed": {
+      "enabled": true,
+      "thread_id": null,
+      "description": "Cloudflare Pages棚卸し完了・失敗"
+    },
+    "forms.submission.received": {
+      "enabled": false,
+      "thread_id": null,
+      "description": "Google Form新規回答の受付（連携未実装）"
+    },
+    "catalog.content.published": {
+      "enabled": false,
+      "thread_id": null,
+      "description": "新規ページ・コンテンツ公開（連携未実装）"
+    },
+    "deploy.staging.completed": {
+      "enabled": false,
+      "thread_id": null,
+      "description": "Stagingデプロイ完了・失敗（連携未実装）"
+    },
+    "deploy.production.completed": {
+      "enabled": false,
+      "thread_id": null,
+      "description": "本番デプロイ完了・失敗（連携未実装）"
+    }
+  }
+}
