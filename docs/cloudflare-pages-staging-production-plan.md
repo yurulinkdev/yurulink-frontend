@@ -39,3 +39,10 @@
 - 旧Stagingプロジェクトでは`main`がPreviewとして記録され、Pagesの環境区分は動作している。
 - `staging`ブランチに表示影響のないマーカー `ops/requests/staging-preview-smoke-20261117.md` をコミット（`e5e49c6a3502345f38fadb1cbdeb46e05c970164`）。本番プロジェクトのPreviewに同SHAが現れるかを検証する。
 - 検証結果を確認するまで、旧Stagingプロジェクトは削除せず、CloudflareのProduction branch設定も変更しない。
+
+## 2026-11-17 Previewデプロイ実証結果と待機方式
+- 本番Pagesプロジェクト `yurulink-frontend` のデプロイ `7174987e-036a-4826-b511-81066805e23a` は `environment=preview`, `branch=staging`, `commit_hash=e5e49c6a3502345f38fadb1cbdeb46e05c970164`, `latest_stage=success` を確認。Preview URL: https://7174987e.yurulink-frontend.pages.dev 。単一Pagesプロジェクトによる分離が動作している。
+- `scripts/wait-cloudflare-pages.py`: Cloudflare Pagesデプロイ一覧APIを15秒間隔、最大600秒ポーリングし、SHA・ブランチ・環境がすべて一致するデプロイの成功を待つ。タイムアウト・失敗・APIエラーは非ゼロ終了。固定Sleepのみで成功とみなさない。
+- `.github/workflows/cloudflare-preview-verify.yml`: `staging`へのPushをトリガーとして、対象コミットのPreview反映を待機。手動実行では任意のフルSHAを指定可能。読み取り専用。
+- ブラウザテストは別途失敗しており、Cloudflareデプロイ成功とアプリ機能の合格を区別する。
+- 旧Stagingプロジェクトの停止・削除は未実施。切替後のアクセスURL・ブラウザテスト・運用手順の確認を残す。
