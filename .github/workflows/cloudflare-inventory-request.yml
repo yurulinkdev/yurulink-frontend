@@ -54,10 +54,46 @@ jobs:
           set -euo pipefail
           mkdir -p inventory
           npx wrangler pages project list | tee inventory/projects-summary.txt
+      - name: Inspect Pages details via REST API (diagnostic)
+        id: rest_inventory
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          status=$(curl --silent --show-error --retry 2 -o inventory/api-response.json -w '%{http_code}' \
+            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?per_page=25")
+          if [ "$status" != 200 ]; then
+            echo "::warning::Cloudflare Pages REST API HTTP $status"
+            jq -r '[.errors[]? | .code] | "Cloudflare error codes: " + (map(tostring) | join(","))' inventory/api-response.json || true
+            rm -f inventory/api-response.json
+            exit 1
+          fi
+          jq -e '.success == true and (.result | type == "array")' inventory/api-response.json >/dev/null
+          jq '[.result[] | {
+            name, subdomain, production_branch,
+            source_type: .source.type,
+            source_repo: .source.config.repo_name,
+            build_command: .build_config.build_command,
+            destination_dir: .build_config.destination_dir,
+            domains
+          }]' inventory/api-response.json > inventory/projects-details.json
+          rm -f inventory/api-response.json
+          jq . inventory/projects-details.json
       - name: Upload inventory
         uses: actions/upload-artifact@v4
         with:
           name: cloudflare-pages-inventory-request
-          path: inventory/projects-summary.txt
+          path: |
+            inventory/projects-summary.txt
+            inventory/projects-details.json
           retention-days: 7
           if-no-files-found: error
+      - name: Notify Discord (optional)
+        if: always()
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          YURULINK_EVENT_CODE: ops.cloudflare.inventory.completed
+          YURULINK_EVENT_STATUS: ${{ job.status }}
+        run: node ops/notifications/notify-discord.js
