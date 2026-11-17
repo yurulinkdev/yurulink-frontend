@@ -170,8 +170,8 @@ test('multiple category memberships: playlist and channel both filter the same i
       <span data-category-definition="youtube-playlist:pl1" data-label="特集[番組A]" data-order="20"></span>
     </div>
     <div id="category-buttons"></div><div id="catalog">
-      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one youtube-playlist:pl1" data-category-label="番組A" data-category-order="10" data-title="動画A" data-search="動画A"></div>
-      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one" data-category-label="番組A" data-category-order="10" data-title="動画B" data-search="動画B"></div>
+      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one youtube-playlist:pl1" data-category-label="番組A" data-category-order="10" data-title="動画A" data-search="動画A">動画A</div>
+      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one" data-category-label="番組A" data-category-order="10" data-title="動画B" data-search="動画B">動画B</div>
     </div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
   `);
   const errors = [];
