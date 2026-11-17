@@ -26,3 +26,10 @@
 - Cloudflare REST APIの一覧取得はHTTP 400、エラーコード8000024。認証・アカウント・エンドポイントの切り分けを実行中。
 - GitHub ActionsのFrontend Smoke Testと読み取り専用の棚卸しWorkflowは存在。
 - Preview/Productionの対応付けと公開動作は未検証。
+
+## 2026-11-17 診断結果（実測）
+- アカウント情報GET: HTTP 403 / Cloudflare error code 9109。Pages関連のGETはHTTP 200で成功したため、Pages操作に必要な権限不足とは断定しない。最小権限を維持する。
+- `yurulink-frontend`: GitHub連携、Production branch=`main`、build=`npm run css:build && hugo --minify`、output=`public`。
+- `yurulink-frontend-staging`: GitHub連携、Production branch=`staging`、build/outputは同じ。
+- 両者の現在のドメインはそれぞれの `.pages.dev`。現状の構成ではStagingは独立したPagesプロジェクトのProduction環境。
+- 次に、本番PagesプロジェクトのPreview deploymentに`staging`が存在するかを読み取り専用で検証する。既存プロジェクトの削除やDNS変更は行わない。
