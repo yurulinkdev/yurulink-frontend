@@ -45,6 +45,36 @@
             {{ $order := $collection.order | default (add (mul (add $index (len $catalog.programs)) 10) 10) }}
             {{ $categoryOrder = merge $categoryOrder (dict $collection.id $order) }}
           {{ end }}
+          {{/* サイドバーの分類IDとは別に、カードの所属番組名を多対多関係から解決する。 */}}
+          {{ $trustedProgramLabels := dict }}
+          {{ range $catalog.programs }}
+            {{ if not (hasPrefix .name "YouTube channel UC") }}
+              {{ $trustedProgramLabels = merge $trustedProgramLabels (dict .id .name) }}
+            {{ end }}
+          {{ end }}
+          {{ $collectionChannelLabels := dict }}
+          {{ range $catalog.collections }}
+            {{ if .channel_name }}
+              {{ $collectionChannelLabels = merge $collectionChannelLabels (dict .id .channel_name) }}
+            {{ end }}
+          {{ end }}
+          {{ $itemProgramLabels := dict }}
+          {{ $itemProgramLabels := dict }}
+          {{ range $catalog.item_programs }}
+            {{ $p := .program_id }}
+            {{ $i := .item_id }}
+            {{ with index $trustedProgramLabels $p }}
+              {{ $prior := index $itemProgramLabels $i | default (slice) }}
+              {{ $itemProgramLabels = merge $itemProgramLabels (dict $i (uniq (append . $prior))) }}
+            {{ end }}
+          {{ end }}
+          {{ range $catalog.memberships }}
+            {{ $i := .item_id }}
+            {{ with index $collectionChannelLabels .collection_id }}
+              {{ $prior := index $itemProgramLabels $i | default (slice) }}
+              {{ $itemProgramLabels = merge $itemProgramLabels (dict $i (uniq (append . $prior))) }}
+            {{ end }}
+          {{ end }}
           {{/* Build many-to-many category membership once, retaining legacy primary category. */}}
           {{ $itemCategories := dict }}
           {{ range $catalog.item_programs }}
@@ -97,9 +127,14 @@
                 {{ $related := index $itemCategories .id | default (slice) }}
                 {{ $allCategories := uniq (append $cat $related) }}
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
+                {{ $itemLabels := index $itemProgramLabels .id | default (slice) }}
+                {{ $visibleLabel := $catLabel }}
+                {{ if and (eq .kind "video") (gt (len $itemLabels) 0) }}
+                  {{ $visibleLabel = delimit (first 2 $itemLabels) "・" }}
+                {{ end }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
-                {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ if isset . "view_count" }}{{ .view_count }}{{ end }}" data-video-format="{{ .video_format | default "video" }}">
+                {{ $search := printf "%s %s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel (delimit $itemLabels " ") }}
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ if isset . "view_count" }}{{ .view_count }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ if eq .kind "social_profile" }}
                       {{ $avatar := .avatar_url | default "" }}
@@ -125,7 +160,7 @@
                       {{ end }}
                     {{ end }}
                     <div class="p-4">
-                    <p class="catalog-item-meta mb-2 text-xs text-muted-ink">{{ $catLabel }}{{ with .platform }} · {{ . }}{{ end }}</p>
+                    <p class="catalog-item-meta mb-2 text-xs text-muted-ink"><span class="font-semibold">{{ $visibleLabel }}</span>{{ with .platform }} · {{ . }}{{ end }}{{ if eq .provenance "official" }} · 公式{{ else if eq .provenance "community" }} · 有志・非公式{{ end }}</p>
                     <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
                     {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
                     {{ with .published_at }}<p class="catalog-item-date mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
