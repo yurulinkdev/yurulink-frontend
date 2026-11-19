@@ -236,7 +236,8 @@
   appendVirtual('browse:web-community');
   appendVirtual('browse:web-other');
   const known = new Set([...categories.filter(([id])=>id.startsWith('youtube-channel:')), ...playlists].map(([id]) => id));
-  const other = categories.filter(([id]) => !known.has(id) && !id.startsWith('browse:'));
+  // kind由来の汎用「動画」も種類フィルタと重複するため、その他カテゴリには掲載しない。
+  const other = categories.filter(([id]) => !known.has(id) && id !== 'video' && !id.startsWith('browse:'));
   if (other.length) {
     const group = makeGroup('その他のカテゴリー', other.some(([id]) => id === category));
     other.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
