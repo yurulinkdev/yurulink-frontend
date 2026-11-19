@@ -30,4 +30,4 @@ jobs:
         run: |
           test -s public/brand/yurulink-symbol-tight.svg
           grep -q 'brand/yurulink-symbol-tight.svg' public/index.html
-          grep -q 'rel="icon"' public/index.html
+          grep -Eq 'rel=("icon"|icon)([ >])' public/index.html
