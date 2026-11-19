@@ -1,3 +1,5 @@
+baseURL = "https://staging.yurulink-frontend.pages.dev/"
+# staging専用。main昇格時はProductionのURLへ差し替える。
 title = "YuruLink"
 defaultContentLanguage = "ja"
 disableKinds = ["taxonomy", "term", "RSS"]
@@ -5,6 +7,8 @@ enableRobotsTXT = true
 
 [params]
 # ブランド素材の確定SVGが配置された段階で、公開パスを指定する。
-brand_logo = ""
+brand_logo = "brand/yurulink-symbol-approved.svg"
 # サイドバーの注記。空欄は表示しない。審査ポリシーそのものは変更しない。
 sidebar_notice = ""
+# OGPは候補AをPreviewで暫定設定。正式採用の判断後に切り替える。
+og_image = "ogp/yurulink-light.png"
