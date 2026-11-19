@@ -218,3 +218,50 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
   await expect(page.locator('#pagination-top button[aria-current="page"]')).toHaveText('2');
   await expect(page.locator('#pagination button[aria-current="page"]')).toHaveText('2');
 });
+
+
+test('hierarchical sidebar: channel playlists and virtual top-level categories', async ({ page }) => {
+  await page.goto('/');
+  await page.setContent(`
+    <input id="query"><span id="selected-category"></span><span id="count"></span>
+    <div id="category-definitions" hidden>
+      <span data-category-definition="youtube-channel:one" data-category-type="program" data-label="ゆる言語学ラジオ" data-order="10"></span>
+      <span data-category-definition="youtube-playlist:nested" data-category-type="collection" data-collection-kind="playlist" data-channel-name="ゆる言語学ラジオ" data-label="プレイリスト1[ゆる言語学ラジオ]" data-order="20"></span>
+      <span data-category-definition="youtube-playlist:other" data-category-type="collection" data-collection-kind="playlist" data-label="ゆるっとアップデータ" data-order="30"></span>
+    </div>
+    <div id="category-buttons"></div><ul id="catalog">
+      <li data-catalog-item data-kind="video" data-platform="youtube" data-category="youtube-channel:one" data-category-ids="youtube-channel:one youtube-playlist:nested" data-title="番組動画" data-search="番組動画">番組動画</li>
+      <li data-catalog-item data-kind="video" data-platform="youtube" data-category="youtube-playlist:other" data-category-ids="youtube-playlist:other" data-title="独立プレイリスト" data-search="独立プレイリスト">独立プレイリスト</li>
+      <li data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="単発動画" data-search="単発動画">単発動画</li>
+      <li data-catalog-item data-kind="social_profile" data-platform="x" data-category="social_profile" data-title="SNSプロフィール" data-search="SNSプロフィール">SNSプロフィール</li>
+      <li data-catalog-item data-kind="website" data-provenance="official" data-category="website" data-title="公式サイト" data-search="公式サイト">公式サイト</li>
+      <li data-catalog-item data-kind="website" data-provenance="community" data-category="website" data-title="非公式サイト" data-search="非公式サイト">非公式サイト</li>
+      <li data-catalog-item data-kind="website" data-provenance="unknown" data-category="website" data-title="その他サイト" data-search="その他サイト">その他サイト</li>
+    </ul><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
+  `);
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.addScriptTag({ url: '/js/site.js' });
+  const labels = await page.locator('#category-buttons summary').allTextContents();
+  expect(labels).toContain('YouTubeチャンネル');
+  expect(labels).toContain('ゆる言語学ラジオ');
+  expect(labels).toContain('YouTubeチャンネルプレイリスト');
+
+  await page.locator('#category-buttons summary', {hasText:'ゆる言語学ラジオ'}).click();
+  await page.locator('button[data-category="youtube-playlist:nested"]').click();
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '番組動画');
+
+  for (const [id, title] of [
+    ['browse:single', '単発動画'],
+    ['browse:social', 'SNSプロフィール'],
+    ['browse:web-official', '公式サイト'],
+    ['browse:web-community', '非公式サイト'],
+    ['browse:web-other', 'その他サイト']
+  ]) {
+    await page.locator('#category-buttons button[data-category="' + id + '"]').click();
+    await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
+    await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', title);
+  }
+  expect(errors).toEqual([]);
+});
