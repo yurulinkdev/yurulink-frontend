@@ -64,3 +64,9 @@ YouTubeの収集データは公開品質検査に基づいて掲載します。�
 - [環境・デプロイ](docs/environments.md)
 - [デザイン仕様](docs/design-system-phase2.md)
 - [Backend](https://github.com/yurulinkdev/yurulink-backend)
+
+## ブランド素材・媒体別画像（開発中）
+
+- [ブランドロゴとHTML/CSS画像生成方針](docs/brand-visuals.md)
+- ロゴのSVG初期版: `static/brand/yurulink-symbol.svg`
+- 採用JPEGはGoogle Driveの `YuruLink_Assets/02-selected` に保存。サイトへの正式適用は未完了。
