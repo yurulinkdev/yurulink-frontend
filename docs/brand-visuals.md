@@ -21,3 +21,11 @@ OGP 1200×630、hero 1600×900、YouTube 1280×720、note 1280×670。
 
 **未対応：** SVGの手動曲線清書と16px/32pxでの比較評価、完成PNGのFrontend `static/` へのコピー、OGPメタタグ設定、実Stagingでのレイアウト・モバイル表示確認。
 本番マージ／Production更新は別途承認が必要。
+
+## 画像テンプレート改修 v3（デザインレビュー中）
+Automation Labの `feat/brand-html-image-pipeline-20261119` で、4媒体の画像をタイトル優先のエディトリアル構図に変更。採用ロゴを固定SVGとして再利用し、背景はHTML/CSS/SVGの円弧・紙片・ノードで表現する。
+
+- [Actionsで生成したOGP・hero・YouTube・noteのプレビュー](https://github.com/yurulinkdev/yurulink-automation-lab/actions/runs/44502837842)
+- [Automation Labの画像生成設計](https://github.com/yurulinkdev/yurulink-automation-lab/blob/feat/brand-html-image-pipeline-20261119/docs/brand-visual-rendering.md)
+
+テンプレートのCI成功とFrontendでの画像採用は別。現時点で当PRに含むのは採用ロゴのナビゲーション・faviconへの組み込みのみで、OGP/heroをサイトに反映した状態ではない。
