@@ -1,6 +1,7 @@
 <header class="sticky top-0 z-20 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur sm:px-7">
   <div class="flex items-center gap-3">
     <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">メニューを開く</span></button>
+    <a href="{{ "" | relURL }}" class="inline-flex h-9 w-9 shrink-0 items-center justify-center lg:hidden" aria-label="YuruLinkトップへ"><img src="{{ "brand/yurulink-symbol-tight.svg" | relURL }}" width="30" height="30" alt="" aria-hidden="true"></a>
     {{ if .IsHome }}
       <label class="relative min-w-0 flex-1">
         <span class="sr-only">コンテンツを検索</span>
