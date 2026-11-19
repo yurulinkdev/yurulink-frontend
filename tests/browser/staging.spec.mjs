@@ -238,8 +238,8 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
       <li data-catalog-item data-kind="video" data-platform="youtube" data-category="youtube-playlist:other" data-category-ids="youtube-playlist:other" data-title="独立プレイリスト" data-search="独立プレイリスト">独立プレイリスト</li>
       <li data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="単発動画" data-search="単発動画">単発動画</li>
       <li data-catalog-item data-kind="social_profile" data-platform="x" data-category="social_profile" data-title="SNSプロフィール" data-search="SNSプロフィール">SNSプロフィール</li>
-      <li data-catalog-item data-kind="website" data-provenance="official" data-category="website" data-title="公式サイト" data-search="公式サイト">公式サイト</li>
-      <li data-catalog-item data-kind="website" data-provenance="community" data-category="website" data-title="非公式サイト" data-search="非公式サイト">非公式サイト</li>
+      <li data-catalog-item data-kind="website" data-provenance="official" data-classification-verified="true" data-category="website" data-title="公式サイト" data-search="公式サイト">公式サイト</li>
+      <li data-catalog-item data-kind="website" data-provenance="community" data-classification-verified="true" data-category="website" data-title="非公式サイト" data-search="非公式サイト">非公式サイト</li>
       <li data-catalog-item data-kind="website" data-provenance="unknown" data-category="website" data-title="その他サイト" data-search="その他サイト">その他サイト</li>
     </ul><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
   `);
@@ -258,22 +258,27 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '番組動画');
 
-  // 「SNSアカウント」はトップから撤去し、SNSプロフィールだけをその他カテゴリに残す。
+  // SNSプロフィールは「サイト・SNS → 公式性未確認」に収め、以前の重複を戻さない。
   await expect(page.locator('#category-buttons button[data-category="browse:social"]')).toHaveCount(0);
-  await expect(page.locator('#category-buttons button[data-category="social_profile"]')).toHaveCount(1);
-  await page.locator('#category-buttons summary', {hasText:'その他のカテゴリー'}).click();
-
-  for (const [id, title] of [
-    ['browse:single', '単発動画'],
-    ['social_profile', 'SNSプロフィール'],
-    ['browse:web-official', '公式サイト'],
-    ['browse:web-community', '非公式サイト'],
-    ['browse:web-other', 'その他サイト']
+  await expect(page.locator('#category-buttons button[data-category="social_profile"]')).toHaveCount(0);
+  await expect(page.locator('#category-buttons summary', {hasText:'サイト・SNS'})).toHaveCount(1);
+  await page.locator('#category-buttons summary', {hasText:'サイト・SNS'}).click();
+  await page.locator('#category-buttons summary', {hasText:'公式関連'}).click();
+  await page.locator('#category-buttons button[data-category="browse:web-official"]').click();
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title','公式サイト');
+  await page.locator('#category-buttons summary', {hasText:'有志・非公式'}).click();
+  await page.locator('#category-buttons button[data-category="browse:web-community"]').click();
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title','非公式サイト');
+  await page.locator('#category-buttons summary', {hasText:'公式性未確認'}).click();
+  for (const [id,title] of [
+    ['browse:web-other','その他サイト'],['browse:social-other','SNSプロフィール']
   ]) {
     await page.locator('#category-buttons button[data-category="' + id + '"]').click();
-    await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
-    await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', title);
+    await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title',title);
   }
+  await page.locator('#category-buttons summary', {hasText:'動画の位置づけ'}).click();
+  await page.locator('#category-buttons button[data-category="browse:single"]').click();
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title','単発動画');
   expect(errors).toEqual([]);
 });
 
@@ -457,9 +462,10 @@ test('sidebar keeps program categories without global type duplicates or virtual
     await expect(sidebar.locator('button[data-category="' + id + '"]')).toHaveCount(0);
   }
   await expect(sidebar.getByRole('button', {name:'すべてのコンテンツ'})).toHaveCount(1);
-  await expect(sidebar.locator('button[data-category="social_profile"]')).toHaveCount(1);
+  await expect(sidebar.locator('button[data-category="social_profile"]')).toHaveCount(0);
   await expect(sidebar.locator('button[data-category="video"]')).toHaveCount(0);
-  await expect(sidebar.locator('summary', {hasText:'その他のカテゴリー'})).toHaveCount(1);
+  await expect(sidebar.locator('summary', {hasText:'サイト・SNS'})).toHaveCount(1);
+  await expect(sidebar.locator('summary', {hasText:'公式性未確認'})).toHaveCount(1);
 
   // 旧URLの直リンクはメニュー項目を削除しても動作させる。
   await page.goto('/?category=browse%3Alive');
@@ -467,4 +473,30 @@ test('sidebar keeps program categories without global type duplicates or virtual
     items.map(x => x.dataset.videoFormat));
   expect(formats.length).toBeGreaterThan(0);
   expect(formats.every(format => format === 'live')).toBe(true);
+});
+
+
+test('site/SNS provenance is reviewer-verified: test imports stay in unverified group', async ({page}) => {
+  await page.goto('/');
+  const sidebar=page.locator('#category-buttons');
+  await expect(sidebar.locator('summary', {hasText:'サイト・SNS'})).toBeVisible();
+  // 旧Book4の全communityは検証用のため、明示的な確定印なしに非公式へ分類しない。
+  const community=await page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"]').count();
+  expect(community).toBeGreaterThan(0);
+  const notReviewed=await page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"][data-classification-verified="false"]').count();
+  expect(notReviewed).toBe(community);
+  await page.goto('/?category=browse%3Aweb-other');
+  expect(await page.locator('[data-catalog-item]:visible').count()).toBeGreaterThan(0);
+  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]')).toHaveCount(1);
+});
+
+test('video cards show the actual related program and preserve channel/playlist identity', async ({page}) => {
+  await page.goto('/');
+  const videoCards=page.locator('[data-catalog-item][data-kind="video"]');
+  expect(await videoCards.count()).toBeGreaterThan(3000);
+  // チャンネル投稿とプレイリスト所属から取得した番組名のない項目を誤って公式表示しない。
+  const labeled=videoCards.locator('.catalog-item-meta').filter({hasText:/ゆる/});
+  expect(await labeled.count()).toBeGreaterThan(100);
+  const matched=await videoCards.evaluateAll(nodes=>nodes.filter(n=>n.dataset.programLabels).length);
+  expect(matched).toBeGreaterThan(100);
 });
