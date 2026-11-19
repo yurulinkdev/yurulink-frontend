@@ -71,3 +71,15 @@
 - プレイリストは `collections[].title` と `collections[].channel_name` から `プレイリスト名[チャンネル名]` を表示する。チャンネル名が未解決の場合はプレイリスト名のみとし、架空のチャンネル名を補わない。
 - `channel_name` はYouTube側の所属チャンネルを示す表示用属性で、`program_id`（番組の編集分類）と混同しない。
 - Backend developのBook1行順とchannel_titleからorder/channel_nameを生成し、Green Book4を含む3,185件の結合・書込・再実行差分0件を実証済み。Frontend stagingは複数所属カテゴリーの絞り込み・ページネーションを含む8件のPlaywrightテストに成功。main/Productionへの反映は承認待ち。
+
+
+## ナビゲーション・画像表示の追加規約（2026-11-19）
+
+- Frontendのトップ分類は、YouTubeチャンネル（配下にチャンネル別プレイリスト）、所属先未確定のYouTubeプレイリスト、単発動画、SNSアカウント、公式・非公式・その他Webサイトを表示する。`browse:*` はFrontendだけのフィルタIDであり、公開JSONの`items[].category_id` として永続化しない。
+- チャンネル・プレイリストの表示順は既存の`order` を維持する。`channel_name` とチャンネル表示名が正規化後に一意一致した場合だけ暫定的に階層化する。一致しないプレイリストは独立した見出しに残し、推測で誤ったチャンネルに所属させない。将来はYouTubeの安定した`channel_id` に基づく正規の親子リンクを優先する。
+- 未所属動画は、現行データでは「チャンネル・プレイリスト未所属」と表示し、Book0未登録という断定はしない。Book0由来と単発投稿の完全な峻別にはBackendで明示的なソース属性を付ける必要がある。
+- YouTube画像は`i.ytimg.com` の既存URLをホワイトリスト判定したうえで、標準120px画像から中・高解像度画像へ切り替え、`srcset` / `sizes` / 遅延読み込みを指定する。解像度・帯域のCore Web Vitals実測は別途行う。
+- `items[].kind = social_profile` の場合、任意項目`avatar_url`（検証済み公開HTTPS画像URL）、`profile_bio`（公開プロフィール本文）を表示してよい。両方欠けた場合はSNSのアイコンと既存`description` にフォールバックする。現時点の許可画像ホストはXの`pbs.twimg.com` のみ。ブラウザからSNSを直接スクレイピングしない。
+- SNSプロフィールの自動更新、画像保存/キャッシュ、更新頻度、利用規約対応、更新日時と公開可否の検証はBackendの別実装課題。現行のFrontend修正だけでは自動追随は実現しない。
+- 現行3,185件の全件Hugo HTML描画は維持されている。操作時に動かすDOMは表示対象の最大100件に限定したが、初期HTMLの軽量化（ビルド時分割、検索用索引、初期サーバ描画20件、JS後続読込）は今後の性能課題。
+
