@@ -131,3 +131,24 @@ html { line-height: 1.7; }
 .article-prose pre { overflow-x: auto; border-radius: .6rem; background: var(--panel-muted); padding: 1rem; }
 .article-prose code { overflow-wrap: anywhere; }
 .article-prose img { max-width: 100%; height: auto; }
+
+/* Collectionから投影したプレイリストカードは、リスト表示でも見出しとリンクを維持する */
+.catalog-list-view [data-playlist-card] article {
+  display: grid;
+  grid-template-columns: 88px minmax(0, 1fr);
+  min-height: 78px;
+  gap: .75rem;
+  padding: .625rem;
+}
+.catalog-list-view [data-playlist-card] article > div {
+  grid-column: auto !important;
+  padding: 0;
+}
+.catalog-list-view [data-playlist-card] article > div:first-child {
+  height: 60px;
+  width: 88px;
+  font-size: 1.5rem;
+}
+.catalog-list-view [data-playlist-card] h2 {
+  font-size: .875rem;
+}
