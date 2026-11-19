@@ -2,7 +2,7 @@ name: Frontend smoke test
 
 on:
   push:
-    branches: [main, staging, feat/catalog-v2-taxonomy-ui]
+    branches: [main, staging, feat/catalog-v2-taxonomy-ui, feat/brand-html-image-pipeline-20261119]
   pull_request:
   workflow_dispatch:
 
