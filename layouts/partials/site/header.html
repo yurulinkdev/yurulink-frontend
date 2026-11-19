@@ -6,10 +6,14 @@
       <span class="brand-wordmark">YuruLink</span>
     </a>
     {{ if .IsHome }}
-      <label class="relative order-3 w-full min-w-0 lg:order-none lg:flex-1">
-        <span class="sr-only">コンテンツを検索</span>
-        <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page px-4 py-2.5 text-ink placeholder:text-muted-ink" autocomplete="off">
-      </label>
+      <div class="relative order-3 w-full min-w-0 lg:order-none lg:flex-1">
+        <label class="sr-only" for="query">コンテンツを検索</label>
+        <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page py-2.5 pl-4 pr-12 text-ink placeholder:text-muted-ink" autocomplete="off">
+        <a id="search-help-link" href="{{ "posts/search-guide/" | relURL }}" class="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-ink hover:bg-panel-muted hover:text-accent" aria-label="検索の使い方を開く" title="検索の使い方">
+          {{/* Heroicons outline question-mark-circle */}}
+          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519a3 3 0 1 1 4.242 4.242c-.765.765-2.121 1.378-2.121 2.489V15m0 3h.008v.008H12V18Z"/><circle cx="12" cy="12" r="9.75"/></svg>
+        </a>
+      </div>
     {{ else }}
       <a class="min-w-0 flex-1 truncate font-semibold text-accent hover:underline" href="{{ "" | relURL }}">YuruLink</a>
     {{ end }}
