@@ -7,15 +7,25 @@
           </div>
           <div class="flex flex-wrap items-center gap-3"><p id="count" class="text-sm text-muted-ink" aria-live="polite"></p><label class="text-sm text-muted-ink">並び順 <select id="sort-order" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="コンテンツの並び順"><option value="newest">公開日：新しい順</option><option value="oldest">公開日：古い順</option><option value="title-asc">タイトル：昇順</option><option value="title-desc">タイトル：降順</option><option value="views-desc">再生数：多い順</option><option value="views-asc">再生数：少ない順</option></select></label><label class="text-sm text-muted-ink">表示件数 <select id="page-size" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="1ページの表示件数"><option value="20">20件</option><option value="50">50件</option><option value="100">100件</option></select></label><div role="group" aria-label="リンク一覧の表示形式" class="inline-flex gap-1"><button type="button" data-catalog-view="grid" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="true">カード</button><button type="button" data-catalog-view="list" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="false">リスト</button></div></div>
         </div>
-        <fieldset id="content-type-filter" class="mb-4 flex flex-wrap items-center gap-x-4 gap-y-2 rounded-lg border border-line bg-panel px-4 py-3 text-sm" aria-label="コンテンツの種類で絞り込み">
-          <legend class="px-1 text-xs font-semibold text-muted-ink">種類で絞り込み（複数選択可）</legend>
-          <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="video" class="accent-accent">動画</label>
-          <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="playlist" class="accent-accent">プレイリスト</label>
-          <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="short" class="accent-accent">ショート</label>
-          <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="live" class="accent-accent">ライブ</label>
-          <button type="button" id="reset-content-type-filter" class="rounded-md border border-line px-2 py-1 text-xs hover:bg-panel-muted">解除</button>
-          <p class="w-full text-xs text-muted-ink">未選択ならすべて表示。種類の指定はOR条件です。</p>
-        </fieldset>
+        {{/* details/summary は標準HTMLで開閉できる。フィルタの選択値は折りたたんでも保持する。 */}}
+        <details id="content-type-filter" class="content-type-disclosure mb-4 rounded-lg border border-line bg-panel text-sm">
+          <summary class="flex cursor-pointer select-none items-center justify-between gap-3 px-4 py-3 font-semibold text-ink focus-visible:outline" aria-label="種類で絞り込みを展開または折りたたむ">
+            <span class="flex min-w-0 flex-wrap items-center gap-2">
+              <span>種類で絞り込み（複数選択可）</span>
+              <span id="content-type-filter-status" class="text-xs font-normal text-muted-ink">すべて表示</span>
+            </span>
+            <svg class="content-type-chevron h-5 w-5 shrink-0 text-muted-ink" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <fieldset class="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-line px-4 py-4" aria-label="コンテンツの種類で絞り込み">
+            <legend class="sr-only">表示するコンテンツの種類</legend>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="video" class="accent-accent">動画</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="playlist" class="accent-accent">プレイリスト</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="short" class="accent-accent">ショート</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="live" class="accent-accent">ライブ</label>
+            <button type="button" id="reset-content-type-filter" class="rounded-md border border-line px-2 py-1 text-xs hover:bg-panel-muted">解除</button>
+            <p class="w-full text-xs text-muted-ink">未選択ならすべて表示。種類の指定はOR条件です。ショートには暫定判定の動画を含みます。</p>
+          </fieldset>
+        </details>
         <nav id="pagination-top" class="mb-4 flex flex-wrap items-center justify-center gap-2" aria-label="ページ切り替え（上部）"></nav>
         {{ $catalog := .Site.Data.public.catalog }}
         {{ if and $catalog (eq (int ($catalog.schema_version | default 0)) 2) }}
