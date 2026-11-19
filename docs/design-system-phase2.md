@@ -54,3 +54,22 @@
 - [WCAG 2.2](https://www.w3.org/TR/WCAG22/)
 - [Hugo](https://gohugo.io/documentation/)
 - [Core Web Vitals](https://web.dev/vitals/)
+
+## 書体・タイポグラフィの統一規則（2026-11-19）
+
+既存の「システム和文サンセリフを優先し、必須の外部Webフォントを使わない」という方針を正式な実装ルールとして固定する。
+
+| 用途 | CSS参照／指定 | サイズ・ウェイト |
+| --- | --- | --- |
+| 本文・検索欄・ナビゲーション | `--font-ui` | 基本16px、通常400、行間1.7 |
+| YuruLinkワードマーク（HTMLテキスト） | `--font-brand`、`.brand-wordmark` | 20px、700、字間 -0.02em、行間1.2 |
+| 小見出し・メニューラベル | `--font-ui` | 原則14px、必要時600〜700 |
+| 注記・カードのメタ情報 | `--font-ui` | 13pxを目安（コンパクトリストは11〜12pxまで縮小可） |
+| 媒体別画像の文字 | 共通フォント規則を参照し、HTML/CSSで組版 | 見出し・本文ごとにスタイルを分離 |
+
+- CSSトークンは `assets/css/tokens.css` の `--font-ui`、`--font-brand`、`--type-*`。適用は `assets/css/input.css` に集約する。
+- フォントスタックは和文：`system-ui / -apple-system / Hiragino Sans / Yu Gothic / Noto Sans JP / Meiryo / sans-serif`。欧文ブランド：`system-ui / -apple-system / Segoe UI / sans-serif`。OSごとに実際のグリフ形状が異なる点は既知の制限。厳密なブランド形状固定が必要になった時点で、フォントの利用許諾・配信サイズを評価して別途採用判断する。
+- ブランドシンボルはSVGアイコンフォントで代用せず、`static/brand/yurulink-symbol-approved-transparent.png`（承認原本JPEGから背景を透過した画像）を使用。サイト名「YuruLink」は文字列としてHTMLに保持するため、検索・拡大・読み上げ可能。
+- ダークテーマでもテキストの色は`text-accent`トークンで切り替える。ブランドシンボルの色は元のデザインを保持する。
+- アイコンはTailwind CSSの機能ではない。使用する小型UIアイコンは同開発元のHeroicons（MITライセンス）のoutlineスタイル24pxを標準とし、SVGをインラインで配置する。アイコンのみのボタンには`aria-label`を必須とする。現在の閉じるボタンには`arrow-left`を採用した。
+- 正式ブランド画像・関連資料: Google Drive `YuruLink_Assets/02-selected`、`Image-Prompts.md`。favicon／OGPのデザイン承認状態とは区別する。
