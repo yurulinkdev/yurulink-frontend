@@ -38,10 +38,10 @@
           {{ end }}
           <div id="category-definitions" hidden>
             {{ range $catalog.programs }}
-              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}"></span>
+              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}" data-category-type="program"></span>
             {{ end }}
             {{ range $catalog.collections }}
-              <span data-category-definition="{{ .id }}" data-label="{{ index $programs .id }}" data-order="{{ index $categoryOrder .id }}"></span>
+              <span data-category-definition="{{ .id }}" data-label="{{ index $programs .id }}" data-order="{{ index $categoryOrder .id }}" data-category-type="collection" data-collection-kind="{{ .kind }}" data-channel-name="{{ .channel_name | default "" }}"></span>
             {{ end }}
           </div>
           {{ $tax := .Site.Data.taxonomy }}
@@ -58,20 +58,35 @@
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
-                    {{ with .thumbnail_url }}
-                      {{ $thumbnail := urls.Parse . }}
-                      {{ if and (eq $thumbnail.Scheme "https") (eq $thumbnail.Host "i.ytimg.com") }}
-                        <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="block">
-                          <img src="{{ . | safeURL }}" alt="" loading="lazy" decoding="async" width="120" height="90" class="aspect-video w-full bg-panel object-cover" referrerpolicy="no-referrer">
-                        </a>
+                    {{ if eq .kind "social_profile" }}
+                      {{ $avatar := .avatar_url | default "" }}
+                      {{ $avatarURL := urls.Parse $avatar }}
+                      <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="social-avatar-wrap block px-4 pt-4" aria-label="SNSプロフィールを開く">
+                        {{ if and (eq $avatarURL.Scheme "https") (eq $avatarURL.Host "pbs.twimg.com") (not $avatarURL.User) }}
+                          <img src="{{ $avatar | safeURL }}" alt="" loading="lazy" decoding="async" width="64" height="64" class="social-avatar h-16 w-16 rounded-full bg-panel-muted object-cover" referrerpolicy="no-referrer">
+                        {{ else }}
+                          <span class="social-avatar-placeholder inline-flex h-16 w-16 items-center justify-center rounded-full bg-panel-muted text-sm font-bold text-accent" aria-hidden="true">SNS</span>
+                        {{ end }}
+                      </a>
+                    {{ else }}
+                      {{ with .thumbnail_url }}
+                        {{ $thumbnail := urls.Parse . }}
+                        {{ if and (eq $thumbnail.Scheme "https") (eq $thumbnail.Host "i.ytimg.com") (not $thumbnail.User) }}
+                          {{/* default.jpg (120x90)を引き伸ばさず、YouTubeの高解像度版を指定する。 */}}
+                          {{ $mq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\.(jpg|webp)$" "mqdefault.$2" . }}
+                          {{ $hq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\.(jpg|webp)$" "hqdefault.$2" . }}
+                          <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="block">
+                            <img src="{{ $mq | safeURL }}" srcset="{{ $mq | safeURL }} 320w, {{ $hq | safeURL }} 480w" sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 33vw" alt="" loading="lazy" decoding="async" width="480" height="270" class="aspect-video w-full bg-panel object-cover" referrerpolicy="no-referrer">
+                          </a>
+                        {{ end }}
                       {{ end }}
                     {{ end }}
                     <div class="p-4">
                     <p class="catalog-item-meta mb-2 text-xs text-muted-ink">{{ $catLabel }}{{ with .platform }} · {{ . }}{{ end }}</p>
                     <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
-                    {{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}
+                    {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
                     {{ with .published_at }}<p class="catalog-item-date mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
                     </div>
                   </article>
