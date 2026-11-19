@@ -103,6 +103,6 @@
 - 任意フィールド `video_format` は `video` / `short` / `live`。出所は `video_format_source`。ライブはYouTube `liveStreamingDetails` に基づく。ショートはAPIの直接識別子がないため `#Shorts` 等の明示表示と180秒以下の長さを併用した**暫定候補**。正確性についてはBackend develop `docs/video-format-classification.md` を参照。
 - 種類フィルタはチェックボックス複数選択。選択した種類の間はOR、未選択は全種表示。URLクエリ `types=video,playlist,short,live` に状態を保持する。検索・番組カテゴリ・ソート・ページネーションとAND条件で合成する。
 - モバイルは画面左端から右へ70px以上、縦移動50px以下の明確なスワイプでカテゴリドロワーを開く。ドロワー内の逆向きスワイプでも閉じる。既存のボタン・Escape操作・フォーカストラップを維持する。
-- モバイルヘッダーのブランド名はサイト表示の先頭へ置き、下スクロールで隠れてもよい。ブランドロゴはHugo TOML `params.brandLogo` に公開パスを指定する。現在は画像制作の別ブランチ `feat/brand-html-image-pipeline-20261119` の確定SVG待ちのため、既存の開いた本アイコンを仮表示する。制作ブランチの素材自体は本変更では加工・上書きしない。
-- サイドバー末尾の説明はHugo TOML `params.sidebarNotice` に外部化。空文字で非表示とし、投稿承認・公開審査のセキュリティ仕様自体は変更しない。
+- モバイルヘッダーのブランド名はサイト表示の先頭へ置き、下スクロールで隠れてもよい。ブランドロゴはHugo TOML `params.brand_logo` に公開パスを指定する。現在は画像制作の別ブランチ `feat/brand-html-image-pipeline-20261119` の確定SVG待ちのため、既存の開いた本アイコンを仮表示する。制作ブランチの素材自体は本変更では加工・上書きしない。
+- サイドバー末尾の説明はHugo TOML `params.sidebar_notice` に外部化。空文字で非表示とし、投稿承認・公開審査のセキュリティ仕様自体は変更しない。
 - Google Driveのブランド正本は `YuruLink_Assets/02-selected/YuruLink-symbol-approved-reference.jpg`。Image-Prompts.md／Assets READMEの素材管理規則に従う。未清書のSVGを最終正本と混同しない。
