@@ -21,7 +21,7 @@ flowchart TB
     class D,E,F deploy
 ```
 
-`data/public/catalog.json` は `schema_version: 2` の統合形式です。公開リンク実体 `items`、番組 `programs`、コレクション `collections` と、それらの多対多関係 `item_programs`・`memberships` を扱います。現行のJSONは代表サンプルで、Backendからの全件自動配信は整備中です。
+`data/public/catalog.json` は `schema_version: 2` の統合形式です。公開リンク実体 `items`、番組 `programs`、コレクション `collections` と、それらの多対多関係 `item_programs`・`memberships` を扱います。2026-11-19現在、`staging`にはGreen Book2由来3,176件とBook4の手動登録9件、計3,185件の統合カタログをBackend Actionsから配信済みです。Hugo・Cloudflare Preview・Playwright Chromium 8件の検証に成功しました。`main`/Productionへの反映および12時間の定期自動公開は未有効化です。
 
 ## 技術・機能
 
