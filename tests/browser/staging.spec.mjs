@@ -200,7 +200,7 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
   await openCatalog(page, '/?size=20');
   const groups = await page.locator('[data-catalog-item]').evaluateAll(items => {
     const counts = new Map();
-    for (const item of items) for (const id of (item.dataset.categoryIds || item.dataset.category || '').split(/\\s+/).filter(Boolean)) {
+    for (const item of items) for (const id of (item.dataset.categoryIds || item.dataset.category || '').split(/\s+/).filter(Boolean)) {
       counts.set(id, (counts.get(id) || 0) + 1);
     }
     return [...counts].filter(([, count]) => count > 20).sort((a,b) => b[1] - a[1]);
@@ -208,28 +208,12 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
   expect(groups.length).toBeGreaterThan(0);
   const [category, count] = groups[0];
   await page.goto('/?' + new URLSearchParams({ category, size: '20' }));
-  // 実データ全件のときだけ起きるURL直アクセスの不整合を診断する。
-  const diagnostic = await page.evaluate(selectedCategory => {
-    const items = [...document.querySelectorAll('[data-catalog-item]')];
-    const ids = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\\s+/).filter(Boolean);
-    return {
-      category: selectedCategory,
-      href: location.href,
-      items: items.length,
-      matching: items.filter(item => ids(item).includes(selectedCategory)).length,
-      visible: items.filter(item => !item.hidden).length,
-      count: document.querySelector('#count')?.textContent,
-      selected: document.querySelector('#selected-category')?.textContent,
-      jsLoaded: !!document.querySelector('#category-buttons button')
-    };
-  }, category);
-  console.log('CATEGORY_DEEP_LINK_DIAGNOSTIC ' + JSON.stringify(diagnostic));
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
   await page.locator('#pagination button', { hasText: '2', exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(Math.min(count - 20, 20));
   const valid = await page.locator('[data-catalog-item]:visible').evaluateAll((items, id) =>
-    items.every(item => (item.dataset.categoryIds || item.dataset.category || '').split(/\\s+/).includes(id)), category);
+    items.every(item => (item.dataset.categoryIds || item.dataset.category || '').split(/\s+/).includes(id)), category);
   expect(valid).toBe(true);
   await expect(page.locator('#pagination-top button[aria-current="page"]')).toHaveText('2');
   await expect(page.locator('#pagination button[aria-current="page"]')).toHaveText('2');
