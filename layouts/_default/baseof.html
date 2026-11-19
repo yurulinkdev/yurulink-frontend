@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   {{ partial "head/meta.html" . }}
   {{ partial "theme-init.html" . }}
+  <link rel="icon" type="image/svg+xml" href="{{ "brand/yurulink-symbol-tight.svg" | relURL }}">
   <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
   <script src="{{ "js/theme-control.js" | relURL }}" defer></script>
   {{ if .IsHome }}<script src="{{ "js/site.js" | relURL }}" defer></script>{{ end }}
