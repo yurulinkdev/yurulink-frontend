@@ -522,7 +522,7 @@ test('official/community classification is not inferred from unreviewed legacy p
   await page.goto('/');
   const recorded=page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"]');
   expect(await recorded.count()).toBeGreaterThan(0);
-  expect(await recorded.filter({has:page.locator('[data-classification-verified="true"]')}).count()).toBe(0);
+  expect(await recorded.evaluateAll(nodes=>nodes.every(node=>node.dataset.classificationVerified==='false'))).toBe(true);
   await page.goto('/?category=browse%3Aweb-community');
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(0);
   await page.goto('/?category=browse%3Aweb-other');
