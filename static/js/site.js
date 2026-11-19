@@ -76,16 +76,16 @@
     ['browse:web-community', '非公式ウェブサイト'],
     ['browse:web-other', 'その他ウェブサイト']
   ]);
-  const matchesCategory = record => {
-    if (!category) return true;
-    if (record.ids.has(category)) return true;
-    if (category === 'browse:video') return record.kind === 'video' && record.platform === 'youtube';
-    if (category === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
+  const matchesCategory = (record, selectedCategory = category) => {
+    if (!selectedCategory) return true;
+    if (record.ids.has(selectedCategory)) return true;
+    if (selectedCategory === 'browse:video') return record.kind === 'video' && record.platform === 'youtube';
+    if (selectedCategory === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
       && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
-    if (category === 'browse:social') return record.kind === 'social_profile';
-    if (category === 'browse:web-official') return record.kind === 'website' && record.provenance === 'official';
-    if (category === 'browse:web-community') return record.kind === 'website' && record.provenance === 'community';
-    if (category === 'browse:web-other') return record.kind === 'website' && record.provenance !== 'official' && record.provenance !== 'community';
+    if (selectedCategory === 'browse:social') return record.kind === 'social_profile';
+    if (selectedCategory === 'browse:web-official') return record.kind === 'website' && record.provenance === 'official';
+    if (selectedCategory === 'browse:web-community') return record.kind === 'website' && record.provenance === 'community';
+    if (selectedCategory === 'browse:web-other') return record.kind === 'website' && record.provenance !== 'official' && record.provenance !== 'community';
     return false;
   };
   const makeButton = (label, value) => {
@@ -114,14 +114,8 @@
     details.append(summary, children);
     return {details, children};
   };
-  const appendVirtual = (id) => {
-    if (records.some(record => {
-      const current = category;
-      category = id;
-      const found = matchesCategory(record);
-      category = current;
-      return found;
-    })) buttons?.append(makeButton(virtualLabels.get(id), id));
+  const appendVirtual = id => {
+    if (records.some(record => matchesCategory(record, id))) buttons?.append(makeButton(virtualLabels.get(id), id));
   };
   buttons?.append(makeButton('すべてのコンテンツ', ''));
   appendVirtual('browse:video');
