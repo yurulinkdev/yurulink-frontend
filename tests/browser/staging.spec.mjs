@@ -381,3 +381,37 @@ test('mobile header and swipe: edge gesture opens navigation and escape closes i
   await page.keyboard.press('Escape');
   await expect(page.locator('#open-categories')).toHaveAttribute('aria-expanded', 'false');
 });
+
+
+test('real metadata: live and identified Shorts filters are available', async ({ page }) => {
+  for (const [category, videoFormat] of [
+    ['browse:live', 'live'],
+    ['browse:short', 'short']
+  ]) {
+    await openCatalog(page, '/?' + new URLSearchParams({ category }));
+    await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
+    const formats = await page.locator('[data-catalog-item]:visible').evaluateAll(elements =>
+      elements.map(el => el.dataset.videoFormat));
+    expect(formats.every(value => value === videoFormat)).toBe(true);
+  }
+  await openCatalog(page, '/?types=short%2Clive');
+  const formats = await page.locator('[data-catalog-item]:visible').evaluateAll(elements =>
+    elements.map(el => el.dataset.videoFormat));
+  expect(formats.every(value => ['short','live'].includes(value))).toBe(true);
+  await expect(page.locator('#category-buttons')).not.toContainText('YouTube channel UCJy_hfwQw2_OGTESC3OBckg');
+  await expect(page.locator('#category-drawer')).not.toContainText('公開承認されたリンクのみを掲載します');
+});
+
+test('channel playlist heading opens the link directory', async ({ page }) => {
+  await openCatalog(page);
+  const channel = page.locator('#category-buttons details').filter({
+    has: page.locator('button[data-category^="browse:playlists:"]')
+  }).first();
+  await channel.locator('summary').first().click();
+  const summary = channel.locator('details > summary', {hasText:'プレイリスト'}).first();
+  await summary.click();
+  await expect(page).toHaveURL(/category=browse%3Aplaylists%3A/);
+  const cards = page.locator('[data-playlist-card]:visible');
+  expect(await cards.count()).toBeGreaterThan(0);
+  expect(await cards.count()).toBeLessThanOrEqual(20);
+});
