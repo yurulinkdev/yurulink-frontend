@@ -281,12 +281,10 @@
   }
   // 公式性の未確認データを自動で公式／有志扱いしない分類メニュー。
   const appendAvailable = (container, id) => {
-    if (records.some(record => matchesCategory(record,id))) {
-      categoryLabels.set(id, virtualLabels.get(id));
-      container.append(makeButton(virtualLabels.get(id),id));
-      return true;
-    }
-    return false;
+    // 0件でもカテゴリーを表示して、新設分類の位置を編集者と閲覧者が確認できるようにする。
+    categoryLabels.set(id, virtualLabels.get(id));
+    container.append(makeButton(virtualLabels.get(id),id));
+    return records.some(record => matchesCategory(record,id));
   };
   const relevantVideoIds = [
     'browse:video-official','browse:video-channel','browse:video-community',
@@ -304,7 +302,6 @@
   ];
   const site = makeGroup('サイト・SNS',siteGroupDefs.some(([,ids])=>ids.includes(category)));
   for(const [label, ids] of siteGroupDefs){
-    if(!ids.some(id => records.some(record => matchesCategory(record,id))))continue;
     const sub=makeGroup(label,ids.includes(category));
     for(const id of ids)appendAvailable(sub.children,id);
     site.children.append(sub.details);
