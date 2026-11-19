@@ -5,7 +5,7 @@
             <p class="mb-1 text-xs text-muted-ink">閲覧中のカテゴリー</p>
             <h1 id="selected-category" class="text-xl font-semibold sm:text-2xl">すべてのコンテンツ</h1>
           </div>
-          <div class="flex flex-wrap items-center gap-3"><p id="count" class="text-sm text-muted-ink" aria-live="polite"></p><label class="text-sm text-muted-ink">並び順 <select id="sort-order" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="コンテンツの並び順"><option value="newest">公開日：新しい順</option><option value="oldest">公開日：古い順</option><option value="title-asc">タイトル：昇順</option><option value="title-desc">タイトル：降順</option></select></label><label class="text-sm text-muted-ink">表示件数 <select id="page-size" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="1ページの表示件数"><option value="20">20件</option><option value="50">50件</option><option value="100">100件</option></select></label><div role="group" aria-label="リンク一覧の表示形式" class="inline-flex gap-1"><button type="button" data-catalog-view="grid" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="true">カード</button><button type="button" data-catalog-view="list" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="false">リスト</button></div></div>
+          <div class="flex flex-wrap items-center gap-3"><p id="count" class="text-sm text-muted-ink" aria-live="polite"></p><label class="text-sm text-muted-ink">並び順 <select id="sort-order" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="コンテンツの並び順"><option value="newest">公開日：新しい順</option><option value="oldest">公開日：古い順</option><option value="title-asc">タイトル：昇順</option><option value="title-desc">タイトル：降順</option><option value="views-desc">再生数：多い順</option><option value="views-asc">再生数：少ない順</option></select></label><label class="text-sm text-muted-ink">表示件数 <select id="page-size" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="1ページの表示件数"><option value="20">20件</option><option value="50">50件</option><option value="100">100件</option></select></label><div role="group" aria-label="リンク一覧の表示形式" class="inline-flex gap-1"><button type="button" data-catalog-view="grid" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="true">カード</button><button type="button" data-catalog-view="list" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="false">リスト</button></div></div>
         </div>
         <nav id="pagination-top" class="mb-4 flex flex-wrap items-center justify-center gap-2" aria-label="ページ切り替え（上部）"></nav>
         {{ $catalog := .Site.Data.public.catalog }}
@@ -58,7 +58,7 @@
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ .view_count | default "" }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ if eq .kind "social_profile" }}
                       {{ $avatar := .avatar_url | default "" }}
@@ -88,6 +88,7 @@
                     <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
                     {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
                     {{ with .published_at }}<p class="catalog-item-date mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
+                    {{ if and (eq .kind "video") (ne (printf "%v" (.view_count | default "")) "") }}<p class="catalog-item-views mt-1 text-xs text-muted-ink">再生数: {{ .view_count }}</p>{{ end }}
                     </div>
                   </article>
                 </li>
