@@ -82,6 +82,41 @@ html { line-height: 1.7; }
   }
   .catalog-list-view [data-catalog-item] article > div { padding: .3rem .5rem; }
 }
+/* SNSプロフィールは16:9サムネイルではなく丸いアバターを表示する */
+.catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 112px;
+  padding: .25rem;
+}
+.catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap img.social-avatar {
+  width: 64px;
+  height: 64px;
+  min-height: 0;
+  aspect-ratio: 1;
+  border-radius: 50%;
+}
+.catalog-list-view [data-kind="social_profile"] .social-avatar-placeholder {
+  width: 64px;
+  height: 64px;
+}
+.catalog-list-view .catalog-item-description.social-bio {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+  overflow-wrap: anywhere;
+  line-height: 1.4;
+}
+@media (max-width: 639px) {
+  .catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap { width: 88px; }
+  .catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap img.social-avatar,
+  .catalog-list-view [data-kind="social_profile"] .social-avatar-placeholder {
+    width: 48px;
+    height: 48px;
+  }
+}
 .catalog-view-button[aria-pressed="true"] { background: var(--panel-muted); color: var(--text); border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 
