@@ -327,6 +327,69 @@ test('view-count sorting: descending, ascending, missing-last and URL state', as
 });
 
 
+
+test('high view count: numeric rendering and sorting preserve the elephant video', async ({page}) => {
+  await openCatalog(page, '/?sort=views-desc');
+  const elephant=page.locator('[data-catalog-item][data-title*="象は鼻が長い"][data-view-count]').filter({
+    has: page.locator('a[href*="yzTqAU_kiKM"]')
+  }).first();
+  await expect(elephant).toHaveAttribute('data-view-count','1843230');
+  await expect(elephant.locator('.catalog-item-views')).toContainText('1,843,230');
+  const counts=await page.locator('[data-catalog-item][data-kind="video"][data-platform="youtube"]')
+    .evaluateAll(nodes=>nodes.map(n=>n.dataset.viewCount).filter(Boolean));
+  expect(counts.every(value=>/^\d+$/.test(value))).toBe(true);
+  expect(Math.max(...counts.map(Number))).toBeGreaterThanOrEqual(1843230);
+});
+
+test('search help article and combined publication-date range', async ({page}) => {
+  await openCatalog(page);
+  await expect(page.getByRole('link',{name:'検索の使い方を開く'}))
+    .toHaveAttribute('href',/\/posts\/search-guide\/$/);
+  await page.locator('#search-advanced summary').click();
+  await page.locator('#date-from').fill('2021-03-23');
+  await page.locator('#date-to').fill('2021-03-23');
+  await page.locator('#query').fill('象は鼻が長い');
+  await expect(page).toHaveURL(/from=2021-03-23/);
+  await expect(page).toHaveURL(/to=2021-03-23/);
+  await expect(page.locator('[data-catalog-item]:visible a[href*="yzTqAU_kiKM"]')).toHaveCount(1);
+  const dates=await page.locator('[data-catalog-item]:visible').evaluateAll(nodes=>
+    nodes.map(node=>node.dataset.publishedAt));
+  expect(dates.every(value=>value.startsWith('2021-03-23'))).toBe(true);
+  await page.locator('#date-field').selectOption('updated');
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(0);
+  await page.locator('#reset-advanced-search').click();
+  await expect(page).not.toHaveURL(/from=|to=|date_field=/);
+});
+
+test('person tags require explicit item relations and combine with dates', async ({page}) => {
+  await page.goto('/');
+  await page.setContent(
+    '<input id="query"><span id="selected-category"></span><span id="count"></span>' +
+    '<input id="date-from" type="date"><input id="date-to" type="date">' +
+    '<select id="date-field"><option value="published">公開日</option><option value="updated">更新日</option></select>' +
+    '<div id="person-filter-options"></div><button id="reset-advanced-search"></button>' +
+    '<div id="people-definitions" hidden><span data-person-id="person-a" data-label="出演者A"></span><span data-person-id="person-b" data-label="出演者B"></span></div>' +
+    '<div id="category-buttons"></div><div id="catalog">' +
+    '<div data-catalog-item data-title="動画A" data-search="動画A" data-kind="video" data-platform="youtube" data-person-ids="person-a" data-published-at="2020-01-01T00:00:00Z" data-view-count="1.84323e+06">動画A</div>' +
+    '<div data-catalog-item data-title="動画B" data-search="動画B" data-kind="video" data-platform="youtube" data-person-ids="person-b" data-published-at="2020-01-02T00:00:00Z" data-view-count="10">動画B</div>' +
+    '<div data-catalog-item data-title="動画C" data-search="動画C" data-kind="video" data-platform="youtube" data-published-at="2020-01-03T00:00:00Z" data-view-count="20">動画C</div>' +
+    '</div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>'
+  );
+  await page.addScriptTag({url:'/js/site.js'});
+  const order=()=>page.locator('[data-catalog-item]:visible').evaluateAll(nodes=>nodes.map(n=>n.dataset.title));
+  await page.locator('input[name="person"][value="person-a"]').check();
+  expect(await order()).toEqual(['動画A']);
+  await expect(page).toHaveURL(/people=person-a/);
+  await page.locator('input[name="person"][value="person-b"]').check();
+  expect((await order()).sort()).toEqual(['動画A','動画B']);
+  await page.locator('#date-from').fill('2020-01-02');
+  expect(await order()).toEqual(['動画B']);
+  await page.locator('#date-to').fill('2020-01-01');
+  expect(await order()).toEqual([]);
+  await page.locator('#reset-advanced-search').click();
+  expect(await order()).toEqual(['動画A','動画B','動画C']);
+});
+
 test('playlist directory: links, hierarchy and source channel suppression', async ({ page }) => {
   await openCatalog(page, '/?category=browse%3Aplaylists');
   const cards = page.locator('[data-playlist-card]:visible');
