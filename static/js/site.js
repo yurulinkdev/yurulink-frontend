@@ -33,22 +33,61 @@
     applyView(button.dataset.catalogView);
     try { localStorage.setItem(viewKey, button.dataset.catalogView); } catch { /* storage disabled */ }
   }));
+  // 関連付けは多対多。URLを再生成しても同じ分類を再現する。
   const categoryIds = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\s+/).filter(Boolean);
+  const records = items.map(item => ({
+    item,
+    ids: new Set(categoryIds(item)),
+    query: (item.dataset.search || '').toLocaleLowerCase('ja'),
+    title: item.dataset.title || '',
+    published: Date.parse(item.dataset.publishedAt || ''),
+    kind: item.dataset.kind || '',
+    platform: item.dataset.platform || '',
+    provenance: item.dataset.provenance || ''
+  }));
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
-    { label: node.dataset.label || node.dataset.categoryDefinition,
-      order: Number.isFinite(Number(node.dataset.order)) ? Number(node.dataset.order) : Number.MAX_SAFE_INTEGER }
+    {
+      label: node.dataset.label || node.dataset.categoryDefinition,
+      order: Number.isFinite(Number(node.dataset.order)) ? Number(node.dataset.order) : Number.MAX_SAFE_INTEGER,
+      type: node.dataset.categoryType || '',
+      kind: node.dataset.collectionKind || '',
+      channelName: node.dataset.channelName || ''
+    }
   ]));
-  const categories = [...new Set(items.flatMap(categoryIds))].map(id => {
-    const fallback = items.find(item => item.dataset.category === id);
-    const meta = categoryMetadata.get(id) || {
-      label: fallback?.dataset.categoryLabel || id,
-      order: fallback?.dataset.categoryOrder !== '' && Number.isFinite(Number(fallback?.dataset.categoryOrder))
-        ? Number(fallback.dataset.categoryOrder) : Number.MAX_SAFE_INTEGER
-    };
-    return [id, meta];
-  }).sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'))
-    .map(([id, meta]) => [id, meta.label]);
+  const primaryMeta = new Map();
+  for (const {item} of records) {
+    if (item.dataset.category && !primaryMeta.has(item.dataset.category)) {
+      primaryMeta.set(item.dataset.category, {
+        label: item.dataset.categoryLabel || item.dataset.category,
+        order: Number(item.dataset.categoryOrder) || Number.MAX_SAFE_INTEGER
+      });
+    }
+  }
+  const categories = [...new Set(records.flatMap(record => [...record.ids]))]
+    .map(id => [id, categoryMetadata.get(id) || primaryMeta.get(id) || {label:id, order:Number.MAX_SAFE_INTEGER}])
+    .sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'));
+  const categoryLabels = new Map(categories.map(([id, meta]) => [id, meta.label]));
+  const virtualLabels = new Map([
+    ['browse:video', 'YouTube動画（すべて）'],
+    ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
+    ['browse:social', 'SNSアカウント'],
+    ['browse:web-official', '公式ウェブサイト'],
+    ['browse:web-community', '非公式ウェブサイト'],
+    ['browse:web-other', 'その他ウェブサイト']
+  ]);
+  const matchesCategory = record => {
+    if (!category) return true;
+    if (record.ids.has(category)) return true;
+    if (category === 'browse:video') return record.kind === 'video' && record.platform === 'youtube';
+    if (category === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
+      && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
+    if (category === 'browse:social') return record.kind === 'social_profile';
+    if (category === 'browse:web-official') return record.kind === 'website' && record.provenance === 'official';
+    if (category === 'browse:web-community') return record.kind === 'website' && record.provenance === 'community';
+    if (category === 'browse:web-other') return record.kind === 'website' && record.provenance !== 'official' && record.provenance !== 'community';
+    return false;
+  };
   const makeButton = (label, value) => {
     const button = document.createElement('button');
     button.type = 'button';
@@ -63,21 +102,75 @@
     });
     return button;
   };
-  buttons?.append(makeButton('すべてのコンテンツ', ''));
-  if (categories.length) {
-    const group = document.createElement('details');
-    group.open = true;
-    group.className = 'mt-2';
+  const makeGroup = (label, open = false) => {
+    const details = document.createElement('details');
+    details.open = open;
+    details.className = 'mt-2';
     const summary = document.createElement('summary');
     summary.className = 'cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted';
-    summary.textContent = 'YouTubeチャンネル';
-    group.append(summary);
+    summary.textContent = label;
     const children = document.createElement('div');
     children.className = 'ml-3 border-l border-line pl-2';
-    categories.filter(([id]) => id.startsWith('youtube-channel:')).forEach(([id,label]) => children.append(makeButton(label,id)));
-    group.append(children);
-    if (children.childElementCount) buttons?.append(group);
-    categories.filter(([id]) => !id.startsWith('youtube-channel:')).forEach(([id,label]) => buttons?.append(makeButton(label,id)));
+    details.append(summary, children);
+    return {details, children};
+  };
+  const appendVirtual = (id) => {
+    if (records.some(record => {
+      const current = category;
+      category = id;
+      const found = matchesCategory(record);
+      category = current;
+      return found;
+    })) buttons?.append(makeButton(virtualLabels.get(id), id));
+  };
+  buttons?.append(makeButton('すべてのコンテンツ', ''));
+  appendVirtual('browse:video');
+  const channels = categories.filter(([id]) => id.startsWith('youtube-channel:'));
+  const playlists = categories.filter(([id]) => id.startsWith('youtube-playlist:'));
+  const channelByName = new Map();
+  const normalize = label => label.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ja');
+  for (const [id, meta] of channels) {
+    const name = normalize(meta.label);
+    channelByName.set(name, [...(channelByName.get(name) || []), id]);
+  }
+  const nested = new Map(channels.map(([id]) => [id, []]));
+  const ungrouped = [];
+  for (const playlist of playlists) {
+    // channel_nameは表示属性。名前一致が一意の場合に限り仮の階層へ配置する。
+    // channel_idを公開カタログで保持できた時点で安定IDによる紐付けに移行する。
+    const name = normalize(playlist[1].channelName || '');
+    const matches = name ? channelByName.get(name) || [] : [];
+    if (matches.length === 1) nested.get(matches[0]).push(playlist);
+    else ungrouped.push(playlist);
+  }
+  if (channels.length) {
+    const group = makeGroup('YouTubeチャンネル', true);
+    for (const [id, meta] of channels) {
+      const children = nested.get(id) || [];
+      const channel = makeGroup(meta.label, category === id || children.some(([playlistId]) => playlistId === category));
+      channel.details.classList.add('ml-1');
+      channel.children.append(makeButton('チャンネルの動画', id));
+      children.forEach(([playlistId, playlist]) => channel.children.append(makeButton(playlist.label, playlistId)));
+      group.children.append(channel.details);
+    }
+    buttons?.append(group.details);
+  }
+  if (ungrouped.length) {
+    const group = makeGroup('YouTubeチャンネルプレイリスト', ungrouped.some(([id]) => id === category));
+    ungrouped.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
+    buttons?.append(group.details);
+  }
+  appendVirtual('browse:single');
+  appendVirtual('browse:social');
+  appendVirtual('browse:web-official');
+  appendVirtual('browse:web-community');
+  appendVirtual('browse:web-other');
+  const known = new Set([...channels, ...playlists].map(([id]) => id));
+  const other = categories.filter(([id]) => !known.has(id));
+  if (other.length) {
+    const group = makeGroup('その他のカテゴリー', other.some(([id]) => id === category));
+    other.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
+    buttons?.append(group.details);
   }
   const renderPagination = pages => {
     for (const pagination of paginations) {
@@ -116,36 +209,38 @@
       add('次へ', page + 1, page === pages);
     }
   };
-  const timestamp = item => {
-    const raw = item.dataset.publishedAt || '';
-    const ms = Date.parse(raw);
-    return Number.isFinite(ms) ? ms : null;
-  };
   const compareItems = (a,b) => {
     if (sort.startsWith('title-')) {
-      const result = (a.dataset.title || '').localeCompare(b.dataset.title || '', 'ja');
+      const result = a.title.localeCompare(b.title, 'ja');
       return sort === 'title-asc' ? result : -result;
     }
-    const left = timestamp(a), right = timestamp(b);
-    if (left === null && right === null) return 0;
-    if (left === null) return 1;
-    if (right === null) return -1;
+    const left = a.published, right = b.published;
+    if (!Number.isFinite(left) && !Number.isFinite(right)) return 0;
+    if (!Number.isFinite(left)) return 1;
+    if (!Number.isFinite(right)) return -1;
     return sort === 'oldest' ? left - right : right - left;
   };
   const update = () => {
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = items.filter(item => (!category || categoryIds(item).includes(category)) && (item.dataset.search || '').toLocaleLowerCase('ja').includes(q)).sort(compareItems);
-    matching.forEach(item => catalog.append(item));
+    const matching = records.filter(record => matchesCategory(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
-    const visible = new Set(matching.slice((page-1)*pageSize,page*pageSize));
-    items.forEach(item => { item.hidden = !visible.has(item); });
-    if (selected) selected.textContent = categories.find(([id])=>id===category)?.[1] || 'すべてのコンテンツ';
+    const visible = matching.slice((page-1)*pageSize,page*pageSize).map(record => record.item);
+    const visibleSet = new Set(visible);
+    items.forEach(item => {
+      const hidden = !visibleSet.has(item);
+      if (item.hidden !== hidden) item.hidden = hidden;
+    });
+    // 以前は全3,000件超のDOMを毎回移動していた。表示対象（最大100件）だけ並べ替える。
+    const fragment = document.createDocumentFragment();
+    visible.forEach(item => fragment.append(item));
+    catalog.append(fragment);
+    if (selected) selected.textContent = categoryLabels.get(category) || virtualLabels.get(category) || 'すべてのコンテンツ';
     if (count) count.textContent = matching.length + ' 件 / 全 ' + items.length + ' 件';
     if (empty) empty.hidden = matching.length > 0 || items.length === 0;
     buttons?.querySelectorAll('button[data-category]').forEach(button => {
-      button.setAttribute('aria-current',String(button.dataset.category===category));
-      button.classList.toggle('bg-panel-muted',button.dataset.category===category);
+      button.setAttribute('aria-current', String(button.dataset.category === category));
+      button.classList.toggle('bg-panel-muted', button.dataset.category === category);
     });
     renderPagination(pages);
     const url = new URL(location.href);
