@@ -252,6 +252,8 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
   expect(labels).toContain('その他のプレイリスト');
 
   await page.locator('#category-buttons summary', {hasText:'ゆる言語学ラジオ'}).click();
+  // プレイリストはチャンネル内に一段追加したdetails配下にある。
+  await page.locator('#category-buttons summary', {hasText:'プレイリスト',exact:true}).first().click();
   await page.locator('button[data-category="youtube-playlist:nested"]').click();
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '番組動画');
