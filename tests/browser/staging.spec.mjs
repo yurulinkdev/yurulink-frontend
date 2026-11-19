@@ -258,9 +258,14 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '番組動画');
 
+  // 「SNSアカウント」はトップから撤去し、SNSプロフィールだけをその他カテゴリに残す。
+  await expect(page.locator('#category-buttons button[data-category="browse:social"]')).toHaveCount(0);
+  await expect(page.locator('#category-buttons button[data-category="social_profile"]')).toHaveCount(1);
+  await page.locator('#category-buttons summary', {hasText:'その他のカテゴリー'}).click();
+
   for (const [id, title] of [
     ['browse:single', '単発動画'],
-    ['browse:social', 'SNSプロフィール'],
+    ['social_profile', 'SNSプロフィール'],
     ['browse:web-official', '公式サイト'],
     ['browse:web-community', '非公式サイト'],
     ['browse:web-other', 'その他サイト']
@@ -414,4 +419,49 @@ test('channel playlist heading opens the link directory', async ({ page }) => {
   const cards = page.locator('[data-playlist-card]:visible');
   expect(await cards.count()).toBeGreaterThan(0);
   expect(await cards.count()).toBeLessThanOrEqual(20);
+});
+
+
+test('type filter is a native collapsible panel with visible chevron and persistent selection', async ({page}) => {
+  await openCatalog(page);
+  const filter = page.locator('#content-type-filter');
+  const heading = filter.locator('summary');
+  await expect(heading).toBeVisible();
+  await expect(filter.locator('.content-type-chevron')).toHaveCount(1);
+  await expect(filter).not.toHaveAttribute('open', '');
+  await expect(filter.getByRole('checkbox', {name:'プレイリスト'})).toBeHidden();
+
+  await heading.click();
+  await expect(filter).toHaveAttribute('open', '');
+  await filter.getByRole('checkbox', {name:'プレイリスト'}).check();
+  await expect(page).toHaveURL(/types=playlist/);
+  await expect(page.locator('#content-type-filter-status')).toHaveText('選択中：プレイリスト');
+  await heading.click();
+  await expect(filter).not.toHaveAttribute('open', '');
+  await expect(page.locator('#content-type-filter-status')).toContainText('プレイリスト');
+
+  await page.reload();
+  await expect(filter).toHaveAttribute('open', '');
+  await expect(filter.getByRole('checkbox', {name:'プレイリスト'})).toBeChecked();
+  await page.locator('#reset-content-type-filter').click();
+  await expect(page).not.toHaveURL(/types=/);
+  await expect(page.locator('#content-type-filter-status')).toHaveText('すべて表示');
+});
+
+test('sidebar keeps program categories without global type duplicates or virtual SNS', async ({page}) => {
+  await openCatalog(page);
+  const sidebar = page.locator('#category-buttons');
+  for (const id of ['browse:video','browse:playlists','browse:short','browse:live','browse:social']) {
+    await expect(sidebar.locator('button[data-category="' + id + '"]')).toHaveCount(0);
+  }
+  await expect(sidebar.getByRole('button', {name:'すべてのコンテンツ'})).toHaveCount(1);
+  await expect(sidebar.locator('button[data-category="social_profile"]')).toHaveCount(1);
+  await expect(sidebar.locator('summary', {hasText:'その他のカテゴリー'})).toHaveCount(1);
+
+  // 旧URLの直リンクはメニュー項目を削除しても動作させる。
+  await page.goto('/?category=browse%3Alive');
+  const formats = await page.locator('[data-catalog-item]:visible').evaluateAll(items =>
+    items.map(x => x.dataset.videoFormat));
+  expect(formats.length).toBeGreaterThan(0);
+  expect(formats.every(format => format === 'live')).toBe(true);
 });
