@@ -13,6 +13,9 @@
   const pageSizeSelect = document.getElementById('page-size');
   const buttons = document.getElementById('category-buttons');
   const typeCheckboxes = [...document.querySelectorAll('#content-type-filter input[name="content-type"]')];
+  const typeFilterDisclosure = document.getElementById('content-type-filter');
+  const typeFilterStatus = document.getElementById('content-type-filter-status');
+  const typeLabels = {video:'動画',playlist:'プレイリスト',short:'ショート',live:'ライブ'};
   const validTypes = ['video', 'playlist', 'short', 'live'];
   const parseTypes = query => new Set((query || '').split(',').filter(value => validTypes.includes(value)));
   const playlistTitle = document.getElementById('selected-category-title');
@@ -22,6 +25,7 @@
   let category = params.get('category') || '';
   let selectedTypes = parseTypes(params.get('types'));
   typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
+  if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
   let page = Math.max(1, Number.parseInt(params.get('page'), 10) || 1);
   let pageSize = [20,50,100].includes(Number(params.get('size'))) ? Number(params.get('size')) : 20;
   if (search) search.value = params.get('q') || '';
@@ -155,11 +159,8 @@
   const appendVirtual = id => {
     if (records.some(record => matchesCategory(record, id))) buttons?.append(makeButton(virtualLabels.get(id), id));
   };
+  // 全コンテンツの種類別横断表示は上部フィルタに集約し、重複したサイドバー項目を設けない。
   buttons?.append(makeButton('すべてのコンテンツ', ''));
-  appendVirtual('browse:video');
-  buttons?.append(makeButton(virtualLabels.get('browse:playlists'), 'browse:playlists'));
-  buttons?.append(makeButton(virtualLabels.get('browse:short'), 'browse:short'));
-  buttons?.append(makeButton(virtualLabels.get('browse:live'), 'browse:live'));
 
   // Book1の収集対象に存在しない投稿元チャンネルは、リンク所属を維持したままナビから除外する。
   // 例えば関連プレイリストに含まれる他者の演奏動画を独立番組として表示しない。
@@ -230,7 +231,7 @@
     buttons?.append(group.details);
   }
   appendVirtual('browse:single');
-  appendVirtual('browse:social');
+  // 「SNSアカウント」は「その他のカテゴリー > SNSプロフィール」と重複するためメニューから除外する。
   appendVirtual('browse:web-official');
   appendVirtual('browse:web-community');
   appendVirtual('browse:web-other');
@@ -298,6 +299,10 @@
     return sort === 'oldest' ? left - right : right - left;
   };
   const update = () => {
+    if (typeFilterStatus) {
+      const labels = validTypes.filter(type => selectedTypes.has(type)).map(type => typeLabels[type]);
+      typeFilterStatus.textContent = labels.length ? '選択中：' + labels.join('・') : 'すべて表示';
+    }
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
     const matching = records.filter(record => matchesCategory(record) && matchesType(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
@@ -362,6 +367,7 @@
     category=p.get('category')||'';
     selectedTypes = parseTypes(p.get('types'));
     typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
+    if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
     sort=validSorts.includes(p.get('sort')) ? p.get('sort') : 'newest';
     if (sortSelect) sortSelect.value=sort;
     if (search) search.value=p.get('q')||'';
