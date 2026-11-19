@@ -56,6 +56,10 @@
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
     provenance: item.dataset.provenance || '',
+    categoryId: item.dataset.category || '',
+    verified: item.dataset.classificationVerified === 'true',
+    videoRelation: item.dataset.videoRelation || '',
+    programLabels: item.dataset.programLabels || '',
     format: item.dataset.videoFormat || 'video',
     playlistId: item.dataset.playlistId || '',
     playlistChannelId: item.dataset.playlistChannelId || '',
@@ -93,10 +97,38 @@
     ['browse:live', 'ライブ（すべて）'],
     ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
     ['browse:social', 'SNSアカウント'],
-    ['browse:web-official', '公式ウェブサイト'],
-    ['browse:web-community', '非公式ウェブサイト'],
-    ['browse:web-other', 'その他ウェブサイト']
+    ['browse:web-official', '公式関連サイト'],
+    ['browse:web-community', '有志・非公式サイト'],
+    ['browse:web-other', '公式性未確認サイト'],
+    ['browse:social-official', '公式SNSアカウント'],
+    ['browse:social-community', '有志・非公式SNS'],
+    ['browse:social-other', '公式性未確認SNS'],
+    ['browse:video-official', '公式動画（確認済み）'],
+    ['browse:video-channel', '収集対象チャンネルの投稿'],
+    ['browse:video-community', '有志制作の動画'],
+    ['browse:video-open-mic', 'オープンマイク動画'],
+    ['browse:video-guest', 'ゲスト出演動画'],
+    ['browse:video-related', 'その他の関連動画（未確認）']
   ]);
+  // 手動確認済みIDとBook1収集対象の区別を保つ。登録チャンネル＝公式とは断定しない。
+  let registeredChannelIds = new Set();
+  const webKinds = new Set(['website','tool']);
+  const explicitlyReviewed = record => record.verified ||
+    ['official_site','community_site','official_social_profile','community_social_profile',
+     'official_video','community_video','open_mic_video','guest_video'].includes(record.categoryId);
+  const provenanceOf = record => explicitlyReviewed(record) ? record.provenance : 'unknown';
+  const isVideo = record => record.kind === 'video' && record.platform === 'youtube';
+  const videoRole = record => {
+    if (!isVideo(record)) return '';
+    const manual = record.videoRelation || '';
+    if (['official','community','open_mic','guest'].includes(manual)) return manual;
+    if (record.categoryId === 'official_video') return 'official';
+    if (record.categoryId === 'community_video') return 'community';
+    if (record.categoryId === 'open_mic_video') return 'open_mic';
+    if (record.categoryId === 'guest_video') return 'guest';
+    if (record.verified && record.provenance === 'official') return 'official';
+    return [...record.ids].some(id => registeredChannelIds.has(id)) ? 'channel' : 'related';
+  };
   // 再生種別は公開カタログのvideo_formatを優先する。推測で短尺動画をShortsと断定しない。
   const formatOf = record => record.kind === 'playlist' ? 'playlist'
     : record.kind === 'video' ? (record.format === 'short' || record.format === 'live' ? record.format : 'video')
@@ -125,9 +157,24 @@
     if (selectedCategory === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
       && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
     if (selectedCategory === 'browse:social') return record.kind === 'social_profile';
-    if (selectedCategory === 'browse:web-official') return record.kind === 'website' && record.provenance === 'official';
-    if (selectedCategory === 'browse:web-community') return record.kind === 'website' && record.provenance === 'community';
-    if (selectedCategory === 'browse:web-other') return record.kind === 'website' && record.provenance !== 'official' && record.provenance !== 'community';
+    if (selectedCategory === 'browse:web-official') return webKinds.has(record.kind) &&
+      (record.categoryId === 'official_site' || provenanceOf(record) === 'official');
+    if (selectedCategory === 'browse:web-community') return webKinds.has(record.kind) &&
+      (record.categoryId === 'community_site' || provenanceOf(record) === 'community');
+    if (selectedCategory === 'browse:web-other') return webKinds.has(record.kind) &&
+      !matchesCategory(record,'browse:web-official') && !matchesCategory(record,'browse:web-community');
+    if (selectedCategory === 'browse:social-official') return record.kind === 'social_profile' &&
+      (record.categoryId === 'official_social_profile' || provenanceOf(record) === 'official');
+    if (selectedCategory === 'browse:social-community') return record.kind === 'social_profile' &&
+      (record.categoryId === 'community_social_profile' || provenanceOf(record) === 'community');
+    if (selectedCategory === 'browse:social-other') return record.kind === 'social_profile' &&
+      !matchesCategory(record,'browse:social-official') && !matchesCategory(record,'browse:social-community');
+    if (selectedCategory === 'browse:video-official') return videoRole(record) === 'official';
+    if (selectedCategory === 'browse:video-channel') return videoRole(record) === 'channel';
+    if (selectedCategory === 'browse:video-community') return videoRole(record) === 'community';
+    if (selectedCategory === 'browse:video-open-mic') return videoRole(record) === 'open_mic';
+    if (selectedCategory === 'browse:video-guest') return videoRole(record) === 'guest';
+    if (selectedCategory === 'browse:video-related') return videoRole(record) === 'related';
     return false;
   };
   const makeButton = (label, value) => {
@@ -166,6 +213,7 @@
   // 例えば関連プレイリストに含まれる他者の演奏動画を独立番組として表示しない。
   const channels = categories.filter(([id, meta]) => id.startsWith('youtube-channel:')
     && meta.official !== false && !/^YouTube channel UC[A-Za-z0-9_-]{22}$/.test(meta.label));
+  registeredChannelIds = new Set(channels.map(([id]) => id));
   const playlists = categories.filter(([id]) => id.startsWith('youtube-playlist:'));
   const channelByName = new Map();
   const normalize = label => label.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ja');
@@ -230,17 +278,50 @@
     ungrouped.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
     buttons?.append(group.details);
   }
-  appendVirtual('browse:single');
-  // 「SNSアカウント」は「その他のカテゴリー > SNSプロフィール」と重複するためメニューから除外する。
-  appendVirtual('browse:web-official');
-  appendVirtual('browse:web-community');
-  appendVirtual('browse:web-other');
+  // 公式性の未確認データを自動で公式／有志扱いしない分類メニュー。
+  const appendAvailable = (container, id) => {
+    if (records.some(record => matchesCategory(record,id))) {
+      categoryLabels.set(id, virtualLabels.get(id));
+      container.append(makeButton(virtualLabels.get(id),id));
+      return true;
+    }
+    return false;
+  };
+  const relevantVideoIds = [
+    'browse:video-official','browse:video-channel','browse:video-community',
+    'browse:video-open-mic','browse:video-guest','browse:video-related'
+  ];
+  if (relevantVideoIds.some(id => records.some(record => matchesCategory(record,id)))) {
+    const group = makeGroup('動画の位置づけ', relevantVideoIds.includes(category));
+    for (const id of relevantVideoIds) appendAvailable(group.children,id);
+    buttons?.append(group.details);
+  }
+  const siteGroupDefs = [
+    ['公式関連',['browse:web-official','browse:social-official']],
+    ['有志・非公式',['browse:web-community','browse:social-community']],
+    ['公式性未確認',['browse:web-other','browse:social-other']]
+  ];
+  const site = makeGroup('サイト・SNS',siteGroupDefs.some(([,ids])=>ids.includes(category)));
+  for(const [label, ids] of siteGroupDefs){
+    if(!ids.some(id => records.some(record => matchesCategory(record,id))))continue;
+    const sub=makeGroup(label,ids.includes(category));
+    for(const id of ids)appendAvailable(sub.children,id);
+    site.children.append(sub.details);
+  }
+  if (site.children.childElementCount) buttons?.append(site.details);
+
+  // 記事・イベント・音声など、サイト/SNS/動画に該当しない既存の分類は残す。
   const known = new Set([...categories.filter(([id])=>id.startsWith('youtube-channel:')), ...playlists].map(([id]) => id));
-  // kind由来の汎用「動画」も種類フィルタと重複するため、その他カテゴリには掲載しない。
-  const other = categories.filter(([id]) => !known.has(id) && id !== 'video' && !id.startsWith('browse:'));
+  const siteLeafIds = new Set(['website','tool','social_profile','official_site','community_site','unverified_site',
+    'program_site','personal_site','facility_site','web_service','membership_service',
+    'official_social_profile','community_social_profile','unverified_social_profile','community',
+    'official_video','community_video','open_mic_video','guest_video','related_video_unverified',
+    'video_episode','video_playlist']);
+  const other = categories.filter(([id]) => !known.has(id) && id !== 'video' &&
+    !siteLeafIds.has(id) && !id.startsWith('browse:'));
   if (other.length) {
     const group = makeGroup('その他のカテゴリー', other.some(([id]) => id === category));
-    other.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
+    other.forEach(([id, meta]) => group.children.append(makeButton(meta.label,id)));
     buttons?.append(group.details);
   }
   const renderPagination = pages => {
