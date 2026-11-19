@@ -187,6 +187,8 @@ test('multiple category memberships: playlist and channel both filter the same i
   await page.addScriptTag({ url: '/js/site.js' });
   expect(errors).toEqual([]);
   await expect(page.locator('#category-buttons button[data-category="youtube-playlist:pl1"]')).toHaveText('特集[番組A]');
+  // 独立プレイリストは折りたたみグループの内側にある。
+  await page.locator('#category-buttons summary', { hasText: 'YouTubeチャンネルプレイリスト' }).click();
   await page.locator('#category-buttons button[data-category="youtube-playlist:pl1"]').click();
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '動画A');
