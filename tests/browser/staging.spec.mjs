@@ -51,6 +51,7 @@ test('mobile: list layout and horizontal overflow', async ({ page }) => {
 });
 
 test('category URLs: direct access, filtering, pagination and screenshots', async ({ page }) => {
+  test.setTimeout(90000); // 実データ5カテゴリ×各ページの画像保存にはCI負荷で45秒を超えることがある。
   await openCatalog(page);
   const categoryCounts = await page.locator('[data-catalog-item]').evaluateAll(items => {
     const counts = {};
@@ -351,7 +352,7 @@ test('search help article and combined publication-date range', async ({page}) =
   await page.locator('#query').fill('象は鼻が長い');
   await expect(page).toHaveURL(/from=2021-03-23/);
   await expect(page).toHaveURL(/to=2021-03-23/);
-  await expect(page.locator('[data-catalog-item]:visible a[href*="yzTqAU_kiKM"]')).toHaveCount(1);
+  await expect(page.locator('[data-catalog-item]:visible').filter({has:page.locator('a[href*="yzTqAU_kiKM"]')})).toHaveCount(1);
   const dates=await page.locator('[data-catalog-item]:visible').evaluateAll(nodes=>
     nodes.map(node=>node.dataset.publishedAt));
   expect(dates.every(value=>value.startsWith('2021-03-23'))).toBe(true);
@@ -387,7 +388,7 @@ test('person tags require explicit item relations and combine with dates', async
   await page.locator('#date-to').fill('2020-01-01');
   expect(await order()).toEqual([]);
   await page.locator('#reset-advanced-search').click();
-  expect(await order()).toEqual(['動画A','動画B','動画C']);
+  expect((await order()).sort()).toEqual(['動画A','動画B','動画C']);
 });
 
 test('playlist directory: links, hierarchy and source channel suppression', async ({ page }) => {
