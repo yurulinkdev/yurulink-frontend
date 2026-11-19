@@ -75,8 +75,8 @@
                         {{ $thumbnail := urls.Parse . }}
                         {{ if and (eq $thumbnail.Scheme "https") (eq $thumbnail.Host "i.ytimg.com") (not $thumbnail.User) }}
                           {{/* default.jpg (120x90)を引き伸ばさず、YouTubeの高解像度版を指定する。 */}}
-                          {{ $mq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\.(jpg|webp)$" "mqdefault.$2" . }}
-                          {{ $hq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\.(jpg|webp)$" "hqdefault.$2" . }}
+                          {{ $mq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\\.(jpg|webp)$" "mqdefault.$2" . }}
+                          {{ $hq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\\.(jpg|webp)$" "hqdefault.$2" . }}
                           <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="block">
                             <img src="{{ $mq | safeURL }}" srcset="{{ $mq | safeURL }} 320w, {{ $hq | safeURL }} 480w" sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 33vw" alt="" loading="lazy" decoding="async" width="480" height="270" class="aspect-video w-full bg-panel object-cover" referrerpolicy="no-referrer">
                           </a>
