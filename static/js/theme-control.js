@@ -24,6 +24,37 @@
     else if (restoreFocus?.isConnected) restoreFocus.focus();
   };
   if (drawer) drawer.inert = isMobile();
+  // モバイルの画面左端から右への水平スワイプで開く。縦スクロールとは干渉させない。
+  // iOSのブラウザ戻るジェスチャーと競合するため、右方向70px以上の明確な操作だけ判定する。
+  let swipeStart = null;
+  document.addEventListener('touchstart', event => {
+    if (!isMobile() || drawerOpen || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    if (touch.clientX > 28) return;
+    swipeStart = {x:touch.clientX, y:touch.clientY};
+  }, {passive:true});
+  document.addEventListener('touchend', event => {
+    if (!swipeStart) return;
+    const start = swipeStart;
+    swipeStart = null;
+    if (!isMobile() || drawerOpen || !event.changedTouches.length) return;
+    const touch = event.changedTouches[0];
+    if (touch.clientX - start.x >= 70 && Math.abs(touch.clientY - start.y) <= 50) toggle(true);
+  }, {passive:true});
+  document.addEventListener('touchcancel', () => { swipeStart = null; }, {passive:true});
+  // ドロワー表示中に左へスワイプした場合は閉じる。
+  let drawerSwipe = null;
+  drawer?.addEventListener('touchstart', event => {
+    if (!drawerOpen || event.touches.length !== 1) return;
+    const touch = event.touches[0];
+    drawerSwipe = {x:touch.clientX, y:touch.clientY};
+  }, {passive:true});
+  drawer?.addEventListener('touchend', event => {
+    if (!drawerSwipe || !event.changedTouches.length) return;
+    const start = drawerSwipe; drawerSwipe = null;
+    const touch = event.changedTouches[0];
+    if (touch.clientX - start.x <= -70 && Math.abs(touch.clientY - start.y) <= 50) toggle(false);
+  }, {passive:true});
   open?.addEventListener('click', () => toggle(true));
   close?.addEventListener('click', () => toggle(false));
   backdrop?.addEventListener('click', () => toggle(false));
