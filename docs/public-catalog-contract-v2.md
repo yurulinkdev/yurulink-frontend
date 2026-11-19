@@ -133,3 +133,18 @@
 - 投稿したカテゴリは審査前の提案。承認済みカテゴリは共通投稿マスターで管理し、Book4へ統合して公開カタログの `category_id` へ伝搬する。投稿者による公式性の自己申告だけで`classification_verified`を有効化しない。
 - 公式性と実体種別は別の情報軸：`kind`（website/social_profile/video等）、`provenance`（official/community/unknown）、`category_id`（大・小カテゴリの葉ID）、`video_relation`（ゲスト出演等）。YouTubeの収集データは関係動画の判定なしに公式扱いしない。
 - 不特定多数からの候補投稿に対する24時間後自動承認は、公式性を確定したことにはならない。誤分類リスクが高い公式性値の上書きは別途レビューロジックを持つ。Backend `docs/content-classification-policy.md` を参照。
+
+## キーワード・日付・出演者検索（2026-11-19）
+
+- 現行の文字列検索はブラウザ内で`data-search`を`toLocaleLowerCase('ja')`した値への**部分一致**。対象はタイトル、説明、掲載先、カテゴリ、関連番組名（プレイリストカードはタイトルとチャンネル名）。空白区切りのトークンAND検索・正規表現・あいまい検索・記事本文全文検索は実装していない。
+- キーワードは`q`クエリに反映。カテゴリー・種類・再生数ソート・ページネーションと組み合わせる。使い方はHugoの`content/posts/search-guide.md`、検索欄右端のHeroicons `question-mark-circle`から表示。
+- 詳細検索は検索欄横のHeroicons `funnel`で開くネイティブ`details`。公開日／更新日と開始日／終了日の組合せ、出演者タグ複数選択を持つ。クエリは`date_field=updated`（未指定は公開日）、`from=YYYY-MM-DD`、`to=YYYY-MM-DD`、`people=ID,ID`。条件間AND、出演者間OR。URLの戻る／進むと再表示に対応する。
+- `items[].published_at`はコンテンツ公開日、`items[].updated_at`は実際の内容更新日。`statistics_fetched_at`／`last_checked_at`は更新日ではない。更新日時の未設定Itemは更新日で範囲指定された場合には一致しない。
+- `people[]`（`id`,`name`）は確認済み出演者マスターの公開部分、`items[].person_ids[]`は公開可能な確認済み出演関係（多対多）。現在の実カタログに出演者マスタがない場合、フィルタには「出演者の確定データは現在準備中です」と表示。未確認の情報を推測登録しない。
+- 収集・審査の方式はBackend develop `docs/people-relations-design.md` を参照。Book1人物マスターとBook4の人・Item関係テーブルを提案しているが、実Sheetsタブ作成・同期連携は未完了。Frontend受入用スキーマ／UI実装を、全件データの割当完了と混同しない。
+
+## 再生数の表示不具合の対処（2026-11-19）
+
+- Green Book2 O列およびBook4の`payload_json.view_count`は正常な整数。例：動画 `youtube:yzTqAU_kiKM` の値`1843230`。
+- HugoのJSON数値を素の`{{ .view_count }}`でHTMLに出力すると、桁の大きな値が`1.84323e+06`となり、以前のJS正規表現`^\d+$`で無効扱いされていた。
+- 現在はHugo側で整数文字列`printf "%.0f" (float .view_count)`に正規化し、JSは指数表記も非負の安全な整数なら受容する。表示は`Intl.NumberFormat('ja-JP')`で`1,843,230`。欠損・非動画は再生数ソートで末尾。固定値と実カタログの検証をPlaywrightに追加。
