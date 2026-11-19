@@ -58,7 +58,7 @@
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ .view_count | default "" }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ if isset . "view_count" }}{{ .view_count }}{{ end }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ if eq .kind "social_profile" }}
                       {{ $avatar := .avatar_url | default "" }}
@@ -88,7 +88,7 @@
                     <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
                     {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
                     {{ with .published_at }}<p class="catalog-item-date mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
-                    {{ if and (eq .kind "video") (ne (printf "%v" (.view_count | default "")) "") }}<p class="catalog-item-views mt-1 text-xs text-muted-ink">再生数: {{ .view_count }}</p>{{ end }}
+                    {{ if and (eq .kind "video") (isset . "view_count") }}<p class="catalog-item-views mt-1 text-xs text-muted-ink">再生数: {{ .view_count }}</p>{{ end }}
                     </div>
                   </article>
                 </li>
