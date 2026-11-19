@@ -269,3 +269,25 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
   }
   expect(errors).toEqual([]);
 });
+
+test('view-count sorting: descending, ascending, missing-last and URL state', async ({ page }) => {
+  await page.goto('/');
+  await page.setContent(`
+    <input id="query"><span id="selected-category"></span><span id="count"></span>
+    <select id="sort-order"><option value="newest">新しい順</option><option value="views-desc">再生数：多い順</option><option value="views-asc">再生数：少ない順</option></select>
+    <div id="category-buttons"></div><div id="catalog">
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="youtube-channel:x" data-title="B" data-search="B" data-view-count="30">B</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="youtube-channel:x" data-title="A" data-search="A" data-view-count="2">A</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="youtube-channel:x" data-title="C" data-search="C" data-view-count="">C</div>
+      <div data-catalog-item data-kind="website" data-platform="web" data-category="website" data-title="D" data-search="D">D</div>
+    </div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
+  `);
+  await page.addScriptTag({ url: '/js/site.js' });
+  const order = () => page.locator('[data-catalog-item]:visible').evaluateAll(nodes => nodes.map(n => n.dataset.title));
+  await page.locator('#sort-order').selectOption('views-desc');
+  expect(await order()).toEqual(['B','A','C','D']);
+  await expect(page).toHaveURL(/sort=views-desc/);
+  await page.locator('#sort-order').selectOption('views-asc');
+  expect(await order()).toEqual(['A','B','C','D']);
+  await expect(page).toHaveURL(/sort=views-asc/);
+});
