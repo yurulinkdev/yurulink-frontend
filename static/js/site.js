@@ -167,7 +167,7 @@
     && meta.official !== false && !/^YouTube channel UC[A-Za-z0-9_-]{22}$/.test(meta.label));
   const playlists = categories.filter(([id]) => id.startsWith('youtube-playlist:'));
   const channelByName = new Map();
-  const normalize = label => label.normalize('NFKC').trim().replace(/\\s+/g, ' ').toLocaleLowerCase('ja');
+  const normalize = label => label.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ja');
   for (const [id, meta] of channels) {
     const name = normalize(meta.label);
     channelByName.set(name, [...(channelByName.get(name) || []), id]);
