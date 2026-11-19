@@ -29,6 +29,48 @@
   let page = Math.max(1, Number.parseInt(params.get('page'), 10) || 1);
   let pageSize = [20,50,100].includes(Number(params.get('size'))) ? Number(params.get('size')) : 20;
   if (search) search.value = params.get('q') || '';
+  const dateFieldControl = document.getElementById('date-field');
+  const dateFromControl = document.getElementById('date-from');
+  const dateToControl = document.getElementById('date-to');
+  const personFilterOptions = document.getElementById('person-filter-options');
+  const advancedDetails = document.getElementById('search-advanced');
+  const validCalendarDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value || '');
+  const initialDate = value => validCalendarDate(value) ? value : '';
+  let dateField = params.get('date_field') === 'updated' ? 'updated' : 'published';
+  let dateFrom = initialDate(params.get('from'));
+  let dateTo = initialDate(params.get('to'));
+  if (dateFieldControl) dateFieldControl.value = dateField;
+  if (dateFromControl) dateFromControl.value = dateFrom;
+  if (dateToControl) dateToControl.value = dateTo;
+  const peopleDefinitions = [...document.querySelectorAll('[data-person-id]')].map(node => ({
+    id: node.dataset.personId || '', name: node.dataset.label || ''
+  })).filter(person => person.id && person.name);
+  const peopleById = new Map(peopleDefinitions.map(person => [person.id, person.name]));
+  const parsePeople = query => new Set((query || '').split(',').filter(id => peopleById.has(id)));
+  let selectedPeople = parsePeople(params.get('people'));
+  let personCheckboxes = [];
+  if (personFilterOptions) {
+    if (!peopleDefinitions.length) {
+      const p = document.createElement('p');
+      p.textContent = '出演者の確定データは現在準備中です。';
+      p.className = 'text-muted-ink';
+      personFilterOptions.append(p);
+    } else {
+      for (const person of peopleDefinitions) {
+        const label = document.createElement('label');
+        label.className = 'flex items-center gap-2';
+        const input = document.createElement('input');
+        input.type = 'checkbox';
+        input.value = person.id;
+        input.name = 'person';
+        input.checked = selectedPeople.has(person.id);
+        label.append(input, document.createTextNode(person.name));
+        personFilterOptions.append(label);
+        personCheckboxes.push(input);
+      }
+    }
+  }
+  if ((dateFrom || dateTo || selectedPeople.size) && advancedDetails) advancedDetails.open = true;
   if (sortSelect) sortSelect.value = sort;
   if (pageSizeSelect) pageSizeSelect.value = String(pageSize);
   const viewKey = 'yurulink-catalog-view';
@@ -60,6 +102,9 @@
     query: (item.dataset.search || '').toLocaleLowerCase('ja'),
     title: item.dataset.title || '',
     published: Date.parse(item.dataset.publishedAt || ''),
+    publishedDate: (item.dataset.publishedAt || '').slice(0, 10),
+    updatedDate: (item.dataset.updatedAt || '').slice(0, 10),
+    personIds: new Set((item.dataset.personIds || '').split(/\s+/).filter(Boolean)),
     views: parseViewCount(item.dataset.viewCount),
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
@@ -412,13 +457,23 @@
     if (!Number.isFinite(right)) return -1;
     return sort === 'oldest' ? left - right : right - left;
   };
+  const matchesAdvanced = record => {
+    if (dateFrom || dateTo) {
+      const date = dateField === 'updated' ? record.updatedDate : record.publishedDate;
+      if (!validCalendarDate(date)) return false;
+      if (dateFrom && date < dateFrom) return false;
+      if (dateTo && date > dateTo) return false;
+    }
+    if (selectedPeople.size && ![...selectedPeople].some(id => record.personIds.has(id))) return false;
+    return true;
+  };
   const update = () => {
     if (typeFilterStatus) {
       const labels = validTypes.filter(type => selectedTypes.has(type)).map(type => typeLabels[type]);
       typeFilterStatus.textContent = labels.length ? '選択中：' + labels.join('・') : 'すべて表示';
     }
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && record.query.includes(q)).sort(compareItems);
+    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
     const visible = matching.slice((page-1)*pageSize,page*pageSize).map(record => record.item);
@@ -456,7 +511,7 @@
     });
     renderPagination(pages);
     const url = new URL(location.href);
-    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')]]) {
+    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')],['date_field',dateField==='updated'?'updated':''],['from',dateFrom],['to',dateTo],['people',peopleDefinitions.filter(person=>selectedPeople.has(person.id)).map(person=>person.id).join(',')]]) {
       if (value) url.searchParams.set(key,value);
       else url.searchParams.delete(key);
     }
@@ -473,6 +528,21 @@
     page = 1;
     update();
   });
+  dateFieldControl?.addEventListener('change',()=>{dateField=dateFieldControl.value==='updated'?'updated':'published';page=1;update();});
+  dateFromControl?.addEventListener('change',()=>{dateFrom=initialDate(dateFromControl.value);page=1;update();});
+  dateToControl?.addEventListener('change',()=>{dateTo=initialDate(dateToControl.value);page=1;update();});
+  personCheckboxes.forEach(input=>input.addEventListener('change',()=>{
+    selectedPeople = new Set(personCheckboxes.filter(el=>el.checked).map(el=>el.value));
+    page=1;update();
+  }));
+  document.getElementById('reset-advanced-search')?.addEventListener('click',()=>{
+    dateField='published';dateFrom='';dateTo='';selectedPeople.clear();
+    if(dateFieldControl)dateFieldControl.value=dateField;
+    if(dateFromControl)dateFromControl.value='';
+    if(dateToControl)dateToControl.value='';
+    personCheckboxes.forEach(input=>{input.checked=false;});
+    page=1;update();
+  });
   sortSelect?.addEventListener('change',()=>{sort=sortSelect.value;page=1;update();});
   search?.addEventListener('input',()=>{page=1;update();});
   pageSizeSelect?.addEventListener('change',()=>{pageSize=Number(pageSizeSelect.value);page=1;update();});
@@ -485,6 +555,14 @@
     sort=validSorts.includes(p.get('sort')) ? p.get('sort') : 'newest';
     if (sortSelect) sortSelect.value=sort;
     if (search) search.value=p.get('q')||'';
+    dateField=p.get('date_field')==='updated'?'updated':'published';
+    dateFrom=initialDate(p.get('from'));dateTo=initialDate(p.get('to'));
+    selectedPeople=parsePeople(p.get('people'));
+    if(dateFieldControl)dateFieldControl.value=dateField;
+    if(dateFromControl)dateFromControl.value=dateFrom;
+    if(dateToControl)dateToControl.value=dateTo;
+    personCheckboxes.forEach(input=>{input.checked=selectedPeople.has(input.value);});
+    if ((dateFrom||dateTo||selectedPeople.size)&&advancedDetails)advancedDetails.open=true;
     page=Math.max(1,Number.parseInt(p.get('page'),10)||1);
     pageSize=[20,50,100].includes(Number(p.get('size'))) ? Number(p.get('size')) : 20;
     if (pageSizeSelect) pageSizeSelect.value=String(pageSize);
