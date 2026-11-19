@@ -5,6 +5,6 @@ enableRobotsTXT = true
 
 [params]
 # ブランド素材の確定SVGが配置された段階で、公開パスを指定する。
-brandLogo = ""
+brand_logo = ""
 # サイドバーの注記。空欄は表示しない。審査ポリシーそのものは変更しない。
-sidebarNotice = ""
+sidebar_notice = ""
