@@ -5,7 +5,13 @@
     "uncategorized_id": "uncategorized",
     "tags": "zero_or_more",
     "submitted_classification": "suggestion_only",
-    "public_classification": "admin_approved_only"
+    "public_classification": "admin_approved_only",
+    "provenance_values": [
+      "official",
+      "community",
+      "unknown"
+    ],
+    "provenance_rule": "reviewer_verified_only"
   },
   "categories": [
     {
@@ -31,6 +37,18 @@
         {
           "id": "membership_service",
           "label": "会員サービス"
+        },
+        {
+          "id": "official_site",
+          "label": "公式関連サイト"
+        },
+        {
+          "id": "community_site",
+          "label": "有志・非公式サイト"
+        },
+        {
+          "id": "unverified_site",
+          "label": "公式性未確認サイト"
         }
       ]
     },
@@ -45,6 +63,18 @@
         {
           "id": "community",
           "label": "コミュニティ・交流先"
+        },
+        {
+          "id": "official_social_profile",
+          "label": "公式SNSアカウント"
+        },
+        {
+          "id": "community_social_profile",
+          "label": "有志・非公式SNSアカウント"
+        },
+        {
+          "id": "unverified_social_profile",
+          "label": "公式性未確認SNSアカウント"
         }
       ]
     },
@@ -105,6 +135,26 @@
         {
           "id": "video_playlist",
           "label": "動画プレイリスト"
+        },
+        {
+          "id": "official_video",
+          "label": "公式動画（確認済み）"
+        },
+        {
+          "id": "community_video",
+          "label": "有志制作の動画"
+        },
+        {
+          "id": "open_mic_video",
+          "label": "オープンマイク動画"
+        },
+        {
+          "id": "guest_video",
+          "label": "ゲスト出演の動画"
+        },
+        {
+          "id": "related_video_unverified",
+          "label": "関連動画（公式性未確認）"
         }
       ]
     },
