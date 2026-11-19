@@ -1,6 +1,6 @@
 # YuruLink 公開カタログ仕様 — 統合形式
 
-**状態：統合形式を正式採用。** フロントエンドの読み込み処理はstagingに実装済みです。バックエンドからの全件自動配信と実データ結合検証は未完了です。内部の `schema_version: 2` は機械的な識別子として維持します。
+**状態：統合形式を正式採用。** フロントエンドの読み込み処理はstagingに実装済みです。2026-11-19にBackendのBook1/2/Green Book4から3,185件の統合カタログを生成し、stagingへ実配送、Hugo・Cloudflare Preview・Playwright Chromium 8件の検証に成功しました。通常の12時間定期配信およびProductionの初期有効化は未実施です。内部の `schema_version: 2` は機械的な識別子として維持します。
 
 ## 対象と分類
 
@@ -70,4 +70,4 @@
 - YouTubeチャンネルの表示名は `programs[].name` をそのまま使う。
 - プレイリストは `collections[].title` と `collections[].channel_name` から `プレイリスト名[チャンネル名]` を表示する。チャンネル名が未解決の場合はプレイリスト名のみとし、架空のチャンネル名を補わない。
 - `channel_name` はYouTube側の所属チャンネルを示す表示用属性で、`program_id`（番組の編集分類）と混同しない。
-- Backendの開発ブランチでは、Book1の行順からorderを、解決済みのchannel_titleからchannel_nameを出力する処理を実装済み。Frontend stagingは複数所属のカテゴリー絞り込みに対応している。実Book1/Book2を用いた結合検証、Book4書き込み、Frontendへの自動配信は未完了。
+- Backend developのBook1行順とchannel_titleからorder/channel_nameを生成し、Green Book4を含む3,185件の結合・書込・再実行差分0件を実証済み。Frontend stagingは複数所属カテゴリーの絞り込み・ページネーションを含む8件のPlaywrightテストに成功。main/Productionへの反映は承認待ち。
