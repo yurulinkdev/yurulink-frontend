@@ -193,6 +193,8 @@ test('multiple category memberships: playlist and channel both filter the same i
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '動画A');
   await expect(page).toHaveURL(/category=youtube-playlist/);
+  // チャンネル項目も二段階の折りたたみ配下にある。
+  await page.locator('#category-buttons summary', { hasText: '番組A', exact: true }).click();
   await page.locator('#category-buttons button[data-category="youtube-channel:one"]').click();
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(2);
 });
