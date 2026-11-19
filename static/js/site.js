@@ -12,9 +12,16 @@
   let sort = validSorts.includes(new URL(location.href).searchParams.get('sort')) ? new URL(location.href).searchParams.get('sort') : 'newest';
   const pageSizeSelect = document.getElementById('page-size');
   const buttons = document.getElementById('category-buttons');
+  const typeCheckboxes = [...document.querySelectorAll('#content-type-filter input[name="content-type"]')];
+  const validTypes = ['video', 'playlist', 'short', 'live'];
+  const parseTypes = query => new Set((query || '').split(',').filter(value => validTypes.includes(value)));
+  const playlistTitle = document.getElementById('selected-category-title');
+  const playlistTitleLink = document.getElementById('playlist-title-link');
   const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
   const params = new URL(location.href).searchParams;
   let category = params.get('category') || '';
+  let selectedTypes = parseTypes(params.get('types'));
+  typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
   let page = Math.max(1, Number.parseInt(params.get('page'), 10) || 1);
   let pageSize = [20,50,100].includes(Number(params.get('size'))) ? Number(params.get('size')) : 20;
   if (search) search.value = params.get('q') || '';
@@ -44,7 +51,11 @@
     views: /^\d+$/.test(item.dataset.viewCount || '') ? Number(item.dataset.viewCount) : null,
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
-    provenance: item.dataset.provenance || ''
+    provenance: item.dataset.provenance || '',
+    format: item.dataset.videoFormat || 'video',
+    playlistId: item.dataset.playlistId || '',
+    playlistChannelId: item.dataset.playlistChannelId || '',
+    playlistChannelName: item.dataset.playlistChannelName || ''
   }));
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
@@ -53,7 +64,9 @@
       order: Number.isFinite(Number(node.dataset.order)) ? Number(node.dataset.order) : Number.MAX_SAFE_INTEGER,
       type: node.dataset.categoryType || '',
       kind: node.dataset.collectionKind || '',
-      channelName: node.dataset.channelName || ''
+      channelName: node.dataset.channelName || '',
+      channelId: node.dataset.channelId || '',
+      official: node.dataset.officialChannel === 'false' ? false : true
     }
   ]));
   const primaryMeta = new Map();
@@ -71,16 +84,40 @@
   const categoryLabels = new Map(categories.map(([id, meta]) => [id, meta.label]));
   const virtualLabels = new Map([
     ['browse:video', 'YouTube動画（すべて）'],
+    ['browse:playlists', 'プレイリスト（すべて）'],
+    ['browse:short', 'ショート（すべて）'],
+    ['browse:live', 'ライブ（すべて）'],
     ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
     ['browse:social', 'SNSアカウント'],
     ['browse:web-official', '公式ウェブサイト'],
     ['browse:web-community', '非公式ウェブサイト'],
     ['browse:web-other', 'その他ウェブサイト']
   ]);
+  // 再生種別は公開カタログのvideo_formatを優先する。推測で短尺動画をShortsと断定しない。
+  const formatOf = record => record.kind === 'playlist' ? 'playlist'
+    : record.kind === 'video' ? (record.format === 'short' || record.format === 'live' ? record.format : 'video')
+    : 'other';
+  const matchesType = record => !selectedTypes.size || selectedTypes.has(formatOf(record));
   const matchesCategory = (record, selectedCategory = category) => {
     if (!selectedCategory) return true;
-    if (record.ids.has(selectedCategory)) return true;
+    if (selectedCategory === 'browse:playlists') return record.kind === 'playlist';
     if (selectedCategory === 'browse:video') return record.kind === 'video' && record.platform === 'youtube';
+    if (selectedCategory === 'browse:short') return formatOf(record) === 'short';
+    if (selectedCategory === 'browse:live') return formatOf(record) === 'live';
+    if (selectedCategory.startsWith('browse:playlists:')) {
+      return record.kind === 'playlist' && record.playlistChannelId === selectedCategory.slice('browse:playlists:'.length);
+    }
+    if (selectedCategory.startsWith('browse:short:')) {
+      const id = selectedCategory.slice('browse:short:'.length);
+      return formatOf(record) === 'short' && record.ids.has(id);
+    }
+    if (selectedCategory.startsWith('browse:live:')) {
+      const id = selectedCategory.slice('browse:live:'.length);
+      return formatOf(record) === 'live' && record.ids.has(id);
+    }
+    // プレイリストそのものは一覧画面、個別プレイリストは所属動画を表示する。
+    if (record.kind === 'playlist' && selectedCategory.startsWith('youtube-playlist:')) return false;
+    if (record.ids.has(selectedCategory)) return true;
     if (selectedCategory === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
       && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
     if (selectedCategory === 'browse:social') return record.kind === 'social_profile';
@@ -120,38 +157,65 @@
   };
   buttons?.append(makeButton('すべてのコンテンツ', ''));
   appendVirtual('browse:video');
-  const channels = categories.filter(([id]) => id.startsWith('youtube-channel:'));
+  buttons?.append(makeButton(virtualLabels.get('browse:playlists'), 'browse:playlists'));
+  buttons?.append(makeButton(virtualLabels.get('browse:short'), 'browse:short'));
+  buttons?.append(makeButton(virtualLabels.get('browse:live'), 'browse:live'));
+
+  // Book1の収集対象に存在しない投稿元チャンネルは、リンク所属を維持したままナビから除外する。
+  // 例えば関連プレイリストに含まれる他者の演奏動画を独立番組として表示しない。
+  const channels = categories.filter(([id, meta]) => id.startsWith('youtube-channel:')
+    && meta.official !== false && !/^YouTube channel UC[A-Za-z0-9_-]{22}$/.test(meta.label));
   const playlists = categories.filter(([id]) => id.startsWith('youtube-playlist:'));
   const channelByName = new Map();
-  const normalize = label => label.normalize('NFKC').trim().replace(/\s+/g, ' ').toLocaleLowerCase('ja');
+  const normalize = label => label.normalize('NFKC').trim().replace(/\\s+/g, ' ').toLocaleLowerCase('ja');
   for (const [id, meta] of channels) {
     const name = normalize(meta.label);
     channelByName.set(name, [...(channelByName.get(name) || []), id]);
   }
   const nested = new Map(channels.map(([id]) => [id, []]));
   const ungrouped = [];
-  for (const playlist of playlists) {
-    // channel_nameは表示属性。名前一致が一意の場合に限り仮の階層へ配置する。
-    // channel_idを公開カタログで保持できた時点で安定IDによる紐付けに移行する。
-    const name = normalize(playlist[1].channelName || '');
-    const matches = name ? channelByName.get(name) || [] : [];
-    if (matches.length === 1) nested.get(matches[0]).push(playlist);
-    else ungrouped.push(playlist);
+  const playlistChannels = new Map();
+  for (const [id, meta] of playlists) {
+    const explicit = meta.channelId ? 'youtube-channel:' + meta.channelId : '';
+    const name = normalize(meta.channelName || '');
+    const matches = explicit && nested.has(explicit) ? [explicit]
+      : name ? channelByName.get(name) || [] : [];
+    if (matches.length === 1) {
+      nested.get(matches[0]).push([id, meta]);
+      playlistChannels.set(id, matches[0]);
+    } else {
+      ungrouped.push([id, meta]);
+    }
   }
+  for (const record of records) {
+    if (record.kind !== 'playlist') continue;
+    const id = record.playlistId ? 'youtube-playlist:' + record.playlistId : '';
+    const parent = playlistChannels.get(id);
+    if (parent) record.playlistChannelId = parent;
+  }
+
   if (channels.length) {
     const group = makeGroup('YouTubeチャンネル', true);
     for (const [id, meta] of channels) {
       const children = nested.get(id) || [];
-      const channel = makeGroup(meta.label, category === id || children.some(([playlistId]) => playlistId === category));
+      const channel = makeGroup(meta.label, category === id ||
+        [`browse:playlists:${id}`,`browse:short:${id}`,`browse:live:${id}`].includes(category) ||
+        children.some(([playlistId]) => playlistId === category));
       channel.details.classList.add('ml-1');
-      channel.children.append(makeButton('チャンネルの動画', id));
-      children.forEach(([playlistId, playlist]) => channel.children.append(makeButton(playlist.label, playlistId)));
+      channel.children.append(makeButton('動画', id));
+      const playlistGroup = makeGroup('プレイリスト', category === `browse:playlists:${id}` ||
+        children.some(([playlistId]) => playlistId === category));
+      playlistGroup.children.append(makeButton('プレイリスト一覧', `browse:playlists:${id}`));
+      children.forEach(([playlistId, playlist]) => playlistGroup.children.append(makeButton(playlist.label, playlistId)));
+      channel.children.append(playlistGroup.details);
+      channel.children.append(makeButton('ショート', `browse:short:${id}`));
+      channel.children.append(makeButton('ライブ', `browse:live:${id}`));
       group.children.append(channel.details);
     }
     buttons?.append(group.details);
   }
   if (ungrouped.length) {
-    const group = makeGroup('YouTubeチャンネルプレイリスト', ungrouped.some(([id]) => id === category));
+    const group = makeGroup('その他のプレイリスト', ungrouped.some(([id]) => id === category));
     ungrouped.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
     buttons?.append(group.details);
   }
@@ -160,8 +224,8 @@
   appendVirtual('browse:web-official');
   appendVirtual('browse:web-community');
   appendVirtual('browse:web-other');
-  const known = new Set([...channels, ...playlists].map(([id]) => id));
-  const other = categories.filter(([id]) => !known.has(id));
+  const known = new Set([...categories.filter(([id])=>id.startsWith('youtube-channel:')), ...playlists].map(([id]) => id));
+  const other = categories.filter(([id]) => !known.has(id) && !id.startsWith('browse:'));
   if (other.length) {
     const group = makeGroup('その他のカテゴリー', other.some(([id]) => id === category));
     other.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
@@ -225,7 +289,7 @@
   };
   const update = () => {
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = records.filter(record => matchesCategory(record) && record.query.includes(q)).sort(compareItems);
+    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
     const visible = matching.slice((page-1)*pageSize,page*pageSize).map(record => record.item);
@@ -238,7 +302,23 @@
     const fragment = document.createDocumentFragment();
     visible.forEach(item => fragment.append(item));
     catalog.append(fragment);
-    if (selected) selected.textContent = categoryLabels.get(category) || virtualLabels.get(category) || 'すべてのコンテンツ';
+    const label = categoryLabels.get(category) || virtualLabels.get(category)
+      || (category.startsWith('browse:playlists:') ? 'プレイリスト一覧' : '')
+      || (category.startsWith('browse:short:') ? 'ショート' : '')
+      || (category.startsWith('browse:live:') ? 'ライブ' : '')
+      || 'すべてのコンテンツ';
+    if (playlistTitle) playlistTitle.textContent = label;
+    else if (selected) selected.textContent = label;
+    const playlistId = category.startsWith('youtube-playlist:') ? category.slice('youtube-playlist:'.length) : '';
+    if (playlistTitle && playlistTitleLink) {
+      const external = /^[A-Za-z0-9_-]{2,100}$/.test(playlistId);
+      playlistTitle.hidden = external;
+      playlistTitleLink.hidden = !external;
+      if (external) {
+        playlistTitleLink.textContent = label + ' ↗';
+        playlistTitleLink.href = 'https://www.youtube.com/playlist?list=' + encodeURIComponent(playlistId);
+      }
+    }
     if (count) count.textContent = matching.length + ' 件 / 全 ' + items.length + ' 件';
     if (empty) empty.hidden = matching.length > 0 || items.length === 0;
     buttons?.querySelectorAll('button[data-category]').forEach(button => {
@@ -247,18 +327,31 @@
     });
     renderPagination(pages);
     const url = new URL(location.href);
-    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort]]) {
+    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')]]) {
       if (value) url.searchParams.set(key,value);
       else url.searchParams.delete(key);
     }
     history.replaceState(null,'',url);
   };
+  typeCheckboxes.forEach(input => input.addEventListener('change', () => {
+    selectedTypes = new Set(typeCheckboxes.filter(el => el.checked).map(el => el.value));
+    page = 1;
+    update();
+  }));
+  document.getElementById('reset-content-type-filter')?.addEventListener('click', () => {
+    selectedTypes.clear();
+    typeCheckboxes.forEach(input => { input.checked = false; });
+    page = 1;
+    update();
+  });
   sortSelect?.addEventListener('change',()=>{sort=sortSelect.value;page=1;update();});
   search?.addEventListener('input',()=>{page=1;update();});
   pageSizeSelect?.addEventListener('change',()=>{pageSize=Number(pageSizeSelect.value);page=1;update();});
   window.addEventListener('popstate',()=>{
     const p = new URL(location.href).searchParams;
     category=p.get('category')||'';
+    selectedTypes = parseTypes(p.get('types'));
+    typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
     sort=validSorts.includes(p.get('sort')) ? p.get('sort') : 'newest';
     if (sortSelect) sortSelect.value=sort;
     if (search) search.value=p.get('q')||'';
