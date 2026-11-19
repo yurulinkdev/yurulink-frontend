@@ -46,13 +46,21 @@
   }));
   // 関連付けは多対多。URLを再生成しても同じ分類を再現する。
   const categoryIds = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\s+/).filter(Boolean);
+  // Go/Hugoが科学的記数法で出力した既存HTMLも整数として比較する。
+  const parseViewCount = value => {
+    const raw = String(value ?? '').trim();
+    if (!/^\d+(?:\.\d+)?(?:[eE][+-]?\d+)?$/.test(raw)) return null;
+    const numeric = Number(raw);
+    return Number.isSafeInteger(numeric) && numeric >= 0 ? numeric : null;
+  };
+  const formatViewCount = new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 0 });
   const records = items.map(item => ({
     item,
     ids: new Set(categoryIds(item)),
     query: (item.dataset.search || '').toLocaleLowerCase('ja'),
     title: item.dataset.title || '',
     published: Date.parse(item.dataset.publishedAt || ''),
-    views: /^\d+$/.test(item.dataset.viewCount || '') ? Number(item.dataset.viewCount) : null,
+    views: parseViewCount(item.dataset.viewCount),
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
     provenance: item.dataset.provenance || '',
@@ -65,6 +73,12 @@
     playlistChannelId: item.dataset.playlistChannelId || '',
     playlistChannelName: item.dataset.playlistChannelName || ''
   }));
+  // 数値フォーマットをDOM生成時に統一する。
+  records.forEach(({item,views,kind,platform}) => {
+    const node = item.querySelector('.catalog-item-views');
+    if (!node || kind !== 'video' || platform !== 'youtube') return;
+    node.textContent = views === null ? '再生数: 未取得' : '再生数: ' + formatViewCount.format(views);
+  });
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
     {
