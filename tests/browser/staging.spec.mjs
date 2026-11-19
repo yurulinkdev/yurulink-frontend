@@ -404,11 +404,9 @@ test('real metadata: live and identified Shorts filters are available', async ({
 
 test('channel playlist heading opens the link directory', async ({ page }) => {
   await openCatalog(page);
-  const channel = page.locator('#category-buttons details').filter({
-    has: page.locator('button[data-category^="browse:playlists:"]')
-  }).first();
-  await channel.locator('summary').first().click();
-  const summary = channel.locator('details > summary', {hasText:'プレイリスト'}).first();
+  const channel = page.locator('#category-buttons details > div > details > summary').first();
+  await channel.click();
+  const summary = page.locator('#category-buttons details details details > summary', {hasText:'プレイリスト'}).first();
   await summary.click();
   await expect(page).toHaveURL(/category=browse%3Aplaylists%3A/);
   const cards = page.locator('[data-playlist-card]:visible');
