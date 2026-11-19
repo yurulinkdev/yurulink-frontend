@@ -345,6 +345,8 @@ test('playlist directory: links, hierarchy and source channel suppression', asyn
 
 test('type filter: multi-select and URL restoration', async ({ page }) => {
   await openCatalog(page);
+  // 初期状態は折りたたまれるため、チェックボックス操作の前に明示的に展開する。
+  await page.locator('#content-type-filter summary').click();
   await page.locator('#content-type-filter input[value="playlist"]').check();
   await expect(page).toHaveURL(/types=playlist/);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
