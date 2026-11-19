@@ -203,9 +203,19 @@
         children.some(([playlistId]) => playlistId === category));
       channel.details.classList.add('ml-1');
       channel.children.append(makeButton('動画', id));
-      const playlistGroup = makeGroup('プレイリスト', category === `browse:playlists:${id}` ||
+      const playlistCategory = `browse:playlists:${id}`;
+      categoryLabels.set(playlistCategory, meta.label + 'のプレイリスト');
+      categoryLabels.set(`browse:short:${id}`, meta.label + 'のショート');
+      categoryLabels.set(`browse:live:${id}`, meta.label + 'のライブ');
+      const playlistGroup = makeGroup('プレイリスト', category === playlistCategory ||
         children.some(([playlistId]) => playlistId === category));
-      playlistGroup.children.append(makeButton('プレイリスト一覧', `browse:playlists:${id}`));
+      // プレイリスト見出し自体を選んでも、リンク一覧へ切り替える。
+      playlistGroup.details.querySelector('summary')?.addEventListener('click', () => {
+        category = playlistCategory;
+        page = 1;
+        update();
+      });
+      playlistGroup.children.append(makeButton('プレイリスト一覧', playlistCategory));
       children.forEach(([playlistId, playlist]) => playlistGroup.children.append(makeButton(playlist.label, playlistId)));
       channel.children.append(playlistGroup.details);
       channel.children.append(makeButton('ショート', `browse:short:${id}`));
