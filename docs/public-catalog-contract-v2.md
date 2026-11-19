@@ -124,3 +124,12 @@
 - Frontendは「動画の位置づけ」と「サイト・SNS」の折りたたみ階層を提供する。サイト・SNSの公式／有志／未確認カテゴリーは0件でも表示する。新しいタクソノミーIDはBackend develop `config/taxonomy.v1.json` とFrontend `data/taxonomy.json` で同じ定義を維持する。
 - 公式性を確定する入力は審査済み `category_id` または `classification_verified=true` と `provenance` の組。既存Green Book4の検証用9リンクはすべて旧 `provenance=community` であるため、現時点では公式性未確認へ安全側表示し、根拠なしに「有志」と断定しない。投稿カテゴリは提案であり審査済み公式性ではない。
 - Google Formsのカテゴリ選択肢更新はBackendコードのdry-runプレビューでのみ反映可能な状態。実フォーム・Book3の元回答・Green Book4の審査値は本変更では更新しない。これらの境界はBackend develop `docs/content-classification-policy.md` を参照する。
+
+## Google Formsとカテゴリ定義の所在（2026-11-19）
+
+- 大カテゴリ・小カテゴリの**定義正本はBackend** `config/taxonomy.v1.json`。Frontendの `data/taxonomy.json` は表示用の複製であり、同じID・表示ラベル・階層を維持する。
+- `Book1` はYouTube収集対象チャンネル／プレイリストと表示順の管理であり、一般リンクのカテゴリ定義ではない。`Book3` はGoogle Formからの**カテゴリ選択結果**を受け取る投稿原本であり、カテゴリ辞書ではない。
+- フォーム選択肢は `scripts/sync_google_form.py` で `大カテゴリ › 小カテゴリ` へ変換。フォームは単一のドロップダウンから選択する方式で、動的に2段階を連動させるUIではない。
+- 投稿したカテゴリは審査前の提案。承認済みカテゴリは共通投稿マスターで管理し、Book4へ統合して公開カタログの `category_id` へ伝搬する。投稿者による公式性の自己申告だけで`classification_verified`を有効化しない。
+- 公式性と実体種別は別の情報軸：`kind`（website/social_profile/video等）、`provenance`（official/community/unknown）、`category_id`（大・小カテゴリの葉ID）、`video_relation`（ゲスト出演等）。YouTubeの収集データは関係動画の判定なしに公式扱いしない。
+- 不特定多数からの候補投稿に対する24時間後自動承認は、公式性を確定したことにはならない。誤分類リスクが高い公式性値の上書きは別途レビューロジックを持つ。Backend `docs/content-classification-policy.md` を参照。
