@@ -567,7 +567,7 @@ test('video cards show the actual related program and preserve channel/playlist 
 
 test('branding: approved logo, favicon and OGP candidate are served from staging', async ({page, request}) => {
   await page.goto('/');
-  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-approved-transparent.png"]')).toHaveCount(1);
+  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-master.svg"]')).toHaveCount(1);
   await expect(page.locator('#category-drawer svg[aria-hidden="true"] path[d^="M12 5.5"]')).toHaveCount(0);
   const svgIcon=page.locator('head link[rel="icon"][type="image/svg+xml"]');
   await expect(svgIcon).toHaveAttribute('href', /yurulink-symbol-approved\.svg/);
@@ -575,7 +575,7 @@ test('branding: approved logo, favicon and OGP candidate are served from staging
   const og=page.locator('head meta[property="og:image"]');
   await expect(og).toHaveAttribute('content', /\/ogp\/yurulink-light\.png$/);
   await expect(page.locator('head meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
-  for(const asset of ['/brand/yurulink-symbol-approved-transparent.png','/brand/yurulink-symbol-approved.svg','/favicon-32.png','/apple-touch-icon.png','/ogp/yurulink-light.png']){
+  for(const asset of ['/brand/yurulink-symbol-master.svg','/brand/yurulink-symbol-flat-1024.png','/favicon-32.png','/apple-touch-icon.png','/ogp/yurulink-light.png','/ogp/yurulink-dark.png','/brand/hero-light-1600x900.png','/brand/form-header-1600x400.png']){
     const response=await request.get(asset);
     expect(response.ok(),asset).toBe(true);
     expect((await response.body()).length).toBeGreaterThan(500);
@@ -585,7 +585,7 @@ test('branding: approved logo, favicon and OGP candidate are served from staging
 test('mobile: approved logo and arrow-left drawer control keep typography consistent', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   await page.goto('/');
-  const headerLogo=page.locator('header img[src*="yurulink-symbol-approved-transparent.png"]');
+  const headerLogo=page.locator('header img[src*="yurulink-symbol-master.svg"]');
   await expect(headerLogo).toBeVisible();
   const natural=await headerLogo.evaluate(async img => {
     await img.decode();
@@ -594,7 +594,7 @@ test('mobile: approved logo and arrow-left drawer control keep typography consis
   expect(natural.width).toBeGreaterThan(500);
   expect(natural.height).toBeGreaterThan(500);
   await page.locator('#open-categories').click();
-  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-approved-transparent.png"]')).toBeVisible();
+  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-master.svg"]')).toBeVisible();
   const close=page.getByRole('button',{name:'カテゴリメニューを閉じる'});
   await expect(close).toBeVisible();
   await expect(close.locator('svg path[d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"]')).toHaveCount(1);
