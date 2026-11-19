@@ -188,7 +188,7 @@ test('multiple category memberships: playlist and channel both filter the same i
   expect(errors).toEqual([]);
   await expect(page.locator('#category-buttons button[data-category="youtube-playlist:pl1"]')).toHaveText('特集[番組A]');
   // 独立プレイリストは折りたたみグループの内側にある。
-  await page.locator('#category-buttons summary', { hasText: 'YouTubeチャンネルプレイリスト' }).click();
+  await page.locator('#category-buttons summary', { hasText: 'その他のプレイリスト' }).click();
   await page.locator('#category-buttons button[data-category="youtube-playlist:pl1"]').click();
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '動画A');
@@ -249,7 +249,7 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
   const labels = await page.locator('#category-buttons summary').allTextContents();
   expect(labels).toContain('YouTubeチャンネル');
   expect(labels).toContain('ゆる言語学ラジオ');
-  expect(labels).toContain('YouTubeチャンネルプレイリスト');
+  expect(labels).toContain('その他のプレイリスト');
 
   await page.locator('#category-buttons summary', {hasText:'ゆる言語学ラジオ'}).click();
   await page.locator('button[data-category="youtube-playlist:nested"]').click();
@@ -312,4 +312,72 @@ test('view-count sorting: descending, ascending, missing-last and URL state', as
   await page.locator('#sort-order').selectOption('views-asc');
   expect(await order()).toEqual(['A','B','C','D']);
   await expect(page).toHaveURL(/sort=views-asc/);
+});
+
+
+test('playlist directory: links, hierarchy and source channel suppression', async ({ page }) => {
+  await openCatalog(page, '/?category=browse%3Aplaylists');
+  const cards = page.locator('[data-playlist-card]:visible');
+  await expect(cards).toHaveCount(20);
+  await expect(cards.first().locator('a[href^="https://www.youtube.com/playlist?list="]').first()).toBeVisible();
+
+  const playlist = await cards.first().getAttribute('data-playlist-id');
+  await page.goto('/?' + new URLSearchParams({category: 'youtube-playlist:' + playlist}));
+  await expect(page.locator('#playlist-title-link')).toBeVisible();
+  await expect(page.locator('#playlist-title-link')).toHaveAttribute('href',
+    'https://www.youtube.com/playlist?list=' + playlist);
+  await expect(page.locator('[data-playlist-card]:visible')).toHaveCount(0);
+
+  // 参照プレイリスト由来の他チャンネルが「番組」として表示されていないこと。
+  await expect(page.locator('#category-buttons button[data-category="youtube-channel:UCJy_hfwQw2_OGTESC3OBckg"]')).toHaveCount(0);
+  const channel = page.locator('#category-buttons details').filter({
+    has: page.locator('button[data-category^="browse:playlists:"]')
+  }).first();
+  await expect(channel).toBeAttached();
+});
+
+test('type filter: multi-select and URL restoration', async ({ page }) => {
+  await openCatalog(page);
+  await page.locator('#content-type-filter input[value="playlist"]').check();
+  await expect(page).toHaveURL(/types=playlist/);
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
+  expect(await page.locator('[data-catalog-item]:visible').evaluateAll(nodes =>
+    nodes.every(node => node.dataset.kind === 'playlist'))).toBe(true);
+
+  await page.locator('#content-type-filter input[value="video"]').check();
+  await expect(page).toHaveURL(/types=video%2Cplaylist|types=playlist%2Cvideo/);
+  const kinds = await page.locator('[data-catalog-item]:visible').evaluateAll(nodes =>
+    [...new Set(nodes.map(n => n.dataset.kind))]);
+  expect(kinds.length).toBeGreaterThan(0);
+  expect(kinds.every(kind => ['playlist','video'].includes(kind))).toBe(true);
+
+  await page.reload();
+  await expect(page.locator('#content-type-filter input[value="playlist"]')).toBeChecked();
+  await expect(page.locator('#content-type-filter input[value="video"]')).toBeChecked();
+  await page.locator('#reset-content-type-filter').click();
+  await expect(page).not.toHaveURL(/types=/);
+});
+
+test('mobile header and swipe: edge gesture opens navigation and escape closes it', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await openCatalog(page);
+  await expect(page.getByRole('link', { name: 'YuruLink トップページ' })).toBeVisible();
+  await expect(page.locator('#category-drawer')).toHaveClass(/-translate-x-full/);
+  // Touch events are only available on a touch-enabled context, but a native Event
+  // can exercise the gesture code without relying on mobile emulation internals.
+  await page.evaluate(() => {
+    const dispatch = (name, x, y) => {
+      const event = new Event(name, {bubbles:true});
+      Object.defineProperty(event, name === 'touchend' ? 'changedTouches' : 'touches', {
+        value: [{clientX:x,clientY:y}]
+      });
+      document.dispatchEvent(event);
+    };
+    dispatch('touchstart', 5, 240);
+    dispatch('touchend', 124, 246);
+  });
+  await expect(page.locator('#open-categories')).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.locator('#category-drawer')).not.toHaveClass(/-translate-x-full/);
+  await page.keyboard.press('Escape');
+  await expect(page.locator('#open-categories')).toHaveAttribute('aria-expanded', 'false');
 });
