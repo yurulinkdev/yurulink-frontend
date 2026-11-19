@@ -270,6 +270,28 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
   expect(errors).toEqual([]);
 });
 
+test('live catalog: view-count sort matches actual YouTube video statistics', async ({ page }) => {
+  await openCatalog(page, '/?sort=views-desc');
+  const counts = await page.locator('[data-catalog-item]').evaluateAll(items =>
+    items
+      .filter(item => item.dataset.kind === 'video' &&
+                      item.dataset.platform === 'youtube' &&
+                      /^\\d+$/.test(item.dataset.viewCount || ''))
+      .map(item => Number(item.dataset.viewCount))
+      .filter(value => Number.isSafeInteger(value))
+  );
+  expect(counts.length).toBeGreaterThan(100);
+  const visibleCounts = async () => page.locator('[data-catalog-item]:visible')
+    .evaluateAll(items => items.map(item => Number(item.dataset.viewCount)));
+  const descending = [...counts].sort((a, b) => b - a);
+  expect(await visibleCounts()).toEqual(descending.slice(0, 20));
+
+  await page.locator('#sort-order').selectOption('views-asc');
+  await expect(page).toHaveURL(/sort=views-asc/);
+  const ascending = [...counts].sort((a, b) => a - b);
+  expect(await visibleCounts()).toEqual(ascending.slice(0, 20));
+});
+
 test('view-count sorting: descending, ascending, missing-last and URL state', async ({ page }) => {
   await page.goto('/');
   await page.setContent(`
