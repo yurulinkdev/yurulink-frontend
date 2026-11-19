@@ -29,5 +29,7 @@ jobs:
       - name: Validate brand asset integration
         run: |
           test -s public/brand/yurulink-symbol-tight.svg
-          grep -q 'brand/yurulink-symbol-tight.svg' public/index.html
+          count=$(grep -o 'brand/yurulink-symbol-tight.svg' public/index.html | wc -l)
+          echo "Brand references in index: $count"
+          test "$count" -ge 3
           grep -Eq 'rel=("icon"|icon)([ >])' public/index.html
