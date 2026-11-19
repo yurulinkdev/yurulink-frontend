@@ -114,3 +114,13 @@
 - 「SNSアカウント」という仮想トップレベルの重複項目は削除。正規カテゴリ「その他のカテゴリー > SNSプロフィール」に一本化する。既存のURLに `category=browse:social` などが指定されても表示ルートは後方互換として維持する。
 - ショートの画面上の注記は「暫定判定を含む」。Backendで `manual_verified` を保持できるように改修したが、APIによる縦横比の確定取得にはまだ対応していない。
 - ブランドシンボルの暫定抽出SVGは別制作ブランチの検証対象。確定SVGマスターとは扱わず、制作ブランチの画像を本変更で取り込まない。サイトのロゴ指定口 `params.brand_logo` は従来のまま維持する。
+
+## 採用ロゴ・関連番組名・公式性の分類（2026-11-19）
+
+- 採用JPEGを基に背景透過したPNGをGoogle Drive `YuruLink_Assets/02-selected/YuruLink-symbol-approved-transparent.png` に保存。元JPEGは保持。サイト用に同じ輪郭から生成した透過SVG `static/brand/yurulink-symbol-approved.svg` を `hugo.toml` の `params.brand_logo` で指定し、モバイルヘッダーと左サイドバーに共通使用する。SVGの曲線清書・16px等の最終マスター検証は別制作ブランチで継続する。
+- Faviconは `static/favicon-32.png` と同SVG、Apple Touch Iconは `static/apple-touch-icon.png`。OGP正式デザインは未決定。候補A `static/ogp/yurulink-light.png` を `params.og_image` でPreviewに暫定指定、候補B `static/ogp/yurulink-dark.png` を保持。実際のOGP生成は別チャットのHTML/CSS+Playwright媒体別パイプラインとの整合を確認する。
+- `catalog.item_programs` と `catalog.memberships → collections.channel_name` から関連番組名を解決し、動画カード／リストのメタ行に表示する。仮の `YouTube channel UC...` は人向けの番組名として表示しない。メタ属性 `data-program-labels` も保持する。
+- 動画の `video_format`（通常/ショート/ライブ）と `video_relation`（公式・有志・オープンマイク・ゲスト出演）は別属性。未確認動画はBook1の収集対象投稿/関連動画（未確認）として分けるが、Book1収集対象登録だけで公式性は断定しない。
+- Frontendは「動画の位置づけ」と「サイト・SNS」の折りたたみ階層を提供する。サイト・SNSの公式／有志／未確認カテゴリーは0件でも表示する。新しいタクソノミーIDはBackend develop `config/taxonomy.v1.json` とFrontend `data/taxonomy.json` で同じ定義を維持する。
+- 公式性を確定する入力は審査済み `category_id` または `classification_verified=true` と `provenance` の組。既存Green Book4の検証用9リンクはすべて旧 `provenance=community` であるため、現時点では公式性未確認へ安全側表示し、根拠なしに「有志」と断定しない。投稿カテゴリは提案であり審査済み公式性ではない。
+- Google Formsのカテゴリ選択肢更新はBackendコードのdry-runプレビューでのみ反映可能な状態。実フォーム・Book3の元回答・Green Book4の審査値は本変更では更新しない。これらの境界はBackend develop `docs/content-classification-policy.md` を参照する。
