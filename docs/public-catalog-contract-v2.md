@@ -93,3 +93,16 @@
 - 再生数順は既存の絞り込み・日本語検索・ページネーションと組み合わせる。動画以外の一覧で再生数ソートが選択されても、非対象リンクを消さない。
 - Backend Greenで動画3,618件の統計を取得し、Front stagingへ3,627件を配信済み。公開候補の取り扱いは `main` / Production / Blue-Green有効世代の切替と分離する。
 - `tests/browser/staging.spec.mjs` のモックによる欠損・昇順・降順テストに加え、実データの上位20件が数値比較に一致するかの回帰テストを設置した。
+
+
+## YouTubeプレイリスト・動画形式・ナビゲーション（2026-11-19）
+
+- 元JSONは `items`（動画などのリンク実体）と `collections`（プレイリスト等）を分離したまま維持する。Frontendで `youtube-playlist:ID` のCollectionを表示用のプレイリストカードへ投影し、`https://www.youtube.com/playlist?list=ID` を外部リンクとして使う。
+- 「プレイリスト一覧」を選ぶとプレイリストのリンクカード群を表示し、個別プレイリストを選ぶと従来どおり所属動画を表示。見出し自体から該当YouTubeプレイリストへ遷移できる。
+- チャンネル階層は `動画` / `プレイリスト`（配下に一覧と個別タイトル）/ `ショート` / `ライブ`。未登録の外部投稿元を自動生成した `YouTube channel UC...` はナビゲーションの独立チャンネルから除外するが、プレイリスト内動画自体は保持する。
+- 任意フィールド `video_format` は `video` / `short` / `live`。出所は `video_format_source`。ライブはYouTube `liveStreamingDetails` に基づく。ショートはAPIの直接識別子がないため `#Shorts` 等の明示表示と180秒以下の長さを併用した**暫定候補**。正確性についてはBackend develop `docs/video-format-classification.md` を参照。
+- 種類フィルタはチェックボックス複数選択。選択した種類の間はOR、未選択は全種表示。URLクエリ `types=video,playlist,short,live` に状態を保持する。検索・番組カテゴリ・ソート・ページネーションとAND条件で合成する。
+- モバイルは画面左端から右へ70px以上、縦移動50px以下の明確なスワイプでカテゴリドロワーを開く。ドロワー内の逆向きスワイプでも閉じる。既存のボタン・Escape操作・フォーカストラップを維持する。
+- モバイルヘッダーのブランド名はサイト表示の先頭へ置き、下スクロールで隠れてもよい。ブランドロゴはHugo TOML `params.brandLogo` に公開パスを指定する。現在は画像制作の別ブランチ `feat/brand-html-image-pipeline-20261119` の確定SVG待ちのため、既存の開いた本アイコンを仮表示する。制作ブランチの素材自体は本変更では加工・上書きしない。
+- サイドバー末尾の説明はHugo TOML `params.sidebarNotice` に外部化。空文字で非表示とし、投稿承認・公開審査のセキュリティ仕様自体は変更しない。
+- Google Driveのブランド正本は `YuruLink_Assets/02-selected/YuruLink-symbol-approved-reference.jpg`。Image-Prompts.md／Assets READMEの素材管理規則に従う。未清書のSVGを最終正本と混同しない。
