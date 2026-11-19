@@ -115,6 +115,12 @@
           </div>
           {{ $categories := dict }}
           {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
+          {{/* 公開カタログが信頼できる出演者マスターを持つ場合だけ選択肢を表示。 */}}
+          <div id="people-definitions" hidden>
+            {{ range ($catalog.people | default (slice)) }}
+              <span data-person-id="{{ .id }}" data-label="{{ .name }}"></span>
+            {{ end }}
+          </div>
           <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
           {{ range $playlistCards }}
             {{ $pid := strings.TrimPrefix "youtube-playlist:" .id }}
@@ -148,7 +154,7 @@
                 {{ end }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel (delimit $itemLabels " ") }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ if isset . "view_count" }}{{ printf "%.0f" (float .view_count) }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}" data-classification-verified="{{ if $verified }}true{{ else }}false{{ end }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-updated-at="{{ .updated_at | default "" }}" data-person-ids="{{ delimit (.person_ids | default (slice)) " " }}" data-view-count="{{ if isset . "view_count" }}{{ printf "%.0f" (float .view_count) }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}" data-classification-verified="{{ if $verified }}true{{ else }}false{{ end }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ if eq .kind "social_profile" }}
                       {{ $avatar := .avatar_url | default "" }}
