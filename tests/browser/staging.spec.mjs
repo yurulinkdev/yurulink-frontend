@@ -456,6 +456,7 @@ test('sidebar keeps program categories without global type duplicates or virtual
   }
   await expect(sidebar.getByRole('button', {name:'すべてのコンテンツ'})).toHaveCount(1);
   await expect(sidebar.locator('button[data-category="social_profile"]')).toHaveCount(1);
+  await expect(sidebar.locator('button[data-category="video"]')).toHaveCount(0);
   await expect(sidebar.locator('summary', {hasText:'その他のカテゴリー'})).toHaveCount(1);
 
   // 旧URLの直リンクはメニュー項目を削除しても動作させる。
