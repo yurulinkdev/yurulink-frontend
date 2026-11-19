@@ -1,3 +1,15 @@
+/* 組版トークン：システム和文サンセリフを優先し、必須Webフォントは読み込まない。 */
+:root {
+  --font-ui: system-ui, -apple-system, BlinkMacSystemFont, "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Yu Gothic UI", "Yu Gothic", "Noto Sans JP", Meiryo, sans-serif;
+  --font-brand: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --type-body: 1rem;
+  --type-body-leading: 1.7;
+  --type-label: .875rem;
+  --type-caption: .8125rem;
+  --type-brand: 1.25rem;
+  --type-brand-leading: 1.2;
+}
+
 :root, [data-theme="light"] {
   color-scheme: light;
   --page: #fbf9f6;
