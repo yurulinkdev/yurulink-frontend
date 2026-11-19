@@ -7,12 +7,46 @@
     </a>
     {{ if .IsHome }}
       <div class="relative order-3 w-full min-w-0 lg:order-none lg:flex-1">
-        <label class="sr-only" for="query">コンテンツを検索</label>
-        <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page py-2.5 pl-4 pr-12 text-ink placeholder:text-muted-ink" autocomplete="off">
-        <a id="search-help-link" href="{{ "posts/search-guide/" | relURL }}" class="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-ink hover:bg-panel-muted hover:text-accent" aria-label="検索の使い方を開く" title="検索の使い方">
-          {{/* Heroicons outline question-mark-circle */}}
-          <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519a3 3 0 1 1 4.242 4.242c-.765.765-2.121 1.378-2.121 2.489V15m0 3h.008v.008H12V18Z"/><circle cx="12" cy="12" r="9.75"/></svg>
-        </a>
+        <div class="flex items-center gap-2">
+          <div class="relative min-w-0 flex-1">
+            <label class="sr-only" for="query">コンテンツを検索</label>
+            <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page py-2.5 pl-4 pr-12 text-ink placeholder:text-muted-ink" autocomplete="off">
+            <a id="search-help-link" href="{{ "posts/search-guide/" | relURL }}" class="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-ink hover:bg-panel-muted hover:text-accent" aria-label="検索の使い方を開く" title="検索の使い方">
+              {{/* Heroicons outline question-mark-circle */}}
+              <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><circle cx="12" cy="12" r="9.75"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519a3 3 0 1 1 4.242 4.242c-.765.765-2.121 1.378-2.121 2.489V15m0 3h.008v.008H12V18Z"/></svg>
+            </a>
+          </div>
+          <details id="search-advanced" class="group relative shrink-0">
+            <summary class="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-line bg-page text-ink hover:bg-panel-muted focus-visible:outline" aria-label="日付・出演者の詳細検索" title="日付・出演者の詳細検索">
+              {{/* Heroicons outline funnel */}}
+              <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18v2.25l-7.5 8.25v5.25l-3 1.5v-6.75L3 6.75V4.5Z"/></svg>
+            </summary>
+            <div class="absolute right-0 top-full z-50 mt-2 w-[min(88vw,22rem)] space-y-4 rounded-xl border border-line bg-panel p-4 shadow-xl" role="group" aria-label="詳細検索条件">
+              <fieldset class="space-y-2">
+                <legend class="text-sm font-semibold">日付による絞り込み</legend>
+                <label class="block text-xs text-muted-ink" for="date-field">対象の日付</label>
+                <select id="date-field" class="w-full rounded-lg border border-line bg-page px-3 py-2 text-sm">
+                  <option value="published">公開日</option>
+                  <option value="updated">更新日（更新日時があるコンテンツのみ）</option>
+                </select>
+                <div class="grid grid-cols-2 gap-2">
+                  <label class="block text-xs text-muted-ink" for="date-from">開始日
+                    <input id="date-from" type="date" class="mt-1 block w-full min-w-0 rounded-lg border border-line bg-page p-2 text-sm">
+                  </label>
+                  <label class="block text-xs text-muted-ink" for="date-to">終了日
+                    <input id="date-to" type="date" class="mt-1 block w-full min-w-0 rounded-lg border border-line bg-page p-2 text-sm">
+                  </label>
+                </div>
+              </fieldset>
+              <fieldset>
+                <legend class="text-sm font-semibold">出演者タグ</legend>
+                <div id="person-filter-options" class="mt-2 max-h-44 space-y-2 overflow-y-auto text-sm" aria-live="polite"></div>
+                <p class="mt-1 text-xs text-muted-ink">確認済みの出演情報のみ対象です。番組の所属だけでは付与しません。</p>
+              </fieldset>
+              <button id="reset-advanced-search" type="button" class="rounded-lg border border-line px-3 py-2 text-sm hover:bg-panel-muted">詳細条件を解除</button>
+            </div>
+          </details>
+        </div>
       </div>
     {{ else }}
       <a class="min-w-0 flex-1 truncate font-semibold text-accent hover:underline" href="{{ "" | relURL }}">YuruLink</a>
