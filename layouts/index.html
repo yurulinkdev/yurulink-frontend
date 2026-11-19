@@ -127,6 +127,8 @@
                 {{ $related := index $itemCategories .id | default (slice) }}
                 {{ $allCategories := uniq (append $cat $related) }}
                 {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
+                {{ $verifiedLeaf := in (slice "official_site" "community_site" "official_social_profile" "community_social_profile" "official_video" "community_video" "open_mic_video" "guest_video") $cat }}
+                {{ $verified := or (.classification_verified | default false) $verifiedLeaf }}
                 {{ $itemLabels := index $itemProgramLabels .id | default (slice) }}
                 {{ $visibleLabel := $catLabel }}
                 {{ if and (eq .kind "video") (gt (len $itemLabels) 0) }}
@@ -134,7 +136,7 @@
                 {{ end }}
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel (delimit $itemLabels " ") }}
-                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ if isset . "view_count" }}{{ .view_count }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}">
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-view-count="{{ if isset . "view_count" }}{{ .view_count }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}" data-classification-verified="{{ if $verified }}true{{ else }}false{{ end }}">
                   <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ if eq .kind "social_profile" }}
                       {{ $avatar := .avatar_url | default "" }}
@@ -160,7 +162,7 @@
                       {{ end }}
                     {{ end }}
                     <div class="p-4">
-                    <p class="catalog-item-meta mb-2 text-xs text-muted-ink"><span class="font-semibold">{{ $visibleLabel }}</span>{{ with .platform }} · {{ . }}{{ end }}{{ if eq .provenance "official" }} · 公式{{ else if eq .provenance "community" }} · 有志・非公式{{ end }}</p>
+                    <p class="catalog-item-meta mb-2 text-xs text-muted-ink"><span class="font-semibold">{{ $visibleLabel }}</span>{{ with .platform }} · {{ . }}{{ end }}{{ if $verified }}{{ if or (eq $cat "official_site") (eq $cat "official_social_profile") (eq $cat "official_video") (eq .provenance "official") }} · 公式{{ else if or (eq $cat "community_site") (eq $cat "community_social_profile") (eq $cat "community_video") (eq .provenance "community") }} · 有志・非公式{{ end }}{{ end }}</p>
                     <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
                     {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
                     {{ with .published_at }}<p class="catalog-item-date mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
