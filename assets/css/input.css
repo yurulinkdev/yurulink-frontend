@@ -13,11 +13,12 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-text);
 }
-html { font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+html { font-family: var(--font-ui); font-size: var(--type-body); line-height: var(--type-body-leading); }
 body { background: var(--page); color: var(--text); }
+.brand-wordmark { font-family: var(--font-brand); font-size: var(--type-brand); font-weight: 700; line-height: var(--type-brand-leading); letter-spacing: -.02em; }
 [hidden] { display: none !important; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-html { line-height: 1.7; }
+/* 本文行間は組版トークンで一括管理。 */
 /* リスト表示はカードの縦積みではなく、サムネイル＋テキストの高密度な行にする */
 .catalog-list-view {
   grid-template-columns: minmax(0, 1fr) !important;
