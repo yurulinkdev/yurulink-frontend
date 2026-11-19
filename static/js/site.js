@@ -8,7 +8,7 @@
   const empty = document.getElementById('no-results');
   const paginations = [document.getElementById('pagination-top'), document.getElementById('pagination')].filter(Boolean);
   const sortSelect = document.getElementById('sort-order');
-  const validSorts = ['newest','oldest','title-asc','title-desc'];
+  const validSorts = ['newest','oldest','title-asc','title-desc','views-desc','views-asc'];
   let sort = validSorts.includes(new URL(location.href).searchParams.get('sort')) ? new URL(location.href).searchParams.get('sort') : 'newest';
   const pageSizeSelect = document.getElementById('page-size');
   const buttons = document.getElementById('category-buttons');
@@ -41,6 +41,7 @@
     query: (item.dataset.search || '').toLocaleLowerCase('ja'),
     title: item.dataset.title || '',
     published: Date.parse(item.dataset.publishedAt || ''),
+    views: /^\d+$/.test(item.dataset.viewCount || '') ? Number(item.dataset.viewCount) : null,
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
     provenance: item.dataset.provenance || ''
@@ -204,6 +205,14 @@
     }
   };
   const compareItems = (a,b) => {
+    if (sort === 'views-desc' || sort === 'views-asc') {
+      // 非動画と未取得の再生数は、どちらの方向でも最後に配置する。
+      const aValid = a.kind === 'video' && a.platform === 'youtube' && Number.isSafeInteger(a.views);
+      const bValid = b.kind === 'video' && b.platform === 'youtube' && Number.isSafeInteger(b.views);
+      if (aValid !== bValid) return aValid ? -1 : 1;
+      if (aValid && a.views !== b.views) return sort === 'views-desc' ? b.views - a.views : a.views - b.views;
+      return a.title.localeCompare(b.title, 'ja');
+    }
     if (sort.startsWith('title-')) {
       const result = a.title.localeCompare(b.title, 'ja');
       return sort === 'title-asc' ? result : -result;
