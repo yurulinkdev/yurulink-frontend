@@ -2,7 +2,7 @@ name: Frontend smoke test
 
 on:
   push:
-    branches: [main, staging, feat/catalog-v2-taxonomy-ui]
+    branches: [main, staging, feat/catalog-v2-taxonomy-ui, feat/brand-staging-preview-20261119]
   pull_request:
   workflow_dispatch:
 
@@ -26,3 +26,10 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build and smoke test
         run: bash scripts/smoke-test.sh
+      - name: Validate brand asset integration
+        run: |
+          test -s public/brand/yurulink-symbol-tight.svg
+          count=$(grep -o 'brand/yurulink-symbol-tight.svg' public/index.html | wc -l)
+          echo "Brand references in index: $count"
+          test "$count" -ge 3
+          grep -Eq 'rel=("icon"|icon)([ >])' public/index.html

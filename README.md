@@ -64,3 +64,9 @@ YouTubeの収集データは公開品質検査に基づいて掲載します。�
 - [環境・デプロイ](docs/environments.md)
 - [デザイン仕様](docs/design-system-phase2.md)
 - [Backend](https://github.com/yurulinkdev/yurulink-backend)
+
+## ブランドロゴ・媒体別画像（開発ブランチ）
+
+- [ブランド素材のStaging適用方針](docs/brand-visuals.md)
+- [HTML/CSS画像レンダラー（Automation Lab）](https://github.com/yurulinkdev/yurulink-automation-lab/tree/feat/brand-html-image-pipeline-20261119/visuals)
+- ロゴは `hugo.toml` の `params.brandLogo` で設定し、HTML/CSS生成画像はレビュー後に別途配備する。
