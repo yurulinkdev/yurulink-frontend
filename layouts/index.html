@@ -101,6 +101,18 @@
             {{ end }}
           {{ end }}
           {{ $tax := .Site.Data.taxonomy }}
+          {{/* 設問の大・小カテゴリ定義をビルドしたHTMLに安全なdata属性として渡し、UIの表示文言を単一の分類マスターへ集約する。 */}}
+          <div id="taxonomy-definitions" hidden>
+            {{ with $tax }}
+              {{ range .categories }}
+                {{ $groupId := .id }}
+                <span data-taxonomy-group="{{ .id }}" data-label="{{ .label }}"></span>
+                {{ range .children }}
+                  <span data-taxonomy-id="{{ .id }}" data-parent-id="{{ $groupId }}" data-label="{{ .label }}"></span>
+                {{ end }}
+              {{ end }}
+            {{ end }}
+          </div>
           {{ $categories := dict }}
           {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
           <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
