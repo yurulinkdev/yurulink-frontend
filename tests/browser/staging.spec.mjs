@@ -161,8 +161,8 @@ test('catalog interactions: sorting, search, and bottom pagination', async ({ pa
   await expect(page.locator('[data-catalog-item]:visible').first()).toHaveAttribute('data-title', firstTitle);
   await expect(page).toHaveURL(/q=/);
   await page.locator('#query').fill('');
-  await expect(page.locator('#pagination button', { hasText: '2', exact: true })).toBeVisible();
-  await page.locator('#pagination button', { hasText: '2', exact: true }).click();
+  await expect(page.locator('#pagination').getByRole('button', { name: '2', exact: true })).toBeVisible();
+  await page.locator('#pagination').getByRole('button', { name: '2', exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.locator('#pagination-top button[aria-current="page"]')).toHaveText('2');
   await expect(page.locator('#pagination button[aria-current="page"]')).toHaveText('2');
@@ -213,7 +213,7 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
   const [category, count] = groups[0];
   await page.goto('/?' + new URLSearchParams({ category, size: '20' }));
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
-  await page.locator('#pagination button', { hasText: '2', exact: true }).click();
+  await page.locator('#pagination').getByRole('button', { name: '2', exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(Math.min(count - 20, 20));
   const valid = await page.locator('[data-catalog-item]:visible').evaluateAll((items, id) =>
