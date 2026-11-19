@@ -2,3 +2,9 @@ title = "YuruLink"
 defaultContentLanguage = "ja"
 disableKinds = ["taxonomy", "term", "RSS"]
 enableRobotsTXT = true
+
+[params]
+# ブランド素材の確定SVGが配置された段階で、公開パスを指定する。
+brandLogo = ""
+# サイドバーの注記。空欄は表示しない。審査ポリシーそのものは変更しない。
+sidebarNotice = ""
