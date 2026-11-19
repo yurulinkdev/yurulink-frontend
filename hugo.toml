@@ -6,8 +6,8 @@ disableKinds = ["taxonomy", "term", "RSS"]
 enableRobotsTXT = true
 
 [params]
-# 採用JPEGから背景透過処理したPNGを全ページのブランドシンボルとして使用する。
-brand_logo = "brand/yurulink-symbol-approved-transparent.png"
+# 採用JPEGを輪郭抽出・単色化した共通ベクターSVGを使用する。
+brand_logo = "brand/yurulink-symbol-master.svg"
 # サイドバーの注記。空欄は表示しない。審査ポリシーそのものは変更しない。
 sidebar_notice = ""
 # OGPは候補AをPreviewで暫定設定。正式採用の判断後に切り替える。
