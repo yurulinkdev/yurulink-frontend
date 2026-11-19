@@ -90,6 +90,11 @@
     .map(id => [id, categoryMetadata.get(id) || primaryMeta.get(id) || {label:id, order:Number.MAX_SAFE_INTEGER}])
     .sort((a,b) => a[1].order - b[1].order || a[1].label.localeCompare(b[1].label,'ja'));
   const categoryLabels = new Map(categories.map(([id, meta]) => [id, meta.label]));
+  // 大・小カテゴリ表示ラベルはBackend taxonomyのFrontend複製から受け取る。
+  // 定義未読込のテストfixtureでは従来ラベルへフォールバックする。
+  const taxonomyLabels = new Map([...document.querySelectorAll('[data-taxonomy-id]')].map(node => [
+    node.dataset.taxonomyId, node.dataset.label
+  ]));
   const virtualLabels = new Map([
     ['browse:video', 'YouTube動画（すべて）'],
     ['browse:playlists', 'プレイリスト（すべて）'],
@@ -110,6 +115,21 @@
     ['browse:video-guest', 'ゲスト出演動画'],
     ['browse:video-related', 'その他の関連動画（未確認）']
   ]);
+  for (const [virtualId,taxId] of [
+    ['browse:web-official','official_site'],
+    ['browse:web-community','community_site'],
+    ['browse:web-other','unverified_site'],
+    ['browse:social-official','official_social_profile'],
+    ['browse:social-community','community_social_profile'],
+    ['browse:social-other','unverified_social_profile'],
+    ['browse:video-official','official_video'],
+    ['browse:video-community','community_video'],
+    ['browse:video-open-mic','open_mic_video'],
+    ['browse:video-guest','guest_video'],
+    ['browse:video-related','related_video_unverified']
+  ]) {
+    if (taxonomyLabels.has(taxId)) virtualLabels.set(virtualId,taxonomyLabels.get(taxId));
+  }
   // 手動確認済みIDとBook1収集対象の区別を保つ。登録チャンネル＝公式とは断定しない。
   let registeredChannelIds = new Set();
   const webKinds = new Set(['website','tool']);
