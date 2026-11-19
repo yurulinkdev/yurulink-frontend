@@ -106,17 +106,25 @@ test('catalog metadata: category order and playlist channel labels', async ({ pa
   expect(metadata.every(x => Number.isFinite(x.order))).toBe(true);
   await page.locator('#category-buttons').evaluate(element => {
     const buttons = [...element.querySelectorAll('button[data-category]')].filter(x => x.dataset.category);
-    const metadata = [...document.querySelectorAll('[data-catalog-item]')].reduce((map, item) => {
+    // 多対多のカテゴリでは「itemのprimary category」から全カテゴリは復元できない。
+    // Frontendと同じカテゴリ定義を正本として並び順を検証する。
+    const metadata = new Map([...document.querySelectorAll('[data-category-definition]')]
+      .map(node => [node.dataset.categoryDefinition, {
+        label: node.dataset.label || node.dataset.categoryDefinition,
+        order: Number(node.dataset.order)
+      }]));
+    const primary = [...document.querySelectorAll('[data-catalog-item]')].reduce((map, item) => {
       if (item.dataset.category && !map.has(item.dataset.category)) map.set(item.dataset.category, {
         label: item.dataset.categoryLabel,
         order: Number(item.dataset.categoryOrder)
       });
       return map;
     }, new Map());
+    const getMeta = id => metadata.get(id) || primary.get(id) || {order: Number.MAX_SAFE_INTEGER, label: id};
     const groups = buttons.filter(x => x.dataset.category.startsWith('youtube-channel:'));
     const actual = groups.map(x => x.dataset.category);
-    const expected = [...actual].sort((a,b) => metadata.get(a).order - metadata.get(b).order ||
-      metadata.get(a).label.localeCompare(metadata.get(b).label,'ja'));
+    const expected = [...actual].sort((a,b) => getMeta(a).order - getMeta(b).order ||
+      getMeta(a).label.localeCompare(getMeta(b).label,'ja'));
     if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('Channel category order differs from catalog order');
   });
 });
@@ -200,6 +208,22 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
   expect(groups.length).toBeGreaterThan(0);
   const [category, count] = groups[0];
   await page.goto('/?' + new URLSearchParams({ category, size: '20' }));
+  // 実データ全件のときだけ起きるURL直アクセスの不整合を診断する。
+  const diagnostic = await page.evaluate(selectedCategory => {
+    const items = [...document.querySelectorAll('[data-catalog-item]')];
+    const ids = item => (item.dataset.categoryIds || item.dataset.category || '').split(/\\s+/).filter(Boolean);
+    return {
+      category: selectedCategory,
+      href: location.href,
+      items: items.length,
+      matching: items.filter(item => ids(item).includes(selectedCategory)).length,
+      visible: items.filter(item => !item.hidden).length,
+      count: document.querySelector('#count')?.textContent,
+      selected: document.querySelector('#selected-category')?.textContent,
+      jsLoaded: !!document.querySelector('#category-buttons button')
+    };
+  }, category);
+  console.log('CATEGORY_DEEP_LINK_DIAGNOSTIC ' + JSON.stringify(diagnostic));
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
   await page.locator('#pagination button', { hasText: '2', exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
