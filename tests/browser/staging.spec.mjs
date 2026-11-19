@@ -276,7 +276,7 @@ test('live catalog: view-count sort matches actual YouTube video statistics', as
     items
       .filter(item => item.dataset.kind === 'video' &&
                       item.dataset.platform === 'youtube' &&
-                      /^\\d+$/.test(item.dataset.viewCount || ''))
+                      /^\d+$/.test(item.dataset.viewCount || ''))
       .map(item => Number(item.dataset.viewCount))
       .filter(value => Number.isSafeInteger(value))
   );
