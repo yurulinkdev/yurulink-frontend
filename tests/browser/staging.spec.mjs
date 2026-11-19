@@ -504,18 +504,46 @@ test('video cards show the actual related program and preserve channel/playlist 
 
 test('branding: approved logo, favicon and OGP candidate are served from staging', async ({page, request}) => {
   await page.goto('/');
-  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-approved.svg"]')).toHaveCount(1);
+  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-approved-transparent.png"]')).toHaveCount(1);
+  await expect(page.locator('#category-drawer svg[aria-hidden="true"] path[d^="M12 5.5"]')).toHaveCount(0);
   const svgIcon=page.locator('head link[rel="icon"][type="image/svg+xml"]');
   await expect(svgIcon).toHaveAttribute('href', /yurulink-symbol-approved\.svg/);
   await expect(page.locator('head link[rel="apple-touch-icon"]')).toHaveAttribute('href', /apple-touch-icon\.png/);
   const og=page.locator('head meta[property="og:image"]');
   await expect(og).toHaveAttribute('content', /\/ogp\/yurulink-light\.png$/);
   await expect(page.locator('head meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
-  for(const asset of ['/brand/yurulink-symbol-approved.svg','/favicon-32.png','/apple-touch-icon.png','/ogp/yurulink-light.png']){
+  for(const asset of ['/brand/yurulink-symbol-approved-transparent.png','/brand/yurulink-symbol-approved.svg','/favicon-32.png','/apple-touch-icon.png','/ogp/yurulink-light.png']){
     const response=await request.get(asset);
     expect(response.ok(),asset).toBe(true);
     expect((await response.body()).length).toBeGreaterThan(500);
   }
+});
+
+test('mobile: approved logo and arrow-left drawer control keep typography consistent', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/');
+  const headerLogo=page.locator('header img[src*="yurulink-symbol-approved-transparent.png"]');
+  await expect(headerLogo).toBeVisible();
+  const natural=await headerLogo.evaluate(async img => {
+    await img.decode();
+    return {width:img.naturalWidth,height:img.naturalHeight};
+  });
+  expect(natural.width).toBeGreaterThan(500);
+  expect(natural.height).toBeGreaterThan(500);
+  await page.locator('#open-categories').click();
+  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-approved-transparent.png"]')).toBeVisible();
+  const close=page.getByRole('button',{name:'カテゴリメニューを閉じる'});
+  await expect(close).toBeVisible();
+  await expect(close.locator('svg path[d="M10.5 19.5 3 12m0 0 7.5-7.5M3 12h18"]')).toHaveCount(1);
+  const typography=await page.locator('.brand-wordmark').first().evaluate(el=>{
+    const style=getComputedStyle(el);
+    return {fontFamily:style.fontFamily,fontWeight:style.fontWeight,fontSize:style.fontSize};
+  });
+  expect(typography.fontWeight).toBe('700');
+  expect(typography.fontSize).toBe('20px');
+  expect(typography.fontFamily).toMatch(/system-ui/);
+  await close.click();
+  await expect(page.locator('#category-drawer')).toHaveClass(/-translate-x-full/);
 });
 
 test('official/community classification is not inferred from unreviewed legacy provenance', async ({page}) => {
