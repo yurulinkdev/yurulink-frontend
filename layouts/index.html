@@ -68,7 +68,7 @@
             {{ $pid := strings.TrimPrefix "youtube-playlist:" .id }}
             {{ $playlistURL := printf "https://www.youtube.com/playlist?list=%s" $pid }}
             {{ $label := index $programs .id }}
-            <li data-catalog-item data-playlist-card data-kind="playlist" data-platform="youtube" data-category="browse:playlists" data-category-ids="{{ .id }}" data-playlist-id="{{ $pid }}" data-playlist-channel-name="{{ .channel_name | default "" }}" data-playlist-channel-id="{{ .channel_id | default "" }}" data-title="{{ .title }}" data-search="{{ printf "%s %s プレイリスト" .title (.channel_name | default "") }}">
+            <li data-catalog-item data-playlist-card data-kind="playlist" data-platform="youtube" data-category="browse:playlists" data-category-label="プレイリスト" data-category-order="999999" data-category-ids="{{ .id }}" data-playlist-id="{{ $pid }}" data-playlist-channel-name="{{ .channel_name | default "" }}" data-playlist-channel-id="{{ .channel_id | default "" }}" data-title="{{ .title }}" data-search="{{ printf "%s %s プレイリスト" .title (.channel_name | default "") }}">
               <article class="flex h-full items-center gap-4 overflow-hidden rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
                 <div aria-hidden="true" class="flex h-24 w-28 shrink-0 items-center justify-center rounded-lg bg-panel-muted text-3xl text-accent">▤</div>
                 <div class="min-w-0">
