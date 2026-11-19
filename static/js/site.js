@@ -290,7 +290,7 @@
   };
   const relevantVideoIds = [
     'browse:video-official','browse:video-channel','browse:video-community',
-    'browse:video-open-mic','browse:video-guest','browse:video-related'
+    'browse:video-open-mic','browse:video-guest','browse:video-related','browse:single'
   ];
   if (relevantVideoIds.some(id => records.some(record => matchesCategory(record,id)))) {
     const group = makeGroup('動画の位置づけ', relevantVideoIds.includes(category));
