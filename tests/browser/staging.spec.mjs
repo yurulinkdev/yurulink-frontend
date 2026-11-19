@@ -500,3 +500,31 @@ test('video cards show the actual related program and preserve channel/playlist 
   const matched=await videoCards.evaluateAll(nodes=>nodes.filter(n=>n.dataset.programLabels).length);
   expect(matched).toBeGreaterThan(100);
 });
+
+
+test('branding: approved logo, favicon and OGP candidate are served from staging', async ({page, request}) => {
+  await page.goto('/');
+  await expect(page.locator('#category-drawer img[src*="yurulink-symbol-approved.svg"]')).toHaveCount(1);
+  const svgIcon=page.locator('head link[rel="icon"][type="image/svg+xml"]');
+  await expect(svgIcon).toHaveAttribute('href', /yurulink-symbol-approved\.svg/);
+  await expect(page.locator('head link[rel="apple-touch-icon"]')).toHaveAttribute('href', /apple-touch-icon\.png/);
+  const og=page.locator('head meta[property="og:image"]');
+  await expect(og).toHaveAttribute('content', /\/ogp\/yurulink-light\.png$/);
+  await expect(page.locator('head meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
+  for(const asset of ['/brand/yurulink-symbol-approved.svg','/favicon-32.png','/apple-touch-icon.png','/ogp/yurulink-light.png']){
+    const response=await request.get(asset);
+    expect(response.ok(),asset).toBe(true);
+    expect((await response.body()).length).toBeGreaterThan(500);
+  }
+});
+
+test('official/community classification is not inferred from unreviewed legacy provenance', async ({page}) => {
+  await page.goto('/');
+  const recorded=page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"]');
+  expect(await recorded.count()).toBeGreaterThan(0);
+  expect(await recorded.filter({has:page.locator('[data-classification-verified="true"]')}).count()).toBe(0);
+  await page.goto('/?category=browse%3Aweb-community');
+  await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(0);
+  await page.goto('/?category=browse%3Aweb-other');
+  expect(await page.locator('[data-catalog-item]:visible').count()).toBeGreaterThan(0);
+});
