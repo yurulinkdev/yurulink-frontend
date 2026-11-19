@@ -556,3 +556,17 @@ test('official/community classification is not inferred from unreviewed legacy p
   await page.goto('/?category=browse%3Aweb-other');
   expect(await page.locator('[data-catalog-item]:visible').count()).toBeGreaterThan(0);
 });
+
+test('taxonomy labels and parent IDs are shared with Google Forms categories', async ({page}) => {
+  await page.goto('/');
+  const web=page.locator('[data-taxonomy-id="official_site"]');
+  const social=page.locator('[data-taxonomy-id="official_social_profile"]');
+  await expect(web).toHaveAttribute('data-parent-id','web');
+  await expect(social).toHaveAttribute('data-parent-id','social');
+  const webLabel=await web.getAttribute('data-label');
+  const socialLabel=await social.getAttribute('data-label');
+  await expect(page.locator('#category-buttons button[data-category="browse:web-official"]')).toHaveText(webLabel);
+  await expect(page.locator('#category-buttons button[data-category="browse:social-official"]')).toHaveText(socialLabel);
+  // 0件の分類もForm候補として存在する以上、ナビの分類階層には掲載する。
+  await expect(page.locator('#category-buttons button[data-category="browse:social-official"]')).toHaveCount(1);
+});
