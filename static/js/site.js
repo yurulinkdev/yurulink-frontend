@@ -113,10 +113,11 @@
   // 手動確認済みIDとBook1収集対象の区別を保つ。登録チャンネル＝公式とは断定しない。
   let registeredChannelIds = new Set();
   const webKinds = new Set(['website','tool']);
-  const explicitlyReviewed = record => record.verified ||
-    ['official_site','community_site','official_social_profile','community_social_profile',
-     'official_video','community_video','open_mic_video','guest_video'].includes(record.categoryId);
-  const provenanceOf = record => explicitlyReviewed(record) ? record.provenance : 'unknown';
+  const provenanceOf = record => {
+    if (['official_site','official_social_profile','official_video'].includes(record.categoryId)) return 'official';
+    if (['community_site','community_social_profile','community_video','open_mic_video','guest_video'].includes(record.categoryId)) return 'community';
+    return record.verified ? record.provenance : 'unknown';
+  };
   const isVideo = record => record.kind === 'video' && record.platform === 'youtube';
   const videoRole = record => {
     if (!isVideo(record)) return '';
