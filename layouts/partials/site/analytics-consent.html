@@ -1,7 +1,7 @@
 {{/* GA4の測定IDが未設定ならコードも通信も発生しない。利用者の明示同意後に読み込む。 */}}
 {{ $id := .Site.Params.analytics.ga4_measurement_id | default "" }}
 {{ if gt (len (findRE "^G-[A-Z0-9]+$" $id)) 0 }}
-  <section class="mt-5 max-w-xl rounded-lg border border-line p-3 text-xs" id="analytics-consent" data-ga4-id="{{ $id }}" hidden>
+  <section class="mt-5 max-w-xl rounded-lg border border-line p-3 text-xs" id="analytics-consent" data-ga4-id="{{ $id }}" data-allowed-hostnames="{{ delimit (.Site.Params.analytics.ga4_hostnames | default (slice)) "," }}" hidden>
     <p>閲覧状況の改善にGoogle Analyticsを利用します。同意がある場合のみ計測します。</p>
     <div class="mt-2 flex flex-wrap gap-2">
       <button type="button" id="analytics-allow" class="rounded border border-line bg-panel-muted px-3 py-1.5">計測に同意する</button>
