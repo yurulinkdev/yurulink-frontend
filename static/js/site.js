@@ -576,6 +576,8 @@
       if (value) url.searchParams.set(key,value);
       else url.searchParams.delete(key);
     }
+    // 過去の再生時間フィルタURLは受け付けず、共有URLからも除去する。
+    url.searchParams.delete('duration');
     history.replaceState(null,'',url);
   };
   typeCheckboxes.forEach(input => input.addEventListener('change', () => {
