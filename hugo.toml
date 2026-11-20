@@ -1,31 +1,40 @@
 baseURL = "https://staging.yurulink-frontend.pages.dev/"
-# staging専用。main昇格時はProductionのURLへ差し替える。
+# サイトの公開URL。導入先に合わせて指定します。
 title = "YuruLink"
 defaultContentLanguage = "ja"
 disableKinds = ["taxonomy", "term", "RSS"]
 enableRobotsTXT = true
 
 [params]
-# 採用JPEGを輪郭抽出・単色化した共通ベクターSVGを使用する。
+# ヘッダーとナビゲーションで使うブランドシンボル。static/以下の相対パスを指定します。
 brand_logo = "brand/yurulink-symbol-master.svg"
-# サイドバーの注記。空欄は表示しない。審査ポリシーそのものは変更しない。
+# サイドバー最下部の任意の補足文。空欄では表示しません。
 sidebar_notice = ""
-# OGPは候補AをPreviewで暫定設定。正式採用の判断後に切り替える。
+# OGP/Twitterカードに使用する画像。static/以下の相対パスを指定します。
 og_image = "ogp/yurulink-light.png"
 
-# ナビゲーションの表示名はここで変更する。
 [params.navigation]
-posts_label = "記事"
+# お知らせと記事の一覧表示名（公開URLは/about/です）。
+posts_label = "記事・お知らせ"
 
-# 本番アカウントのURLは確認後に登録。未設定のリンクは表示しない。
 [params.social]
-x = ""
+# サイト自身が運営するSNSプロフィールのURL。出演者や参照元のSNSは設定しません。
+# HTTPSのURLだけを出力し、未設定のサービスは非表示にします。
+x = "https://x.com/YuruLinkDev"
 instagram = ""
 youtube = ""
 bluesky = ""
 threads = ""
 discord = ""
 
-# GA4測定ID（G-...）。空なら測定機能を読み込まない。計測は訪問者の同意後。
 [params.analytics]
+# GA4ウェブデータストリームの測定ID（G-...）。空欄ならタグと同意UIを出力しません。
+# ID指定時も訪問者の同意後に限りgtag.jsを読み込みます。
 ga4_measurement_id = ""
+# Cloudflare Web Analyticsの手動埋込用サイトトークン。空欄なら無効です。
+# ホスティング先と無関係に利用できます。CDN側の自動挿入と重複させないでください。
+cloudflare_web_analytics_token = ""
+# New Relic Browserの公式画面から取得したCopy/Pasteスニペットを指定します。
+# 貼付けるコード全体は信頼できるサイト管理者だけが設定してください。
+# 空欄なら無効。複数行の場合はTOMLの複数行リテラル文字列を使用できます。
+new_relic_browser_snippet = ""
