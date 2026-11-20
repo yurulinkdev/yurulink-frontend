@@ -12,3 +12,20 @@ brand_logo = "brand/yurulink-symbol-master.svg"
 sidebar_notice = ""
 # OGPは候補AをPreviewで暫定設定。正式採用の判断後に切り替える。
 og_image = "ogp/yurulink-light.png"
+
+# ナビゲーションの表示名はここで変更する。
+[params.navigation]
+posts_label = "記事"
+
+# 本番アカウントのURLは確認後に登録。未設定のリンクは表示しない。
+[params.social]
+x = ""
+instagram = ""
+youtube = ""
+bluesky = ""
+threads = ""
+discord = ""
+
+# GA4測定ID（G-...）。空なら測定機能を読み込まない。計測は訪問者の同意後。
+[params.analytics]
+ga4_measurement_id = ""

@@ -1,0 +1,30 @@
+{{/* SNS URLはhugo.tomlの[params.social]のみを参照。未設定・非HTTPSは出力しない。 */}}
+{{ $links := slice
+  (dict "key" "x" "label" "X")
+  (dict "key" "instagram" "label" "Instagram")
+  (dict "key" "youtube" "label" "YouTube")
+  (dict "key" "bluesky" "label" "Bluesky")
+  (dict "key" "threads" "label" "Threads")
+  (dict "key" "discord" "label" "Discord")
+}}
+{{ range $links }}
+  {{ $label := .label }}
+  {{ $key := .key }}
+  {{ $url := index $.Site.Params.social $key | default "" }}
+  {{ with $url }}
+    {{ $parsed := urls.Parse . }}
+    {{ if and (eq $parsed.Scheme "https") $parsed.Host (not $parsed.User) }}
+      <a class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 hover:bg-panel-muted hover:text-accent" href="{{ $parsed.String | safeURL }}" target="_blank" rel="noopener noreferrer" aria-label="YuruLinkの{{ $label }}を開く">
+        <svg class="h-4 w-4 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          {{ if eq $key "x" }}<path d="M4 4l16 16M19 4L5 20"/>
+          {{ else if eq $key "instagram" }}<rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/>
+          {{ else if eq $key "youtube" }}<rect x="2" y="5" width="20" height="14" rx="4"/><path d="m10 9 5 3-5 3z"/>
+          {{ else if eq $key "discord" }}<path d="M5 7c4-3 10-3 14 0l2 10-5 2-1-2H9l-1 2-5-2 2-10Z"/><circle cx="9" cy="12" r="1"/><circle cx="15" cy="12" r="1"/>
+          {{ else }}<path d="M4 14C7 6 10 5 12 12c2-7 5-6 8 2-3 5-6 6-8 2-2 4-5 3-8-2Z"/>
+          {{ end }}
+        </svg>
+        <span>{{ $label }}</span>
+      </a>
+    {{ end }}
+  {{ end }}
+{{ end }}

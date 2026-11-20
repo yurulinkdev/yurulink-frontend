@@ -1,6 +1,6 @@
 {{ define "main" }}
 <section class="mx-auto max-w-5xl px-4 py-8 sm:px-7">
-  <h1 class="mb-3 text-2xl font-bold">{{ .Title }}</h1>
+  <h1 class="mb-3 text-2xl font-bold">{{ if eq .Section "posts" }}{{ .Site.Params.navigation.posts_label | default .Title }}{{ else }}{{ .Title }}{{ end }}</h1>
   {{ with .Content }}<div class="article-prose mb-8">{{ . }}</div>{{ end }}
   {{ $pages := .RegularPages.ByDate.Reverse }}
   {{ if $pages }}
