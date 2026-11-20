@@ -345,7 +345,7 @@ test('high view count: numeric rendering and sorting preserve the elephant video
 test('search help article and combined publication-date range', async ({page}) => {
   await openCatalog(page);
   await expect(page.getByRole('link',{name:'検索の使い方を開く'}))
-    .toHaveAttribute('href',/\/posts\/search-guide\/$/);
+    .toHaveAttribute('href',/\/help\/search-guide\/$/);
   await page.locator('#search-advanced summary').click();
   await page.locator('#date-from').fill('2021-03-23');
   await page.locator('#date-to').fill('2021-03-23');
@@ -374,7 +374,7 @@ test('invalid calendar dates in shared URL are ignored, valid leap day is retain
 });
 
 test('search guide describes all URL filters and explicitly notes missing participant data', async ({page}) => {
-  await page.goto('/posts/search-guide/');
+  await page.goto('/help/search-guide/');
   await expect(page.getByRole('heading', {name:'YuruLink の検索・絞り込みガイド'})).toBeVisible();
   const text=await page.locator('article').innerText();
   for (const key of ['date_field','from','to','people','AND条件','OR条件']) {
