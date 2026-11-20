@@ -1,6 +1,6 @@
 {{ define "main" }}
       <section class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
-        {{ with .Site.GetPage "/news" }}
+        {{ with .Site.GetPage "/about" }}
           <section class="mb-6 rounded-xl border border-line bg-panel px-4 py-4 sm:px-5" aria-labelledby="home-news-heading">
             <div class="mb-2 flex items-baseline justify-between gap-3">
               <h2 id="home-news-heading" class="font-semibold">おしらせ</h2>
@@ -8,12 +8,10 @@
             </div>
             <ul class="space-y-2 text-sm">
               {{ range first 4 .RegularPages.ByDate.Reverse }}
-                {{ if ne .File.BaseFileName "changelog" }}
-                  <li><time datetime="{{ .Date.Format "2006-01-02" }}" class="mr-2 text-xs text-muted-ink">{{ .Date.Format "2006-01-02" }}</time><a href="{{ .RelPermalink }}" class="text-accent hover:underline">{{ .Title }}</a></li>
-                {{ end }}
+                <li><time datetime="{{ .Date.Format "2006-01-02" }}" class="mr-2 text-xs text-muted-ink">{{ .Date.Format "2006-01-02" }}</time><a href="{{ .RelPermalink }}" class="text-accent hover:underline">{{ .Title }}</a></li>
               {{ end }}
             </ul>
-            <p class="mt-3 text-xs text-muted-ink">初めての方は<a href="{{ "posts/about/" | relURL }}" class="ml-1 text-accent underline underline-offset-2">このサイトについて</a>をご覧ください。</p>
+            <p class="mt-3 text-xs text-muted-ink">関連する動画・記事・サイト・SNSを探せる非公式リンク集です。<a href="{{ "about/" | relURL }}" class="ml-1 text-accent underline underline-offset-2">このサイトについて</a></p>
           </section>
         {{ end }}
         <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
@@ -39,20 +37,9 @@
             <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="short" class="accent-accent">ショート</label>
             <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="live" class="accent-accent">ライブ</label>
             <button type="button" id="reset-content-type-filter" class="rounded-md border border-line px-2 py-1 text-xs hover:bg-panel-muted">解除</button>
-            <p class="w-full text-xs text-muted-ink">未選択ならすべて表示。種類の指定はOR条件です。ショートには暫定判定の動画を含みます。</p>
+            <p class="w-full text-xs text-muted-ink">未選択ならすべて表示。種類の指定はOR条件です。5分未満のYouTube動画は「ショート」に分類します。</p>
           </fieldset>
         </details>
-        <div class="mb-4 flex flex-wrap items-center gap-3 text-sm">
-          <label for="duration-range" class="font-medium text-muted-ink">動画の再生時間</label>
-          <select id="duration-range" class="rounded-lg border border-line bg-panel px-3 py-2 text-ink" aria-label="動画の再生時間で絞り込み">
-            <option value="all">すべて（再生時間で絞り込まない）</option>
-            <option value="under-5">5分未満</option>
-            <option value="5-20">5分以上〜20分未満</option>
-            <option value="20-60">20分以上〜60分未満</option>
-            <option value="over-60">60分以上</option>
-            <option value="unknown">再生時間が未取得の動画</option>
-          </select>
-        </div>
         <nav id="pagination-top" class="mb-4 flex flex-wrap items-center justify-center gap-2" aria-label="ページ切り替え（上部）"></nav>
         {{ $catalog := .Site.Data.public.catalog }}
         {{ if and $catalog (eq (int ($catalog.schema_version | default 0)) 2) }}
