@@ -1,8 +1,8 @@
 import { test, expect } from '@playwright/test';
 
-test('トップの案内・About独立・ヘルプと更新履歴', async ({ page }) => {
+test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履歴', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('#home-news-heading')).toHaveText('おしらせ');
+  await expect(page.locator('#home-news-heading')).toHaveCount(0);
   await page.goto('/about/');
   await expect(page.getByRole('heading', { name: 'このサイトについて', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: '記事・お知らせ', exact: true })).toBeVisible();
@@ -42,9 +42,10 @@ test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
   await expect(page.locator('#sort-order')).toHaveValue('duration-desc');
 });
 
-test('GA4・Browser監視は未設定なら無効、公式Xアカウントを表示', async ({ page }) => {
+test('GA4設定済みだがStagingホストでは測定しない・公式Xを表示', async ({ page }) => {
   await page.goto('/about/');
-  await expect(page.locator('#analytics-consent')).toHaveCount(0);
+  await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
+  await expect(page.locator('#analytics-consent')).toBeHidden();
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="cloudflareinsights.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="newrelic.com"]')).toHaveCount(0);
@@ -75,4 +76,43 @@ test('5分未満はショート・300秒は動画（カテゴリと種類の両�
   await page.locator('input[name="content-type"][value="short"]').uncheck();
   await page.locator('input[name="content-type"][value="video"]').check();
   expect(await titles()).toEqual(['300秒','未取得']);
+});
+
+test('サイドバーの階層はトップ・About・ヘルプで同じ', async ({ page }) => {
+  const categories = async () => page.locator('#category-buttons [data-nav-group]').evaluateAll(nodes =>
+    nodes.map(node => node.dataset.navGroup));
+  await page.goto('/');
+  await expect(page.locator('#home-news-heading')).toHaveCount(0);
+  await expect(page.locator('#category-buttons [data-server-nav-root]')).toHaveCount(1);
+  const homeGroups = await categories();
+  for (const group of ['youtube-channels', 'video-role', 'site-social', 'social-content']) {
+    expect(homeGroups).toContain(group);
+  }
+  await page.goto('/about/');
+  expect(await categories()).toEqual(homeGroups);
+  await page.goto('/help/search-guide/');
+  expect(await categories()).toEqual(homeGroups);
+});
+
+test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', async ({ page }) => {
+  await page.goto('/?category=browse:web-other');
+  const home = page.locator('#category-buttons button[data-category="browse:web-other"]');
+  await expect(home).toHaveAttribute('aria-current','true');
+  await page.goto('/help/search-guide/');
+  const help = page.locator('#category-buttons a[data-category="browse:web-other"]');
+  await expect(help).toHaveAttribute('aria-current','true');
+  await expect(help).toHaveClass(/bg-panel-muted/);
+  await expect(page.locator('#category-buttons details[data-nav-group="source:unknown"]')).toHaveAttribute('open','');
+  await page.goto('/about/');
+  const about = page.locator('#category-buttons a[data-category="browse:web-other"]');
+  await expect(about).toHaveAttribute('aria-current','true');
+  await about.click();
+  await expect(page).toHaveURL(/category=browse%3Aweb-other/);
+  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]')).toHaveAttribute('aria-current','true');
+});
+
+test('GA4 Production専用ホスト制限はページの設定に存在', async ({ page }) => {
+  await page.goto('/help/');
+  await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
+  await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
 });
