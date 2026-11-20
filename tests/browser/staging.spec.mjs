@@ -362,6 +362,26 @@ test('search help article and combined publication-date range', async ({page}) =
   await expect(page).not.toHaveURL(/from=|to=|date_field=/);
 });
 
+test('invalid calendar dates in shared URL are ignored, valid leap day is retained', async ({page}) => {
+  await openCatalog(page, '/?from=2026-02-30&to=2026-13-01&date_field=updated');
+  await expect(page.locator('#date-from')).toHaveValue('');
+  await expect(page.locator('#date-to')).toHaveValue('');
+  await expect(page).not.toHaveURL(/(?:from|to)=2026/);
+  await page.goto('/?from=2024-02-29&to=2024-02-29');
+  await expect(page.locator('#date-from')).toHaveValue('2024-02-29');
+  await expect(page.locator('#date-to')).toHaveValue('2024-02-29');
+  await expect(page).toHaveURL(/from=2024-02-29/);
+});
+
+test('search guide describes all URL filters and explicitly notes missing participant data', async ({page}) => {
+  await page.goto('/posts/search-guide/');
+  await expect(page.getByRole('heading', {name:'YuruLink の検索・絞り込みガイド'})).toBeVisible();
+  const text=await page.locator('article').innerText();
+  for (const key of ['date_field','from','to','people','AND条件','OR条件']) {
+    expect(text).toContain(key);
+  }
+});
+
 test('person tags require explicit item relations and combine with dates', async ({page}) => {
   await page.goto('/');
   await page.setContent(
