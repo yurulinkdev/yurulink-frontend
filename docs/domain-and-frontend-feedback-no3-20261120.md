@@ -1,0 +1,53 @@
+# yurulink.com ドメイン導入・Frontend No.3（2026-11-20）
+
+## 目的と変更境界
+
+- 登録：Cloudflare Registrarで`yurulink.com`を**最初は1年間**取得する。現時点でユーザーは空き確認済み、**購入実行は未確認**。
+- 公開正規URL：`https://www.yurulink.com/` → Cloudflare Pagesの既存`yurulink-frontend`プロジェクト／`main`。
+- 検証URL：`https://staging.yurulink.com/` → 同Pagesプロジェクトの`staging`ブランチ。
+- 補助URL：`https://yurulink.com/`およびHTTPアクセスは正規`www`へ**301**恒久リダイレクト。要求パス・クエリも保持する。
+- この文書の作成・Frontend stagingコード更新は、**Registrar決済・Cloudflare DNS変更・本番公開・mainマージを行わない**。各操作はユーザーの承認を得る。
+
+## Cloudflare Registrarでの1年購入（ユーザー操作）
+
+1. Cloudflareダッシュボード → Domain Registration → Register Domains。登録名`yurulink.com`を再検索。
+2. 決済直前に空き・初年度価格・更新価格・プレミアム扱いでないことを確認。年数は**1年**を選択。
+3. 連絡先・支払方法・規約を確認し決済。必要な登録メール確認を実施。秘密の決済情報をGitHubやProject.mdへ記載しない。
+4. CloudflareのNSを使うことがCloudflare Registrarの前提。登録後はDNSゾーン・NS・証明書・DNSSECの状態を点検。
+5. **自動更新はデフォルト有効**。1年間だけ先払いすることと、1年で失効させることは異なる。ドメイン喪失を避けるため継続利用予定なら自動更新維持を推奨。
+
+## DNS・Pages・分岐の設定（購入完了後、権限と承認を確認）
+
+1. **Stagingから先行**：Pages`yurulink-frontend` → Custom domains → `staging.yurulink.com`を追加・Activate。初期に生成される`staging` CNAMEの宛先を**`staging.yurulink-frontend.pages.dev`**に変更。**Proxied（オレンジ雲）必須**。DNS onlyだとProductionの`main`に流れる可能性がある。
+2. Pages側とDNS側でStaging独自ホストのTLS証明書・公開内容・SHA・キャッシュ・`noindex`を検証（独自ホストでも検索エンジンに索引させないように設定）。なお旧`staging.yurulink-frontend.pages.dev`は切替検証中は保持。
+3. 本番コンテンツを`main`へ移すことは別途承認のうえ行う。確認した後、Pagesの同じプロジェクトのCustom domainsに`www.yurulink.com`を追加・Activate。DNS`www CNAME yurulink-frontend.pages.dev`（Proxied）を確認。PagesのProduction branchは`main`から変更しない。
+4. Apex`@`は「リダイレクト専用」。Cloudflare DNSに`A @ 192.0.2.1`（**Proxied**）を追加。これはCloudflare公式手順の予約済み例示アドレスで、オリジンサーバーではない。不要な重複A/AAAA/CNAMEを作成しない。
+5. Cloudflare Rules → Redirect Rules → Single Redirects。フィルタ`(http.host eq "yurulink.com")`、宛先（Dynamic）`concat("https://www.yurulink.com", http.request.uri.path)`、**301**、**Preserve query string有効**。サブドメインには一致しない。HTTP/HTTPS双方の元ホストを一段で正規HTTPSへ転送する。
+6. `www`および`staging`はそれぞれ証明書の有効性、HTTPS応答とリンクの絶対パス、OGP/canonicalを確認する。必要なら既存`*.pages.dev`へのアクセスを後日独自ホストへ転送するが、Preview/CIの検証用URLを壊さない。
+7. Hugoの`baseURL`を環境別に設定する。**Stagingビルドでは`https://staging.yurulink.com/`、Productionでは`https://www.yurulink.com/`**を使う（`hugo --baseURL`またはCI環境別設定）。現段階は旧Previewが稼働中なので`hugo.toml`の`baseURL`を先行変更しない。
+8. Analytics：GA4測定ID`G-8Y659Y3Y8Y`。Frontend `hugo.toml`の`params.analytics.ga4_measurement_id`へ登録。`ga4_hostnames=["www.yurulink.com"]`によりStagingではタグを読み込まない。GA4は訪問者が同意した後にのみ読み込む。GAの計測検証は本番ホストで同意したテスト端末を使い、個人識別情報を送信しない。
+
+## 動作確認チェック
+
+- `https://staging.yurulink.com/about/` → Stagingのコンテンツ、TLS正常、`noindex`適用・GA4通信なし。
+- `https://www.yurulink.com/` → Production、本番表示の承認済み内容、Canonical/OGPに`www`ドメイン。
+- `http://yurulink.com/about/?q=abc` → 301 `https://www.yurulink.com/about/?q=abc`（パス・クエリ保存）。
+- `https://yurulink.com/help/` → 301 `https://www.yurulink.com/help/`。
+- `https://staging.yurulink.com/`は**Apexリダイレクトの対象外**。StagingがProductionに誤接続されないことを実際のコミットSHAで確認。
+- AnalyticsでStagingが本番のレポートに混入しないことを確認。GDPR等の要否を判断しプライバシー表記を整備。
+
+## No.3 フロントエンド確定仕様
+
+- トップの「お知らせ」ボックスはPC・スマホともに**完全撤去**。本文ページ`/about/`以下で「記事・お知らせ」を扱うことは引き続き可。
+- サイドバーの旧「種類から探す」簡略版を廃止し、**すべてのHugoページで同一のナビゲーション部分テンプレート**を用いる。主要グループはYouTubeチャンネル、その他のプレイリスト、動画の位置づけ、サイト・SNS、その他のカテゴリー。
+- トップページのみクリックでフィルタ適用し、下層ページの項目は同じカテゴリー値を持つトップへのリンクとする。階層・表示名は同一のHugo部分テンプレートからビルドし、JS生成との二重管理を避ける。
+- カテゴリ選択と展開グループは`localStorage`に保持。About・ヘルプ・履歴ページへ移動しても選択状態のハイライトと親グループの展開を維持し、戻ったトップでは最後のカテゴリを再現する。URLクエリ`category`の明示値を優先。
+- Google Formsや公開カタログのBackend分類、Book3/Book4、Productionには手を加えない。
+
+## 公式資料
+
+- Registrar：https://developers.cloudflare.com/registrar/get-started/register-domain/
+- Pages独自ドメイン：https://developers.cloudflare.com/pages/configuration/custom-domains/
+- Staging独自ホスト：https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/
+- Apexリダイレクト：https://developers.cloudflare.com/fundamentals/manage-domains/redirect-domain/
+- 更新と自動更新：https://developers.cloudflare.com/registrar/account-options/renew-domains/
