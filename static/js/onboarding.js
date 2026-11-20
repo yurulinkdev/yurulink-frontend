@@ -38,6 +38,8 @@
   document.body.append(hint);
   hint.querySelector('button').addEventListener('click', clear);
   target.addEventListener('click', clear, { once: true });
+  // 案内の下にあるリンクも通常どおり押せるようにし、操作開始時に案内を閉じる。
+  document.getElementById('category-buttons')?.addEventListener('click', clear, { once: true });
   document.addEventListener('keydown', onKey);
   window.addEventListener('resize', relocate);
   relocate();
