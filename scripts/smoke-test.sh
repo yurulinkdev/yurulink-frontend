@@ -2,7 +2,7 @@
 set -euo pipefail
 
 cleanup() {
-  rm -f content/posts/smoke-ci.md
+  rm -f content/about/smoke-ci.md
   if [[ -d "${BACKUP_DIR:-}" ]]; then
     for file in catalog.json videos.json; do
       if [[ -f "$BACKUP_DIR/$file" ]]; then
@@ -17,7 +17,7 @@ trap cleanup EXIT
 
 echo "::group::Default build"
 npm run build
-for path in public/index.html public/posts/index.html public/news/index.html; do
+for path in public/index.html public/about/index.html public/history/index.html public/help/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
@@ -34,7 +34,7 @@ grep -q 'drawer.inert' static/js/theme-control.js
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
-cat > content/posts/smoke-ci.md <<'EOF'
+cat > content/about/smoke-ci.md <<'EOF'
 ---
 title: "Smoke CI 記事"
 date: 2026-11-13
@@ -45,11 +45,11 @@ description: "自動テスト用の一時記事"
 本文のテストです。
 EOF
 npm run build
-test -s public/posts/smoke-ci/index.html
-grep -q 'Smoke CI 記事' public/posts/smoke-ci/index.html
-grep -q 'テスト見出し' public/posts/smoke-ci/index.html
-grep -Eq 'rel=("canonical"|canonical)([ >])' public/posts/smoke-ci/index.html || { echo '::error::Missing canonical'; exit 1; }
-grep -q 'og:title' public/posts/smoke-ci/index.html
+test -s public/about/smoke-ci/index.html
+grep -q 'Smoke CI 記事' public/about/smoke-ci/index.html
+grep -q 'テスト見出し' public/about/smoke-ci/index.html
+grep -Eq 'rel=("canonical"|canonical)([ >])' public/about/smoke-ci/index.html || { echo '::error::Missing canonical'; exit 1; }
+grep -q 'og:title' public/about/smoke-ci/index.html
 echo "::endgroup::"
 
 echo "::group::Build without catalog JSON"
@@ -59,9 +59,9 @@ for file in catalog.json videos.json; do
 done
 npm run build
 test -s public/index.html
-test -s public/posts/index.html
-test -s public/news/index.html
-test -s public/posts/smoke-ci/index.html
+test -s public/about/index.html
+test -s public/history/index.html
+test -s public/about/smoke-ci/index.html
 grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
 grep -q "catalog-list-view" assets/css/input.css
