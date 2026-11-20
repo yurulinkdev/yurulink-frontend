@@ -20,8 +20,8 @@
 
 ### 列挙値
 
-- `kind`: `video`, `article`, `website`, `tool`, `social_profile`, `podcast_episode`, `other`
-- `platform`: `youtube`, `x`, `instagram`, `spotify`, `web`, `other`
+- `kind`: `video`, `article`, `website`, `tool`, `social_profile`, `social_post`, `podcast_episode`, `other`
+- `platform`: `youtube`, `x`, `instagram`, `note`, `spotify`, `web`, `other`
 - `provenance`: `official`, `community`, `unknown`（ホスト名だけで公式と判定しない）
 - `status`: `published`, `unlisted`（公開JSONには `published` のみ）
 
@@ -148,3 +148,12 @@
 - Green Book2 O列およびBook4の`payload_json.view_count`は正常な整数。例：動画 `youtube:yzTqAU_kiKM` の値`1843230`。
 - HugoのJSON数値を素の`{{ .view_count }}`でHTMLに出力すると、桁の大きな値が`1.84323e+06`となり、以前のJS正規表現`^\d+$`で無効扱いされていた。
 - 現在はHugo側で整数文字列`printf "%.0f" (float .view_count)`に正規化し、JSは指数表記も非負の安全な整数なら受容する。表示は`Intl.NumberFormat('ja-JP')`で`1,843,230`。欠損・非動画は再生数ソートで末尾。固定値と実カタログの検証をPlaywrightに追加。
+
+## 2026-11-20以降の外部投稿・Shorts画面分類の拡張
+
+- `items[].category_id`は任意の、審査済みの分類葉ID。正本はBackend develop `config/taxonomy.v1.json`。Frontendの`data/taxonomy.json`は定義の複製。
+- Instagramの公開投稿／リールは`kind=social_post`, `platform=instagram`で、`category_id=instagram_post`／`instagram_reel`により区別する。自動スクレイピングは行わず、フォームや管理者CSVからの手動候補として受領する。
+- Xの投稿単体は`kind=social_post`, `platform=x`, `category_id=x_post`。
+- noteの記事単体・シリーズは`kind=article`, `platform=note`。記事は`category_id=note_article`、シリーズは`category_id=note_series`。既存の`kind`値を増やさずに対応し、必要に応じてCollectionによる記事関係を追加する。
+- `video_format`はBackend収集時の来歴を持つメタデータ。一方Frontendは**サイト内の表示分類として再生時間が300秒未満のYouTube動画をショート**とみなす（公式Shorts認定とは異なる）。Frontendの画面分類からBook2/Book4の`video_format_source`を変更しない。
+- `status=published`は必ず審査／品質ゲートを通過させる。CSVやGoogle Formsの投稿が来たこと自体を公開承認とみなさない。
