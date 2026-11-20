@@ -34,7 +34,13 @@
   const dateToControl = document.getElementById('date-to');
   const personFilterOptions = document.getElementById('person-filter-options');
   const advancedDetails = document.getElementById('search-advanced');
-  const validCalendarDate = value => /^\d{4}-\d{2}-\d{2}$/.test(value || '');
+  // URLから渡された存在しない日付（例: 2026-02-30）を検索条件に採用しない。
+  // new Date("YYYY-MM-DD")のみでは繰上がりが起きるため、ISOに戻して同値性を確認する。
+  const validCalendarDate = value => {
+    if (!/^\d{4}-\d{2}-\d{2}$/.test(value || '')) return false;
+    const time = Date.parse(value + 'T00:00:00Z');
+    return Number.isFinite(time) && new Date(time).toISOString().slice(0,10) === value;
+  };
   const initialDate = value => validCalendarDate(value) ? value : '';
   let dateField = params.get('date_field') === 'updated' ? 'updated' : 'published';
   let dateFrom = initialDate(params.get('from'));
