@@ -1,17 +1,24 @@
-# SNS投稿単体へのリンクの対応範囲（2026-11-20）
+# 外部SNS・note投稿単体へのリンク分類（2026-11-20確定）
 
-実装：SNSプロフィール（social_profile）と個別Xポスト（social_post / x_post / platform=x）を別分類にする。リンク収集・埋め込みを自動化せず、審査済みの公開URL・表示名・出所のみ採用する。現時点で実ポストのデータは投入しない。
+## 対象
 
-追加候補（提案段階）：
-- Instagramの通常投稿・リール：高優先候補。permalinkが用意されるが、非公開・ログイン・削除時は閲覧できない。
-- Threads・Bluesky・Mastodonの公開投稿：中優先候補。各プラットフォームのURL規則と公開範囲を個別に確認。
-- TikTok動画：YouTube動画カテゴリとの分類重複や権利関係を先に整理。
-- Reddit投稿：コミュニティとしての分類も検討。
+- Xの公開投稿：`kind=social_post`, `platform=x`, `category_id=x_post`。
+- Instagramの公開投稿：`kind=social_post`, `platform=instagram`, `category_id=instagram_post`。
+- Instagramの公開リール：`kind=social_post`, `platform=instagram`, `category_id=instagram_reel`。URLは`instagram.com/reel/...`を想定。
+- noteの記事単体：`kind=article`, `platform=note`, `category_id=note_article`。
+- noteのシリーズ・マガジン等：`kind=article`, `platform=note`, `category_id=note_series`。シリーズ全体のリンクを1つのItemとして扱い、所属記事をCollectionで表現する余地を残す。
 
-個別URLの登録と本文のスクレイピング・画像複製・埋め込みは別の審査事項。SNSプラットフォーム側の認証やAPI権限を勝手に追加しない。
+`items[].platform`は表示元サービス、`kind`はリンク実体、`category_id`はユーザー向け分類である。既存`schema_version=2`の契約を保ち、URLによるプラットフォーム推定だけで公式性を判断しない。
 
-一次資料：
-- https://developers.facebook.com/docs/instagram-platform/reference/instagram-media/v21.0/
-- https://docs.bsky.app/docs/tutorials/creating-a-post
-- https://docs.joinmastodon.org/methods/streaming/
-- https://developers.tiktok.com/docs/en/tiktok-api-v2-video-object/
+## 受付と公開
+
+1. 公開URL・タイトル・説明をGoogle Formsまたは審査用のCSV一括取込から受領する。
+2. Instagramの自動収集・スクレイピング・画像再配信・自動埋め込みは行わない。非公開アカウント、削除投稿、ログインが必要な投稿は公開できないことがある。
+3. 重複URL、投稿先、分類、公式性、公開可否を審査する。管理者の承認済みのみBook4と公開カタログへ渡す。投稿者のカテゴリ指定は承認を意味しない。
+4. Google Form側の分類選択肢実更新、Book3→SubmissionMaster→Book4のE2E処理は未完了。分類の正本はBackend`config/taxonomy.v1.json`。
+
+現状のFrontend実装は**これらの種類を表示できる分類受け皿**まで。外部リンク実データの登録・審査・公開は別工程。
+
+公式：
+- https://www.facebook.com/help/instagram/196883487377501
+- https://www.help-note.com/hc/ja
