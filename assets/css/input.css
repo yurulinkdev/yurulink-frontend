@@ -180,6 +180,7 @@ body { background: var(--page); color: var(--text); }
   background: var(--panel);
   color: var(--ink);
   box-shadow: 0 12px 32px rgb(0 0 0 / .18);
+  pointer-events: none; /* 既存ナビゲーションのクリックを妨げない */
   padding: 12px 14px;
   font-size: .875rem;
   line-height: 1.5;
