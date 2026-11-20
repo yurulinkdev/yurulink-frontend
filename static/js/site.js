@@ -494,6 +494,12 @@
       const av = a.kind === 'video' && a.platform === 'youtube' && a.duration !== null;
       const bv = b.kind === 'video' && b.platform === 'youtube' && b.duration !== null;
       if (av !== bv) return av ? -1 : 1;
+      // 未取得のYouTube動画は、再生時間を持たないサイト等より先に表示。
+      if (!av) {
+        const aVideo = a.kind === 'video' && a.platform === 'youtube';
+        const bVideo = b.kind === 'video' && b.platform === 'youtube';
+        if (aVideo !== bVideo) return aVideo ? -1 : 1;
+      }
       if (av && a.duration !== b.duration) return sort === 'duration-desc' ? b.duration - a.duration : a.duration - b.duration;
       return a.title.localeCompare(b.title, 'ja');
     }
