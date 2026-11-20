@@ -65,6 +65,14 @@
           "label": "Xの投稿（単体）"
         },
         {
+          "id": "instagram_post",
+          "label": "Instagramの投稿（単体）"
+        },
+        {
+          "id": "instagram_reel",
+          "label": "Instagramのリール"
+        },
+        {
           "id": "community",
           "label": "コミュニティ・交流先"
         },
@@ -97,6 +105,14 @@
         {
           "id": "article",
           "label": "記事"
+        },
+        {
+          "id": "note_article",
+          "label": "noteの記事"
+        },
+        {
+          "id": "note_series",
+          "label": "noteのシリーズ・マガジン"
         }
       ]
     },
