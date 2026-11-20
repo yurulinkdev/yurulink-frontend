@@ -1,23 +1,2 @@
-{{/* JavaScriptの前に表示する分類ナビ。記事ページではこのリンクがそのまま機能する。 */}}
-{{ $home := "" | relURL }}
-<a class="block rounded-lg px-3 py-2 text-sm hover:bg-panel-muted" href="{{ $home }}">すべてのコンテンツ</a>
-<details class="mt-2" open>
-  <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">YouTubeチャンネル</summary>
-  <div class="ml-3 border-l border-line pl-2">
-  {{ with .Site.Data.public.catalog }}
-    {{ range .programs }}
-      {{ if and (hasPrefix .id "youtube-channel:") (not (hasPrefix .name "YouTube channel UC")) }}
-        <a class="block rounded-lg px-3 py-1.5 text-sm hover:bg-panel-muted" href="{{ printf "%s?category=%s" $home ((printf "browse:video:%s" .id) | urlquery) | safeURL }}">{{ .name }} の動画</a>
-      {{ end }}
-    {{ end }}
-  {{ end }}
-  </div>
-</details>
-<details class="mt-2">
-  <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">種類から探す</summary>
-  <div class="ml-3 border-l border-line pl-2">
-    {{ range (slice (dict "id" "browse:playlists" "label" "プレイリスト") (dict "id" "browse:short" "label" "ショート") (dict "id" "browse:live" "label" "ライブ") (dict "id" "browse:social-profiles" "label" "SNSプロフィール") (dict "id" "browse:social-posts" "label" "SNSの投稿・リール") (dict "id" "browse:note-articles" "label" "noteの記事") (dict "id" "browse:note-series" "label" "noteのシリーズ") (dict "id" "browse:web-official" "label" "公式関連サイト") (dict "id" "browse:web-community" "label" "有志・非公式サイト")) }}
-      <a class="block rounded-lg px-3 py-1.5 text-sm hover:bg-panel-muted" href="{{ printf "%s?category=%s" $home (.id | urlquery) | safeURL }}">{{ .label }}</a>
-    {{ end }}
-  </div>
-</details>
+{{/* 全ページ共通のカテゴリー木構造を利用。ホームと下層で階層・名称を分岐させない。 */}}
+{{ partial "site/category-navigation.html" . }}
