@@ -61,6 +61,10 @@
           "label": "SNSプロフィール"
         },
         {
+          "id": "x_post",
+          "label": "Xの投稿（単体）"
+        },
+        {
           "id": "community",
           "label": "コミュニティ・交流先"
         },
