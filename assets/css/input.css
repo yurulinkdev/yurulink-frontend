@@ -159,3 +159,30 @@ body { background: var(--page); color: var(--text); }
 .content-type-disclosure > summary::-webkit-details-marker { display: none; }
 .content-type-disclosure .content-type-chevron { transition: transform .15s ease; }
 .content-type-disclosure[open] .content-type-chevron { transform: rotate(180deg); }
+
+/* 初回訪問時だけ表示する分類導線。視線誘導は控えめにし、操作を妨げない。 */
+.onboarding-highlight {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: .5rem;
+  background: var(--panel-muted);
+}
+.onboarding-hint {
+  position: fixed;
+  z-index: 60;
+  width: min(21rem, calc(100vw - 24px));
+  max-width: calc(100vw - 24px);
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 12px 32px rgb(0 0 0 / .18);
+  padding: 12px 14px;
+  font-size: .875rem;
+  line-height: 1.5;
+}
+.onboarding-hint p { margin: 0; flex: 1; }
+.onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; }

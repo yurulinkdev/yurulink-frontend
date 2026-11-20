@@ -8,7 +8,7 @@
   const empty = document.getElementById('no-results');
   const paginations = [document.getElementById('pagination-top'), document.getElementById('pagination')].filter(Boolean);
   const sortSelect = document.getElementById('sort-order');
-  const validSorts = ['newest','oldest','title-asc','title-desc','views-desc','views-asc'];
+  const validSorts = ['newest','oldest','title-asc','title-desc','views-desc','views-asc','duration-desc','duration-asc'];
   let sort = validSorts.includes(new URL(location.href).searchParams.get('sort')) ? new URL(location.href).searchParams.get('sort') : 'newest';
   const pageSizeSelect = document.getElementById('page-size');
   const buttons = document.getElementById('category-buttons');
@@ -23,6 +23,10 @@
   const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
   const params = new URL(location.href).searchParams;
   let category = params.get('category') || '';
+  const durationSelect = document.getElementById('duration-range');
+  const validDurations = ['all','under-5','5-20','20-60','over-60','unknown'];
+  let durationRange = validDurations.includes(params.get('duration')) ? params.get('duration') : 'all';
+  if (durationSelect) durationSelect.value = durationRange;
   let selectedTypes = parseTypes(params.get('types'));
   typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
   if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
@@ -102,6 +106,19 @@
     return Number.isSafeInteger(numeric) && numeric >= 0 ? numeric : null;
   };
   const formatViewCount = new Intl.NumberFormat('ja-JP', { maximumFractionDigits: 0 });
+  const parseDuration = value => {
+    const raw = String(value ?? '').trim();
+    if (!/^\d+$/.test(raw)) return null;
+    const n = Number(raw);
+    return Number.isSafeInteger(n) && n >= 0 ? n : null;
+  };
+  const formatDuration = seconds => {
+    const h = Math.floor(seconds / 3600);
+    const m = Math.floor(seconds % 3600 / 60);
+    const s = seconds % 60;
+    const two = n => String(n).padStart(2, '0');
+    return h ? h + ':' + two(m) + ':' + two(s) : m + ':' + two(s);
+  };
   const records = items.map(item => ({
     item,
     ids: new Set(categoryIds(item)),
@@ -112,6 +129,7 @@
     updatedDate: (item.dataset.updatedAt || '').slice(0, 10),
     personIds: new Set((item.dataset.personIds || '').split(/\s+/).filter(Boolean)),
     views: parseViewCount(item.dataset.viewCount),
+    duration: parseDuration(item.dataset.durationSeconds),
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
     provenance: item.dataset.provenance || '',
@@ -129,6 +147,11 @@
     const node = item.querySelector('.catalog-item-views');
     if (!node || kind !== 'video' || platform !== 'youtube') return;
     node.textContent = views === null ? '再生数: 未取得' : '再生数: ' + formatViewCount.format(views);
+  });
+  records.forEach(({item, duration, kind, platform}) => {
+    const node = item.querySelector('.catalog-item-duration');
+    if (!node || kind !== 'video' || platform !== 'youtube') return;
+    node.textContent = duration === null ? '再生時間: 未取得' : '再生時間: ' + formatDuration(duration);
   });
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
@@ -167,6 +190,8 @@
     ['browse:live', 'ライブ（すべて）'],
     ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
     ['browse:social', 'SNSアカウント'],
+    ['browse:social-profiles', 'SNSプロフィール'],
+    ['browse:social-posts', 'Xの投稿（単体）'],
     ['browse:web-official', '公式関連サイト'],
     ['browse:web-community', '有志・非公式サイト'],
     ['browse:web-other', '公式性未確認サイト'],
@@ -242,7 +267,9 @@
     if (record.ids.has(selectedCategory)) return true;
     if (selectedCategory === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
       && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
-    if (selectedCategory === 'browse:social') return record.kind === 'social_profile';
+    if (selectedCategory === 'browse:social') return record.kind === 'social_profile' || record.kind === 'social_post';
+    if (selectedCategory === 'browse:social-profiles') return record.kind === 'social_profile';
+    if (selectedCategory === 'browse:social-posts') return record.kind === 'social_post' && record.platform === 'x';
     if (selectedCategory === 'browse:web-official') return webKinds.has(record.kind) &&
       (record.categoryId === 'official_site' || provenanceOf(record) === 'official');
     if (selectedCategory === 'browse:web-community') return webKinds.has(record.kind) &&
@@ -293,6 +320,8 @@
     if (records.some(record => matchesCategory(record, id))) buttons?.append(makeButton(virtualLabels.get(id), id));
   };
   // 全コンテンツの種類別横断表示は上部フィルタに集約し、重複したサイドバー項目を設けない。
+  // Hugo出力の分類リンクを先に表示し、DOM解析完了時に動的な階層メニューへ置換。
+  buttons?.replaceChildren();
   buttons?.append(makeButton('すべてのコンテンツ', ''));
 
   // Book1の収集対象に存在しない投稿元チャンネルは、リンク所属を維持したままナビから除外する。
@@ -391,13 +420,16 @@
     for(const id of ids)appendAvailable(sub.children,id);
     site.children.append(sub.details);
   }
+  const socialContent = makeGroup('SNSコンテンツ', ['browse:social-profiles','browse:social-posts'].includes(category));
+  for (const id of ['browse:social-profiles','browse:social-posts']) appendAvailable(socialContent.children,id);
+  site.children.append(socialContent.details);
   if (site.children.childElementCount) buttons?.append(site.details);
 
   // 記事・イベント・音声など、サイト/SNS/動画に該当しない既存の分類は残す。
   const known = new Set([...categories.filter(([id])=>id.startsWith('youtube-channel:')), ...playlists].map(([id]) => id));
   const siteLeafIds = new Set(['website','tool','social_profile','official_site','community_site','unverified_site',
     'program_site','personal_site','facility_site','web_service','membership_service',
-    'official_social_profile','community_social_profile','unverified_social_profile','community',
+    'official_social_profile','community_social_profile','unverified_social_profile','community','social_post','x_post',
     'official_video','community_video','open_mic_video','guest_video','related_video_unverified',
     'video_episode','video_playlist']);
   const other = categories.filter(([id]) => !known.has(id) && id !== 'video' &&
@@ -444,7 +476,27 @@
       add('次へ', page + 1, page === pages);
     }
   };
+  const matchesDuration = record => {
+    if (durationRange === 'all') return true;
+    if (record.kind !== 'video' || record.platform !== 'youtube') return false;
+    const n = record.duration;
+    if (durationRange === 'unknown') return n === null;
+    if (n === null) return false;
+    if (durationRange === 'under-5') return n < 300;
+    if (durationRange === '5-20') return n >= 300 && n < 1200;
+    if (durationRange === '20-60') return n >= 1200 && n < 3600;
+    if (durationRange === 'over-60') return n >= 3600;
+    return true;
+  };
   const compareItems = (a,b) => {
+    if (sort === 'duration-asc' || sort === 'duration-desc') {
+      // 未取得・非動画は必ず末尾。再生時間が同じ場合はタイトル順。
+      const av = a.kind === 'video' && a.platform === 'youtube' && a.duration !== null;
+      const bv = b.kind === 'video' && b.platform === 'youtube' && b.duration !== null;
+      if (av !== bv) return av ? -1 : 1;
+      if (av && a.duration !== b.duration) return sort === 'duration-desc' ? b.duration - a.duration : a.duration - b.duration;
+      return a.title.localeCompare(b.title, 'ja');
+    }
     if (sort === 'views-desc' || sort === 'views-asc') {
       // 非動画と未取得の再生数は、どちらの方向でも最後に配置する。
       const aValid = a.kind === 'video' && a.platform === 'youtube' && Number.isSafeInteger(a.views);
@@ -479,7 +531,7 @@
       typeFilterStatus.textContent = labels.length ? '選択中：' + labels.join('・') : 'すべて表示';
     }
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && record.query.includes(q)).sort(compareItems);
+    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && matchesDuration(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
     const visible = matching.slice((page-1)*pageSize,page*pageSize).map(record => record.item);
@@ -517,7 +569,7 @@
     });
     renderPagination(pages);
     const url = new URL(location.href);
-    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')],['date_field',dateField==='updated'?'updated':''],['from',dateFrom],['to',dateTo],['people',peopleDefinitions.filter(person=>selectedPeople.has(person.id)).map(person=>person.id).join(',')]]) {
+    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['duration',durationRange==='all'?'':durationRange],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')],['date_field',dateField==='updated'?'updated':''],['from',dateFrom],['to',dateTo],['people',peopleDefinitions.filter(person=>selectedPeople.has(person.id)).map(person=>person.id).join(',')]]) {
       if (value) url.searchParams.set(key,value);
       else url.searchParams.delete(key);
     }
@@ -549,6 +601,7 @@
     personCheckboxes.forEach(input=>{input.checked=false;});
     page=1;update();
   });
+  durationSelect?.addEventListener('change',()=>{ durationRange=validDurations.includes(durationSelect.value)?durationSelect.value:'all';page=1;update(); });
   sortSelect?.addEventListener('change',()=>{sort=sortSelect.value;page=1;update();});
   search?.addEventListener('input',()=>{page=1;update();});
   pageSizeSelect?.addEventListener('change',()=>{pageSize=Number(pageSizeSelect.value);page=1;update();});
@@ -560,6 +613,8 @@
     if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
     sort=validSorts.includes(p.get('sort')) ? p.get('sort') : 'newest';
     if (sortSelect) sortSelect.value=sort;
+    durationRange=validDurations.includes(p.get('duration'))?p.get('duration'):'all';
+    if(durationSelect)durationSelect.value=durationRange;
     if (search) search.value=p.get('q')||'';
     dateField=p.get('date_field')==='updated'?'updated':'published';
     dateFrom=initialDate(p.get('from'));dateTo=initialDate(p.get('to'));
