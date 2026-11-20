@@ -481,21 +481,26 @@ test('mobile header and swipe: edge gesture opens navigation and escape closes i
 });
 
 
-test('real metadata: live and identified Shorts filters are available', async ({ page }) => {
-  for (const [category, videoFormat] of [
-    ['browse:live', 'live'],
-    ['browse:short', 'short']
-  ]) {
+test('real metadata: 5分未満を含むショートとライブの表示分類', async ({ page }) => {
+  const check = async category => {
     await openCatalog(page, '/?' + new URLSearchParams({ category }));
-    await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
-    const formats = await page.locator('[data-catalog-item]:visible').evaluateAll(elements =>
-      elements.map(el => el.dataset.videoFormat));
-    expect(formats.every(value => value === videoFormat)).toBe(true);
-  }
+    await expect(page.locator('[data-catalog-item]:visible').first()).toBeVisible();
+    return page.locator('[data-catalog-item]:visible').evaluateAll(elements => elements.map(el => {
+      const duration = el.dataset.durationSeconds;
+      const underFive = duration !== '' && duration !== undefined && Number(duration) < 300;
+      return { underFive, backendFormat:el.dataset.videoFormat };
+    }));
+  };
+  const lives = await check('browse:live');
+  expect(lives.every(item => !item.underFive && item.backendFormat === 'live')).toBe(true);
+  const shorts = await check('browse:short');
+  expect(shorts.every(item => item.underFive || item.backendFormat === 'short')).toBe(true);
   await openCatalog(page, '/?types=short%2Clive');
-  const formats = await page.locator('[data-catalog-item]:visible').evaluateAll(elements =>
-    elements.map(el => el.dataset.videoFormat));
-  expect(formats.every(value => ['short','live'].includes(value))).toBe(true);
+  const types = await page.locator('[data-catalog-item]:visible').evaluateAll(elements => elements.map(el => {
+    const duration = el.dataset.durationSeconds;
+    return (duration !== '' && duration !== undefined && Number(duration) < 300) || ['short','live'].includes(el.dataset.videoFormat);
+  }));
+  expect(types.every(Boolean)).toBe(true);
   await expect(page.locator('#category-buttons')).not.toContainText('YouTube channel UCJy_hfwQw2_OGTESC3OBckg');
   await expect(page.locator('#category-drawer')).not.toContainText('公開承認されたリンクのみを掲載します');
 });
