@@ -32,3 +32,16 @@ Backend develop `assets/brand/yurulink-symbol-master.svg` は同一SHA-1 Git blo
 OGP・ヒーロー・フォームヘッダーの文字、装飾、テーマ別背景はHTML/CSSで管理し、ロゴに不必要な濃淡やノイズを追加しない。以前の「知識をつなぐ〜」は未承認のため不採用。旧画像は `docs/archive/brand-pre-v2/` とアーカイブブランチに保管し、公開 `static` では新派生素材に置換した。
 
 再現性：AutomationLab GitHub Actions [run 44549192979](https://github.com/yurulinkdev/yurulink-automation-lab/actions/runs/44549192979) 成功。フォーム画像は**ファイルを生成したのみ**で、Google Formsの実際のヘッダー更新は未実施。本番OGPの最終採用・main・Production反映には承認を求める。
+
+## 2026-11-20 OGPデザイン採用・人間向け画像制作キット
+
+ユーザーが現在のライト／ダーク両OGPのデザインを肯定評価し、**双方を媒体別の採用バリエーション**とした。メインコピーのみ「**ゆる関連のコンテンツ、集めました**」へ変更。読点位置で自然に改行する表示処理をAutomationLab HTML-to-Imageのプリセットに追加。ロゴシンボルは採用JPEG由来の単色SVGを維持し、AIによる再描画はしていない。
+
+- OGPライト：`static/ogp/yurulink-light.png`。GitHub blob SHA `e262fcd053a42604c942affd357cee51d6d4be95`。
+- OGPダーク：`static/ogp/yurulink-dark.png`。GitHub blob SHA `bf50417fd73232f73cb5206f3fd3b71d213477a4`。
+- 両画像のサイズは1200×630。Frontend staging 2026-11-20 commit `6fa8717e1d49c93e78c3f1c04041b632d4668500` で配置し、AutomationLab生成物とblob SHA一致を読戻し検証した。Production/mainは触れていない。
+- 再生成の**制作正本**：AutomationLab `feat/brand-html-image-pipeline-20261119` の `visuals/template.html`、`visuals/template.css`、`visuals/render.mjs`、`visuals/presets.json`、`visuals/assets/yurulink-symbol.svg`。PNGは成果物であり、画像編集ソフトで直接文字を書き換えて正本にしない。
+- 人間向け `visuals/toolkit-README.md` と `npm run brand:ogp:light` / `brand:ogp:dark` / `brand:all` を用意。ZIPをGoogle Drive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120` に格納： https://drive.google.com/file/d/1HxTLqzED9TIRCxiU9Ke_Id8LgCL0LnSB/view
+- 将来の装飾パーツはSVGまたはHTML/CSSを原則。ラスタイラストは元データを保護してディザリングなしで減色し、単純な形状ではベクタートレースして出力の目視確認を行う。意図されたグラデーション・陰影・半透明は許可。AutomationLab `visuals/prepare-image-part.py` 参照。
+
+PreviewのCIとOGPタグ配信の確認は実行後に別途報告する。OGPコピーの承認は初期Production切替の事前承認と同一ではない。
