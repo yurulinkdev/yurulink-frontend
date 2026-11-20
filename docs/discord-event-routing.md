@@ -55,5 +55,13 @@ Backendワークフロー: [ingest-book3.yml (develop)](https://github.com/yurul
 
 **注意**：本ルーティング設定はFrontend `main` を基点とした作業ブランチでの変更。レビュー・CI後、mainへのマージは別途承認が必要。現在の `staging` にはこの通知ルーターの実体はまだ含まれていない。
 
+### 初回スレッド送信テスト（2026-11-20）
+
+- [GitHub Actions run 44661590694](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44661590694) は **success**。WebhookはFrontendリポジトリの `DISCORD_WEBHOOK_URL` Secretから取得。
+- 10/20/30/40/50/90の6スレッドに「通知経路テスト（本番イベントではありません）」を1件ずつ送信し、Discordのレスポンスの `channel_id` が設定スレッドIDと一致したことを確認。**6/6成功**。
+- 全メッセージ `allowed_mentions.parse=[]`。メンションなし。実フォーム・SubmissionMaster・公開処理は一切起動していない。
+- この結果はWebhook配送とスレッド振り分けの検証であり、各イベントの実際の発火・実データのE2E・BackendのSecret登録・メンション機能の運用確認を意味しない。
+- テスト用ワークフローは `discord-thread-smoke.yml`。ブランチへの通常のpushでは再送されないようワークフローファイル変更のみをpushトリガーとする。手動再実行は明示的に行う。
+
 ## 将来のGoogle Sheets管理
 Sheetsを人間用の編集UIとして採用する場合、`order`, `event_code`, `enabled`, `thread_id`, `description` を列として持ち、スキーマ検証・GitHubへのPR反映を経て有効化する。SecretsはSheetへ置かない。
