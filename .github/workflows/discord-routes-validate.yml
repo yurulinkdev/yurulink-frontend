@@ -1,0 +1,44 @@
+name: Validate Discord event routes
+on:
+  push:
+    branches: [feat/discord-routing-threads-20261120]
+    paths:
+      - 'ops/notifications/**'
+      - 'docs/discord-event-routing.md'
+      - '.github/workflows/discord-routes-validate.yml'
+  pull_request:
+    paths:
+      - 'ops/notifications/**'
+      - 'docs/discord-event-routing.md'
+permissions:
+  contents: read
+jobs:
+  routes:
+    runs-on: ubuntu-24.04
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Validate event schema and thread IDs
+        run: |
+          node ops/notifications/validate-routes.js
+          node - <<'NODE'
+          const assert = require('node:assert/strict');
+          const routes = require('./ops/notifications/routes.json').events;
+          const expected = {
+            'forms.submission.received': '1573138878238560438',
+            'forms.submission.imported': '1573138950279667832',
+            'catalog.content.published': '1573139410734682272',
+            'deploy.staging.completed': '1573139480251211908',
+            'deploy.production.completed': '1573139590741491882',
+            'ops.cloudflare.inventory.completed': '1573139736468529232'
+          };
+          for (const [code, id] of Object.entries(expected)) {
+            assert.equal(routes[code]?.thread_id, id, code);
+          }
+          assert.equal(routes['forms.submission.received'].enabled, false);
+          assert.equal(routes['forms.submission.imported'].enabled, true);
+          assert.equal(routes['ops.cloudflare.inventory.completed'].enabled, true);
+          console.log('Six Discord routes checked; no network messages sent.');
+          NODE
