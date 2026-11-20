@@ -47,3 +47,33 @@ test('GA4・SNSは未設定の場合は空、更新履歴は5件以内', async (
   expect(await updates.count()).toBeLessThanOrEqual(5);
   await expect(page.getByRole('link',{name:'以前の更新履歴はこちら'})).toHaveAttribute('href',/news\/changelog/);
 });
+
+test('再生時間の実数値ソート・境界値・未取得の末尾処理', async ({ page }) => {
+  await page.goto('/');
+  await page.setContent(`
+    <input id="query"><span id="selected-category"></span><span id="count"></span>
+    <select id="sort-order"><option value="newest">新しい順</option><option value="duration-desc">長い順</option><option value="duration-asc">短い順</option></select>
+    <select id="duration-range"><option value="all">すべて</option><option value="under-5">5分未満</option><option value="5-20">5-20分</option><option value="20-60">20-60分</option><option value="over-60">60分以上</option><option value="unknown">未取得</option></select>
+    <div id="category-buttons"></div><div id="catalog">
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="長い" data-search="長い" data-duration-seconds="3600">長い</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="短い" data-search="短い" data-duration-seconds="299">短い</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="普通" data-search="普通" data-duration-seconds="300">普通</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="未取得" data-search="未取得" data-duration-seconds="">未取得</div>
+      <div data-catalog-item data-kind="website" data-platform="web" data-category="website" data-title="サイト" data-search="サイト">サイト</div>
+    </div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
+  `);
+  await page.addScriptTag({ url: '/js/site.js' });
+  const order = () => page.locator('[data-catalog-item]:visible').evaluateAll(nodes => nodes.map(n => n.dataset.title));
+  await page.locator('#sort-order').selectOption('duration-desc');
+  expect(await order()).toEqual(['長い','普通','短い','未取得','サイト']);
+  await page.locator('#sort-order').selectOption('duration-asc');
+  expect(await order()).toEqual(['短い','普通','長い','未取得','サイト']);
+  await page.locator('#duration-range').selectOption('under-5');
+  expect(await order()).toEqual(['短い']);
+  await page.locator('#duration-range').selectOption('5-20');
+  expect(await order()).toEqual(['普通']);
+  await page.locator('#duration-range').selectOption('over-60');
+  expect(await order()).toEqual(['長い']);
+  await page.locator('#duration-range').selectOption('unknown');
+  expect(await order()).toEqual(['未取得']);
+});
