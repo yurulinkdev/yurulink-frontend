@@ -4,6 +4,9 @@
   if (!section) return;
   const id = section.dataset.ga4Id || '';
   if (!/^G-[A-Z0-9]+$/.test(id)) return;
+  const allowedHosts = (section.dataset.allowedHostnames || '').split(',').map(value => value.trim()).filter(Boolean);
+  // Production専用ストリームへのStaging混入防止。任意のhostname制限はhugo.tomlで設定。
+  if (allowedHosts.length && !allowedHosts.includes(location.hostname)) return;
   const key = 'yurulink-ga4-consent-v1';
   const message = section.querySelector('p');
   const allow = document.getElementById('analytics-allow');
