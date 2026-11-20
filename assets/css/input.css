@@ -186,4 +186,4 @@ body { background: var(--page); color: var(--text); }
   line-height: 1.5;
 }
 .onboarding-hint p { margin: 0; flex: 1; }
-.onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; }
+.onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; pointer-events: auto; }
