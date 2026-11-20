@@ -8,6 +8,7 @@
   {{ partial "theme-init.html" . }}
   <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
   <script src="{{ "js/theme-control.js" | relURL }}" defer></script>
+  <script src="{{ "js/category-state.js" | relURL }}" defer></script>
   <script src="{{ "js/onboarding.js" | relURL }}" defer></script>
   {{ $ga := .Site.Params.analytics.ga4_measurement_id | default "" }}
   {{ if gt (len (findRE "^G-[A-Z0-9]+$" $ga)) 0 }}
