@@ -22,7 +22,9 @@
   const playlistTitleLink = document.getElementById('playlist-title-link');
   const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
   const params = new URL(location.href).searchParams;
-  let category = params.get('category') || '';
+  // 明示的なURLを優先。ページ間移動で保存した分類はクエリなしの再訪でも復元する。
+  let category = params.has('category') ? (params.get('category') || '')
+    : (window.YuruLinkCategoryState?.get() || '');
   let selectedTypes = parseTypes(params.get('types'));
   typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
   if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
@@ -328,8 +330,11 @@
   };
   // 全コンテンツの種類別横断表示は上部フィルタに集約し、重複したサイドバー項目を設けない。
   // Hugo出力の分類リンクを先に表示し、DOM解析完了時に動的な階層メニューへ置換。
-  buttons?.replaceChildren();
-  buttons?.append(makeButton('すべてのコンテンツ', ''));
+  const hasServerNavigation = Boolean(buttons?.querySelector('[data-server-nav-root]'));
+  if (!hasServerNavigation) {
+    buttons?.replaceChildren();
+    buttons?.append(makeButton('すべてのコンテンツ', ''));
+  }
 
   // Book1の収集対象に存在しない投稿元チャンネルは、リンク所属を維持したままナビから除外する。
   // 例えば関連プレイリストに含まれる他者の演奏動画を独立番組として表示しない。
@@ -365,6 +370,15 @@
     if (parent) record.playlistChannelId = parent;
   }
 
+  // 非ホームページもHugoが出力する共通ツリーを使用する。テスト用の空DOMだけは従来生成にフォールバック。
+  for (const [id, meta] of channels) {
+    categoryLabels.set(`browse:video:${id}`, meta.label + 'の動画');
+    categoryLabels.set(`browse:playlists:${id}`, meta.label + 'のプレイリスト');
+    categoryLabels.set(`browse:short:${id}`, meta.label + 'のショート');
+    categoryLabels.set(`browse:live:${id}`, meta.label + 'のライブ');
+  }
+  for (const [id,label] of virtualLabels) categoryLabels.set(id,label);
+  if (!hasServerNavigation) {
   if (channels.length) {
     const group = makeGroup('YouTubeチャンネル', true);
     for (const [id, meta] of channels) {
@@ -446,6 +460,17 @@
     const group = makeGroup('その他のカテゴリー', other.some(([id]) => id === category));
     other.forEach(([id, meta]) => group.children.append(makeButton(meta.label,id)));
     buttons?.append(group.details);
+  }
+  } // Hugoが共通ナビを提供する場合は二重生成しない。
+  if (hasServerNavigation) {
+    buttons?.addEventListener('click', event => {
+      const button = event.target.closest('button[data-category]');
+      if (!button || !buttons.contains(button)) return;
+      category = button.dataset.category || '';
+      page = 1;
+      update();
+      document.getElementById('close-categories')?.click();
+    });
   }
   const renderPagination = pages => {
     for (const pagination of paginations) {
@@ -570,6 +595,7 @@
       button.setAttribute('aria-current', String(button.dataset.category === category));
       button.classList.toggle('bg-panel-muted', button.dataset.category === category);
     });
+    window.YuruLinkCategoryState?.sync(category);
     renderPagination(pages);
     const url = new URL(location.href);
     for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')],['date_field',dateField==='updated'?'updated':''],['from',dateFrom],['to',dateTo],['people',peopleDefinitions.filter(person=>selectedPeople.has(person.id)).map(person=>person.id).join(',')]]) {
