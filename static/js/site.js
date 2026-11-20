@@ -275,8 +275,8 @@
     if (selectedCategory === 'browse:social') return record.kind === 'social_profile' || record.kind === 'social_post';
     if (selectedCategory === 'browse:social-profiles') return record.kind === 'social_profile';
     if (selectedCategory === 'browse:social-posts') return record.kind === 'social_post' && ['x','instagram'].includes(record.platform);
-    if (selectedCategory === 'browse:note-articles') return record.kind === 'article' && record.platform === 'note';
-    if (selectedCategory === 'browse:note-series') return record.kind === 'series' && record.platform === 'note';
+    if (selectedCategory === 'browse:note-articles') return record.kind === 'article' && record.platform === 'note' && record.categoryId !== 'note_series';
+    if (selectedCategory === 'browse:note-series') return record.kind === 'article' && record.platform === 'note' && record.categoryId === 'note_series';
     if (selectedCategory === 'browse:web-official') return webKinds.has(record.kind) &&
       (record.categoryId === 'official_site' || provenanceOf(record) === 'official');
     if (selectedCategory === 'browse:web-community') return webKinds.has(record.kind) &&
@@ -437,7 +437,7 @@
   const known = new Set([...categories.filter(([id])=>id.startsWith('youtube-channel:')), ...playlists].map(([id]) => id));
   const siteLeafIds = new Set(['website','tool','social_profile','official_site','community_site','unverified_site',
     'program_site','personal_site','facility_site','web_service','membership_service',
-    'official_social_profile','community_social_profile','unverified_social_profile','community','social_post','x_post',
+    'official_social_profile','community_social_profile','unverified_social_profile','community','social_post','x_post','instagram_post','instagram_reel','note_article','note_series',
     'official_video','community_video','open_mic_video','guest_video','related_video_unverified',
     'video_episode','video_playlist']);
   const other = categories.filter(([id]) => !known.has(id) && id !== 'video' &&
