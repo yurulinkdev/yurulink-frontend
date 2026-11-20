@@ -1,21 +1,5 @@
 {{ define "main" }}
       <section class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
-        {{ with .Site.GetPage "/about" }}
-          <section class="mb-6 hidden rounded-xl border border-line bg-panel px-4 py-4 sm:block sm:px-5" aria-labelledby="home-news-heading">
-            <div class="mb-2 flex items-baseline justify-between gap-3">
-              <h2 id="home-news-heading" class="font-semibold">おしらせ</h2>
-              <a href="{{ .RelPermalink }}" class="text-xs text-accent hover:underline">一覧へ</a>
-            </div>
-            <ul class="space-y-2 text-sm">
-              {{ range first 4 .RegularPages.ByDate.Reverse }}
-                <li><time datetime="{{ .Date.Format "2006-01-02" }}" class="mr-2 text-xs text-muted-ink">{{ .Date.Format "2006-01-02" }}</time><a href="{{ .RelPermalink }}" class="text-accent hover:underline">{{ .Title }}</a></li>
-              {{ else }}
-                <li class="text-muted-ink">新しいお知らせはありません。</li>
-              {{ end }}
-            </ul>
-            <p class="mt-3 text-xs text-muted-ink">関連する動画・記事・サイト・SNSを探せる非公式リンク集です。<a href="{{ "about/" | relURL }}" class="ml-1 text-accent underline underline-offset-2">このサイトについて</a></p>
-          </section>
-        {{ end }}
         <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
             <p class="mb-1 text-xs text-muted-ink">閲覧中のカテゴリー</p>
