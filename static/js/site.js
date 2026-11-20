@@ -23,10 +23,6 @@
   const viewButtons = [...document.querySelectorAll('[data-catalog-view]')];
   const params = new URL(location.href).searchParams;
   let category = params.get('category') || '';
-  const durationSelect = document.getElementById('duration-range');
-  const validDurations = ['all','under-5','5-20','20-60','over-60','unknown'];
-  let durationRange = validDurations.includes(params.get('duration')) ? params.get('duration') : 'all';
-  if (durationSelect) durationSelect.value = durationRange;
   let selectedTypes = parseTypes(params.get('types'));
   typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
   if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
@@ -191,7 +187,9 @@
     ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
     ['browse:social', 'SNSアカウント'],
     ['browse:social-profiles', 'SNSプロフィール'],
-    ['browse:social-posts', 'Xの投稿（単体）'],
+    ['browse:social-posts', 'SNSの投稿・リール'],
+    ['browse:note-articles', 'noteの記事'],
+    ['browse:note-series', 'noteのシリーズ'],
     ['browse:web-official', '公式関連サイト'],
     ['browse:web-community', '有志・非公式サイト'],
     ['browse:web-other', '公式性未確認サイト'],
@@ -240,19 +238,26 @@
     if (record.verified && record.provenance === 'official') return 'official';
     return [...record.ids].some(id => registeredChannelIds.has(id)) ? 'channel' : 'related';
   };
-  // 再生種別は公開カタログのvideo_formatを優先する。推測で短尺動画をShortsと断定しない。
+  // 5分未満をサイト内表示上の「ショート」とする（YouTube公式のShorts認定ではない）。
+  // 再生時間未取得の場合はBook2のvideo_formatを利用し、300秒ちょうどは通常形式。
   const formatOf = record => record.kind === 'playlist' ? 'playlist'
-    : record.kind === 'video' ? (record.format === 'short' || record.format === 'live' ? record.format : 'video')
-    : 'other';
+    : record.kind === 'video' && record.platform === 'youtube'
+      ? (record.duration !== null && record.duration < 300 ? 'short'
+        : record.format === 'short' || record.format === 'live' ? record.format : 'video')
+      : 'other';
   const matchesType = record => !selectedTypes.size || selectedTypes.has(formatOf(record));
   const matchesCategory = (record, selectedCategory = category) => {
     if (!selectedCategory) return true;
     if (selectedCategory === 'browse:playlists') return record.kind === 'playlist';
-    if (selectedCategory === 'browse:video') return record.kind === 'video' && record.platform === 'youtube';
+    if (selectedCategory === 'browse:video') return formatOf(record) === 'video';
     if (selectedCategory === 'browse:short') return formatOf(record) === 'short';
     if (selectedCategory === 'browse:live') return formatOf(record) === 'live';
     if (selectedCategory.startsWith('browse:playlists:')) {
       return record.kind === 'playlist' && record.playlistChannelId === selectedCategory.slice('browse:playlists:'.length);
+    }
+    if (selectedCategory.startsWith('browse:video:')) {
+      const id = selectedCategory.slice('browse:video:'.length);
+      return formatOf(record) === 'video' && record.ids.has(id);
     }
     if (selectedCategory.startsWith('browse:short:')) {
       const id = selectedCategory.slice('browse:short:'.length);
@@ -265,11 +270,13 @@
     // プレイリストそのものは一覧画面、個別プレイリストは所属動画を表示する。
     if (record.kind === 'playlist' && selectedCategory.startsWith('youtube-playlist:')) return false;
     if (record.ids.has(selectedCategory)) return true;
-    if (selectedCategory === 'browse:single') return record.kind === 'video' && record.platform === 'youtube'
+    if (selectedCategory === 'browse:single') return formatOf(record) === 'video'
       && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
     if (selectedCategory === 'browse:social') return record.kind === 'social_profile' || record.kind === 'social_post';
     if (selectedCategory === 'browse:social-profiles') return record.kind === 'social_profile';
-    if (selectedCategory === 'browse:social-posts') return record.kind === 'social_post' && record.platform === 'x';
+    if (selectedCategory === 'browse:social-posts') return record.kind === 'social_post' && ['x','instagram'].includes(record.platform);
+    if (selectedCategory === 'browse:note-articles') return record.kind === 'article' && record.platform === 'note';
+    if (selectedCategory === 'browse:note-series') return record.kind === 'series' && record.platform === 'note';
     if (selectedCategory === 'browse:web-official') return webKinds.has(record.kind) &&
       (record.categoryId === 'official_site' || provenanceOf(record) === 'official');
     if (selectedCategory === 'browse:web-community') return webKinds.has(record.kind) &&
@@ -282,12 +289,12 @@
       (record.categoryId === 'community_social_profile' || provenanceOf(record) === 'community');
     if (selectedCategory === 'browse:social-other') return record.kind === 'social_profile' &&
       !matchesCategory(record,'browse:social-official') && !matchesCategory(record,'browse:social-community');
-    if (selectedCategory === 'browse:video-official') return videoRole(record) === 'official';
-    if (selectedCategory === 'browse:video-channel') return videoRole(record) === 'channel';
-    if (selectedCategory === 'browse:video-community') return videoRole(record) === 'community';
-    if (selectedCategory === 'browse:video-open-mic') return videoRole(record) === 'open_mic';
-    if (selectedCategory === 'browse:video-guest') return videoRole(record) === 'guest';
-    if (selectedCategory === 'browse:video-related') return videoRole(record) === 'related';
+    if (selectedCategory === 'browse:video-official') return formatOf(record) === 'video' && videoRole(record) === 'official';
+    if (selectedCategory === 'browse:video-channel') return formatOf(record) === 'video' && videoRole(record) === 'channel';
+    if (selectedCategory === 'browse:video-community') return formatOf(record) === 'video' && videoRole(record) === 'community';
+    if (selectedCategory === 'browse:video-open-mic') return formatOf(record) === 'video' && videoRole(record) === 'open_mic';
+    if (selectedCategory === 'browse:video-guest') return formatOf(record) === 'video' && videoRole(record) === 'guest';
+    if (selectedCategory === 'browse:video-related') return formatOf(record) === 'video' && videoRole(record) === 'related';
     return false;
   };
   const makeButton = (label, value) => {
@@ -363,10 +370,11 @@
     for (const [id, meta] of channels) {
       const children = nested.get(id) || [];
       const channel = makeGroup(meta.label, category === id ||
-        [`browse:playlists:${id}`,`browse:short:${id}`,`browse:live:${id}`].includes(category) ||
+        [`browse:video:${id}`,`browse:playlists:${id}`,`browse:short:${id}`,`browse:live:${id}`].includes(category) ||
         children.some(([playlistId]) => playlistId === category));
       channel.details.classList.add('ml-1');
-      channel.children.append(makeButton('動画', id));
+      categoryLabels.set(`browse:video:${id}`, meta.label + 'の動画');
+      channel.children.append(makeButton('動画', `browse:video:${id}`));
       const playlistCategory = `browse:playlists:${id}`;
       categoryLabels.set(playlistCategory, meta.label + 'のプレイリスト');
       categoryLabels.set(`browse:short:${id}`, meta.label + 'のショート');
@@ -420,8 +428,8 @@
     for(const id of ids)appendAvailable(sub.children,id);
     site.children.append(sub.details);
   }
-  const socialContent = makeGroup('SNSコンテンツ', ['browse:social-profiles','browse:social-posts'].includes(category));
-  for (const id of ['browse:social-profiles','browse:social-posts']) appendAvailable(socialContent.children,id);
+  const socialContent = makeGroup('SNSコンテンツ・note', ['browse:social-profiles','browse:social-posts','browse:note-articles','browse:note-series'].includes(category));
+  for (const id of ['browse:social-profiles','browse:social-posts','browse:note-articles','browse:note-series']) appendAvailable(socialContent.children,id);
   site.children.append(socialContent.details);
   if (site.children.childElementCount) buttons?.append(site.details);
 
@@ -476,18 +484,6 @@
       add('次へ', page + 1, page === pages);
     }
   };
-  const matchesDuration = record => {
-    if (durationRange === 'all') return true;
-    if (record.kind !== 'video' || record.platform !== 'youtube') return false;
-    const n = record.duration;
-    if (durationRange === 'unknown') return n === null;
-    if (n === null) return false;
-    if (durationRange === 'under-5') return n < 300;
-    if (durationRange === '5-20') return n >= 300 && n < 1200;
-    if (durationRange === '20-60') return n >= 1200 && n < 3600;
-    if (durationRange === 'over-60') return n >= 3600;
-    return true;
-  };
   const compareItems = (a,b) => {
     if (sort === 'duration-asc' || sort === 'duration-desc') {
       // 未取得・非動画は必ず末尾。再生時間が同じ場合はタイトル順。
@@ -537,7 +533,7 @@
       typeFilterStatus.textContent = labels.length ? '選択中：' + labels.join('・') : 'すべて表示';
     }
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
-    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && matchesDuration(record) && record.query.includes(q)).sort(compareItems);
+    const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
     const visible = matching.slice((page-1)*pageSize,page*pageSize).map(record => record.item);
@@ -552,6 +548,7 @@
     catalog.append(fragment);
     const label = categoryLabels.get(category) || virtualLabels.get(category)
       || (category.startsWith('browse:playlists:') ? 'プレイリスト一覧' : '')
+      || (category.startsWith('browse:video:') ? '動画' : '')
       || (category.startsWith('browse:short:') ? 'ショート' : '')
       || (category.startsWith('browse:live:') ? 'ライブ' : '')
       || 'すべてのコンテンツ';
@@ -575,7 +572,7 @@
     });
     renderPagination(pages);
     const url = new URL(location.href);
-    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['duration',durationRange==='all'?'':durationRange],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')],['date_field',dateField==='updated'?'updated':''],['from',dateFrom],['to',dateTo],['people',peopleDefinitions.filter(person=>selectedPeople.has(person.id)).map(person=>person.id).join(',')]]) {
+    for (const [key,value] of [['category',category],['q',q],['page',page===1?'':String(page)],['size',pageSize===20?'':String(pageSize)],['sort',sort==='newest'?'':sort],['types',validTypes.filter(value=>selectedTypes.has(value)).join(',')],['date_field',dateField==='updated'?'updated':''],['from',dateFrom],['to',dateTo],['people',peopleDefinitions.filter(person=>selectedPeople.has(person.id)).map(person=>person.id).join(',')]]) {
       if (value) url.searchParams.set(key,value);
       else url.searchParams.delete(key);
     }
@@ -607,7 +604,6 @@
     personCheckboxes.forEach(input=>{input.checked=false;});
     page=1;update();
   });
-  durationSelect?.addEventListener('change',()=>{ durationRange=validDurations.includes(durationSelect.value)?durationSelect.value:'all';page=1;update(); });
   sortSelect?.addEventListener('change',()=>{sort=sortSelect.value;page=1;update();});
   search?.addEventListener('input',()=>{page=1;update();});
   pageSizeSelect?.addEventListener('change',()=>{pageSize=Number(pageSizeSelect.value);page=1;update();});
@@ -619,8 +615,6 @@
     if (selectedTypes.size && typeFilterDisclosure) typeFilterDisclosure.open = true;
     sort=validSorts.includes(p.get('sort')) ? p.get('sort') : 'newest';
     if (sortSelect) sortSelect.value=sort;
-    durationRange=validDurations.includes(p.get('duration'))?p.get('duration'):'all';
-    if(durationSelect)durationSelect.value=durationRange;
     if (search) search.value=p.get('q')||'';
     dateField=p.get('date_field')==='updated'?'updated':'published';
     dateFrom=initialDate(p.get('from'));dateTo=initialDate(p.get('to'));
