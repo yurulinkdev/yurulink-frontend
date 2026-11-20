@@ -30,7 +30,9 @@ discord = ""
 [params.analytics]
 # GA4ウェブデータストリームの測定ID（G-...）。空欄ならタグと同意UIを出力しません。
 # ID指定時も訪問者の同意後に限りgtag.jsを読み込みます。
-ga4_measurement_id = ""
+ga4_measurement_id = "G-8Y659Y3Y8Y"
+# この測定IDを有効にする公開ホスト名。StagingのアクセスをProduction集計に混ぜません。
+ga4_hostnames = ["www.yurulink.com"]
 # Cloudflare Web Analyticsの手動埋込用サイトトークン。空欄なら無効です。
 # ホスティング先と無関係に利用できます。CDN側の自動挿入と重複させないでください。
 cloudflare_web_analytics_token = ""
