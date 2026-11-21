@@ -85,6 +85,14 @@
   const applyView = value => {
     const view = value === 'list' ? 'list' : 'grid';
     catalog.classList.toggle('catalog-list-view', view === 'list');
+    // sizesは実際のCSS幅に合わせる。カード画像と168/128pxリストで
+    // ブラウザが誤った解像度（または黒帯を含む版）を選ぶのを防ぐ。
+    const sizes = view === 'list'
+      ? '(max-width: 639px) 128px, 168px'
+      : '(max-width: 639px) calc(100vw - 2rem), (max-width: 1279px) 50vw, 33vw';
+    catalog.querySelectorAll('img[data-thumbnail-image]').forEach(image => {
+      image.sizes = sizes;
+    });
     viewButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.catalogView === view)));
   };
   let initialView = 'grid';
