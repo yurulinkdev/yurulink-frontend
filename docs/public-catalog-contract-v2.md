@@ -157,3 +157,16 @@
 - noteの記事単体・シリーズは`kind=article`, `platform=note`。記事は`category_id=note_article`、シリーズは`category_id=note_series`。既存の`kind`値を増やさずに対応し、必要に応じてCollectionによる記事関係を追加する。
 - `video_format`はBackend収集時の来歴を持つメタデータ。一方Frontendは**サイト内の表示分類として再生時間が300秒未満のYouTube動画をショート**とみなす（公式Shorts認定とは異なる）。Frontendの画面分類からBook2/Book4の`video_format_source`を変更しない。
 - `status=published`は必ず審査／品質ゲートを通過させる。CSVやGoogle Formsの投稿が来たこと自体を公開承認とみなさない。
+
+
+## 公開前UI整合（2026-11-21）
+
+- フォーム投稿導線はユーザー確定の `https://forms.gle/hgYcATGs2oHEbf9v9` へ変更。フォーム本体の設問・受付・回答先はFrontendから一切変更しない。Google Forms APIの `forms.get.linkedSheetId` と既存Book3 ID `18EsLZgdKcLHVjwPOLg6LCuOXfj3PiRE6A1IG6aY4nJ4` を読取監査で比較する。フォーム側回答件数とBook3行数は役割が異なる。
+- YouTubeの表示上の形式分類はFrontend `static/js/site.js` の `formatOf(record)` を唯一の判定式とし、カード表示、種類フィルタ、左カテゴリの判定を一致させる。5分未満はサイト内ショート扱い、非公式Shorts判定とは区別。Backendの正本 `video_format` は変更しない。
+- 日時の入力原本は `items[].published_at` / `updated_at` ISO 8601 のまま保持。表示・日付フィルタは `Asia/Tokyo` に変換し、画面に `YYYY-MM-DD HH:mm` を表示。UTCからJSTへの日付境界（当日23:59等）を考慮。
+- 時間は動画のサムネイル右下に `m:ss` または `h:mm:ss`、再生数と高評価数は同一統計行に配置。未取得統計を0と表示せず、動画が未取得の場合は「未取得」と表示する。カード／リストは共通DOMで、リスト表示のみ横向き・説明を省略し、16:9サムネイルの左右を切らない。
+- プレイリストはリストもカードも同一メディア＋本文DOMを使う。厳密な「先頭動画」サムネイルは順序情報がある場合に限る。現状は所属動画の最初に発見された画像で代替。
+- 種類フィルタは動画・プレイリスト・ショート・ライブに加えて、サイト／ツール、SNS、その他の入口を提供する。何も選ばない「すべてのコンテンツ」は全kindを含む。左ナビの種類を選択したら種類チェックボックスへ同期し、種類を切り替えた場合は種別固定の左ナビ選択を解除して検索結果と矛盾させない。チャンネル内の種類変更ではチャンネル親カテゴリを維持する。
+- 公式性は既存 `provenance=official/community/unknown` の来歴と、新しい任意フィールド `officiality=official/authorized/unofficial` + `officiality_verified=true` を区別する。後者が審査確認された場合のみ公認等として表示。YouTubeチャンネルでは `programs[]` に同じ2フィールドを持たせて可視化し、値のない収集対象チャンネルは未確認扱い。その他の投稿リンクも同様の規則。検証前にBook1登録済みという事実から公式認定しない。
+- SNS公式サイトリンクはアイコンだけでなくアカウント名を併記。投稿によるSNSプロフィールリンクはアバター画像がある場合でもメタ情報行へアイコンとハンドルを併記する。
+- 仕様変更はFrontend `staging` とBackend読取監査コード `develop` のみ。main/Production、Form本体、Book3/Book4実データ、有効Blue/Green世代は変更しない。
