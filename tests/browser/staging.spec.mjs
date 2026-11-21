@@ -460,7 +460,7 @@ test('type filter: multi-select and URL restoration', async ({ page }) => {
 test('mobile header and swipe: edge gesture opens navigation and escape closes it', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openCatalog(page);
-  await expect(page.getByRole('link', { name: 'YuruLink トップページ' })).toBeVisible();
+  await expect(page.locator('header').getByRole('link', { name: 'YuruLink トップページ' })).toBeVisible();
   await expect(page.locator('#category-drawer')).toHaveClass(/-translate-x-full/);
   // Touch events are only available on a touch-enabled context, but a native Event
   // can exercise the gesture code without relying on mobile emulation internals.
