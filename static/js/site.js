@@ -464,6 +464,17 @@
   } // Hugoが共通ナビを提供する場合は二重生成しない。
   if (hasServerNavigation) {
     buttons?.addEventListener('click', event => {
+      // Hugo共通ナビでも、プレイリスト見出しは一覧カテゴリの入口。
+      // 旧JS生成ナビの操作を継承し、下層の「プレイリスト一覧」ボタンとも同じ結果にする。
+      const summary = event.target.closest('summary');
+      const disclosure = summary?.parentElement;
+      const navGroup = disclosure?.dataset.navGroup || '';
+      if (disclosure?.tagName === 'DETAILS' && navGroup.startsWith('playlists:')) {
+        category = 'browse:playlists:' + navGroup.slice('playlists:'.length);
+        page = 1;
+        update();
+        return;
+      }
       const button = event.target.closest('button[data-category]');
       if (!button || !buttons.contains(button)) return;
       category = button.dataset.category || '';
