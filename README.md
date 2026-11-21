@@ -108,3 +108,7 @@ Google Driveの`YuruLink_Assets`には、ブランドの採用原本と`05-HTML-
 - [計測サービス設計](docs/observability-evaluation.md)
 - [SNS・note分類](docs/social-post-scope.md)
 - [Backend CSV一括取込設計](https://github.com/yurulinkdev/yurulink-backend/blob/develop/docs/bulk-submission-import-design.md)
+
+## Staging ChatOps（チャットからの検証）
+
+`staging`は日常開発で継続利用します。GitHubの [`ops/requests/frontend-validation.json`](ops/requests/frontend-validation.json) を変更すると、同じWorkflow内で許可されたSmoke／Preview／Browser検証を直接実行します。**既存のコードPush／PR時の自動検証は維持**しています。対象CommitのSHAと実行結果を照合してから報告します。詳細は [Staging ChatOps運用手順](docs/staging-chatops.md) を参照してください。
