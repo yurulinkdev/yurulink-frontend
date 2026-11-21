@@ -36,6 +36,9 @@ enabled = true
 url = "https://forms.gle/hgYcATGs2oHEbf9v9"
 label = "リンクを投稿する"
 description = "掲載候補の情報をお寄せください"
+# 同一Formの公式回答URL（埋込iframe用。短縮URLとの同一性は本番前に要照合）。
+embed_enabled = true
+embed_url = "https://docs.google.com/forms/d/e/1FAIpQLSdEPu603sKgCEiwwlvTFrvIjuV10dvtaRE6WlRHJPCfWQps-g/viewform"
 
 [params.analytics]
 # GA4ウェブデータストリームの測定ID（G-...）。空欄ならタグと同意UIを出力しません。

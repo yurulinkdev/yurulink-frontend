@@ -17,7 +17,7 @@ trap cleanup EXIT
 
 echo "::group::Default build"
 npm run build
-for path in public/index.html public/about/index.html public/history/index.html public/help/index.html; do
+for path in public/index.html public/about/index.html public/history/index.html public/help/index.html public/submit/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
@@ -27,6 +27,10 @@ grep -q 'prefers-color-scheme: dark' assets/css/tokens.css
 grep -q "localStorage.removeItem(key)" static/js/theme-control.js
 grep -q 'page-size' public/index.html
 grep -q 'pagination' public/index.html
+# 投稿ページはGoogle側フォームのみ埋め込み、管理用フォームURLは含めない。
+grep -q 'submission-form-frame' public/submit/index.html
+grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
+! grep -q 'forms/d/1W7ZMlY4pcQk1zWOL3s47StzndF5OxZG-PzRFS63-mSU/edit' public/submit/index.html
 # ドロワーのキーボード操作と非表示時のフォーカス抑止を静的検査
 grep -q "event.key === 'Escape'" static/js/theme-control.js
 grep -q "event.key !== 'Tab'" static/js/theme-control.js
