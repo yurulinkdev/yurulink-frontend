@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "action": "smoke_staging_readonly",
+  "environment": "staging",
+  "request_id": "chatops-bootstrap-20261121-01",
+  "target_sha": "84235b95d21156ebde41a52c75030bb7589b7475"
+}
