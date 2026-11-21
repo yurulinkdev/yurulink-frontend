@@ -30,11 +30,14 @@ body { background: var(--page); color: var(--text); }
   overflow: hidden;
   background: var(--panel-muted);
 }
+/* YouTubeのhqdefaultは480x360に16:9の映像をレターボックス化する。
+   coverは画素比を保ちつつ帯を切り落とし、カード端まで画像を配置する。 */
 .catalog-card .catalog-media:not(.social-avatar-wrap) img {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: contain;
+  object-fit: cover;
+  object-position: center;
 }
 .catalog-card .catalog-media-placeholder { min-height: 0; }
 .catalog-card .catalog-media.social-avatar-wrap { padding: .75rem; }
@@ -75,7 +78,7 @@ body { background: var(--page); color: var(--text); }
   align-self: center;
 }
 .catalog-list-view [data-catalog-item] .catalog-media:not(.social-avatar-wrap) img {
-  width: 100%; height: 100%; object-fit: contain;
+  width: 100%; height: 100%; object-fit: cover; object-position: center;
 }
 .catalog-list-view [data-catalog-item] .catalog-card-body {
   padding: .35rem .875rem;
@@ -159,3 +162,9 @@ body { background: var(--page); color: var(--text); }
 }
 .onboarding-hint p { margin: 0; flex: 1; }
 .onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; pointer-events: auto; }
+
+/* モバイルのドロワー起動ジェスチャーは縦スクロールを維持して横パンを使わない。 */
+@media (max-width: 1023px) {
+  html, body { overscroll-behavior-x: none; }
+  #main-content, #category-drawer { touch-action: pan-y; }
+}
