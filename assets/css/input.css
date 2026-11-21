@@ -19,104 +19,97 @@ body { background: var(--page); color: var(--text); }
 [hidden] { display: none !important; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 /* 本文行間は組版トークンで一括管理。 */
-/* リスト表示はカードの縦積みではなく、サムネイル＋テキストの高密度な行にする */
+/* 一覧は同じカードDOMを共有し、grid/listでレイアウトだけ切替える。 */
+.catalog-card { display: flex; flex-direction: column; min-width: 0; }
+.catalog-card .catalog-media {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--panel-muted);
+}
+.catalog-card .catalog-media img:not(.social-avatar) {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+.catalog-card .catalog-media-placeholder { min-height: 0; }
+.catalog-card .catalog-media.social-avatar-wrap { padding: .75rem; }
+.catalog-card .social-avatar-wrap .social-avatar { width: 64px; height: 64px; object-fit: cover; }
+.catalog-card .social-avatar-wrap .social-avatar-placeholder { width: 64px; height: 64px; }
+.catalog-card .catalog-card-body { min-width: 0; }
+.catalog-meta-line { display: flex; flex-wrap: wrap; align-items: center; column-gap: .75rem; row-gap: .125rem; }
+.catalog-meta-line .catalog-item-meta { margin: 0; }
+.catalog-item-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.catalog-item-stats { font-variant-numeric: tabular-nums; }
+.catalog-item-duration {
+  position: absolute; z-index: 1; right: .4rem; bottom: .4rem;
+  border-radius: .2rem; background: rgb(0 0 0 / .84); color: #fff;
+  padding: .1rem .3rem; font-size: .75rem; font-weight: 700;
+  line-height: 1.25; white-space: nowrap; pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.catalog-social-account { overflow-wrap: anywhere; }
+.catalog-officiality { font-weight: 600; }
 .catalog-list-view {
   grid-template-columns: minmax(0, 1fr) !important;
   gap: .375rem;
 }
-.catalog-list-view [data-catalog-item] article {
+.catalog-list-view [data-catalog-item] .catalog-card {
   display: grid;
-  grid-template-columns: 112px minmax(0, 1fr);
+  grid-template-columns: 168px minmax(0,1fr);
   align-items: center;
-  min-height: 74px;
+  min-height: 96px;
   border-radius: .5rem;
   box-shadow: none;
 }
-.catalog-list-view [data-catalog-item] article > a {
-  width: 112px;
-  align-self: stretch;
+.catalog-list-view [data-catalog-item] .catalog-media {
+  width: 168px;
+  height: auto;
+  aspect-ratio: 16 / 9;
   overflow: hidden;
+  padding: 0;
+  align-self: center;
 }
-.catalog-list-view [data-catalog-item] article > a img {
-  display: block;
-  width: 112px;
-  height: 100%;
-  min-height: 74px;
-  aspect-ratio: auto;
-  object-fit: cover;
+.catalog-list-view [data-catalog-item] .catalog-media img:not(.social-avatar) {
+  width: 100%; height: 100%; object-fit: contain;
 }
-.catalog-list-view [data-catalog-item] article > div {
+.catalog-list-view [data-catalog-item] .catalog-card-body {
+  padding: .35rem .875rem;
   min-width: 0;
-  padding: .375rem .75rem;
 }
-.catalog-list-view [data-catalog-item] article:not(:has(> a)) > div {
-  grid-column: 1 / -1;
-}
+.catalog-list-view [data-catalog-item] .catalog-card:not(:has(> .catalog-media)) > .catalog-card-body { grid-column: 1 / -1; }
 .catalog-list-view [data-catalog-item] h2 {
-  font-size: .875rem;
-  line-height: 1.4;
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
+  font-size: .875rem; line-height: 1.4;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
   overflow: hidden;
 }
-.catalog-list-view .catalog-item-meta {
-  margin-bottom: .125rem;
-  font-size: .6875rem;
+.catalog-list-view .catalog-item-meta,
+.catalog-list-view .catalog-item-date { font-size: .6875rem; }
+.catalog-list-view .catalog-item-description { display: none; }
+.catalog-list-view .catalog-item-stats,
+.catalog-list-view .catalog-social-account { margin-top: .125rem; font-size: .6875rem; }
+.catalog-list-view [data-kind="social_profile"] .catalog-media.social-avatar-wrap {
+  display: flex; align-items: center; justify-content: center;
+  height: 94.5px;
 }
-.catalog-list-view .catalog-item-description {
-  display: none;
+.catalog-list-view [data-kind="social_profile"] .catalog-media .social-avatar {
+  width: 64px; height: 64px; object-fit: cover; border-radius: 50%;
 }
-.catalog-list-view .catalog-item-date {
-  margin-top: .125rem;
-  font-size: .6875rem;
-}
+.catalog-list-view .catalog-item-description.social-bio { display: none; }
 @media (max-width: 639px) {
-  .catalog-list-view [data-catalog-item] article {
-    grid-template-columns: 88px minmax(0, 1fr);
-    min-height: 64px;
+  .catalog-list-view [data-catalog-item] .catalog-card {
+    grid-template-columns: 128px minmax(0,1fr);
+    min-height: 78px;
   }
-  .catalog-list-view [data-catalog-item] article > a { width: 88px; }
-  .catalog-list-view [data-catalog-item] article > a img {
-    width: 88px;
-    min-height: 64px;
-  }
-  .catalog-list-view [data-catalog-item] article > div { padding: .3rem .5rem; }
-}
-/* SNSプロフィールは16:9サムネイルではなく丸いアバターを表示する */
-.catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 112px;
-  padding: .25rem;
-}
-.catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap img.social-avatar {
-  width: 64px;
-  height: 64px;
-  min-height: 0;
-  aspect-ratio: 1;
-  border-radius: 50%;
-}
-.catalog-list-view [data-kind="social_profile"] .social-avatar-placeholder {
-  width: 64px;
-  height: 64px;
-}
-.catalog-list-view .catalog-item-description.social-bio {
-  display: -webkit-box;
-  -webkit-box-orient: vertical;
-  -webkit-line-clamp: 2;
-  overflow: hidden;
-  overflow-wrap: anywhere;
-  line-height: 1.4;
-}
-@media (max-width: 639px) {
-  .catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap { width: 88px; }
-  .catalog-list-view [data-kind="social_profile"] article > a.social-avatar-wrap img.social-avatar,
-  .catalog-list-view [data-kind="social_profile"] .social-avatar-placeholder {
-    width: 48px;
-    height: 48px;
-  }
+  .catalog-list-view [data-catalog-item] .catalog-media { width: 128px; height: 72px; }
+  .catalog-list-view [data-catalog-item] .catalog-card-body { padding: .3rem .5rem; }
+  .catalog-list-view [data-kind="social_profile"] .catalog-media.social-avatar-wrap { height: 72px; }
+  .catalog-list-view [data-kind="social_profile"] .catalog-media .social-avatar,
+  .catalog-list-view [data-kind="social_profile"] .social-avatar-placeholder { width: 48px; height: 48px; }
 }
 .catalog-view-button[aria-pressed="true"] { background: var(--panel-muted); color: var(--text); border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
@@ -132,27 +125,6 @@ body { background: var(--page); color: var(--text); }
 .article-prose pre { overflow-x: auto; border-radius: .6rem; background: var(--panel-muted); padding: 1rem; }
 .article-prose code { overflow-wrap: anywhere; }
 .article-prose img { max-width: 100%; height: auto; }
-
-/* Collectionから投影したプレイリストカードは、リスト表示でも見出しとリンクを維持する */
-.catalog-list-view [data-playlist-card] article {
-  display: grid;
-  grid-template-columns: 88px minmax(0, 1fr);
-  min-height: 78px;
-  gap: .75rem;
-  padding: .625rem;
-}
-.catalog-list-view [data-playlist-card] article > div {
-  grid-column: auto !important;
-  padding: 0;
-}
-.catalog-list-view [data-playlist-card] article > div:first-child {
-  height: 60px;
-  width: 88px;
-  font-size: 1.5rem;
-}
-.catalog-list-view [data-playlist-card] h2 {
-  font-size: .875rem;
-}
 
 /* 折りたたみフィルタの開閉サインを全ブラウザで明示する */
 .content-type-disclosure > summary { list-style: none; }
