@@ -2,13 +2,13 @@
 
 ## 目的と変更境界
 
-- 登録：Cloudflare Registrarで`yurulink.com`を**最初は1年間**取得する。現時点でユーザーは空き確認済み、**購入実行は未確認**。
+- 登録：`yurulink.com`は**購入方法・事業者・期間・費用を検討中**。Cloudflare Registrarで1年間取得する案は過去の候補であり、現在の確定指示ではない。ユーザーは2026-11-20時点で空き確認済みと申告、**購入実行は未確認**。
 - 公開正規URL：`https://www.yurulink.com/` → Cloudflare Pagesの既存`yurulink-frontend`プロジェクト／`main`。
 - 検証URL：`https://staging.yurulink.com/` → 同Pagesプロジェクトの`staging`ブランチ。
 - 補助URL：`https://yurulink.com/`およびHTTPアクセスは正規`www`へ**301**恒久リダイレクト。要求パス・クエリも保持する。
 - この文書の作成・Frontend stagingコード更新は、**Registrar決済・Cloudflare DNS変更・本番公開・mainマージを行わない**。各操作はユーザーの承認を得る。
 
-## Cloudflare Registrarでの1年購入（ユーザー操作）
+## Cloudflare Registrarでの1年購入【比較検討用の旧候補・未確定】
 
 1. Cloudflareダッシュボード → Domain Registration → Register Domains。登録名`yurulink.com`を再検索。
 2. 決済直前に空き・初年度価格・更新価格・プレミアム扱いでないことを確認。年数は**1年**を選択。
@@ -51,3 +51,10 @@
 - Staging独自ホスト：https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/
 - Apexリダイレクト：https://developers.cloudflare.com/fundamentals/manage-domains/redirect-domain/
 - 更新と自動更新：https://developers.cloudflare.com/registrar/account-options/renew-domains/
+
+
+## 2026-11-21 更新：購入方法・スケジュールは保留
+
+- ユーザーは「ドメイン購入は方法論を含めて検討中、購入したら連絡する」と明言。Cloudflare Registrar／1年購入を**確定事項として扱わない**。ドメイン登録・DNS変更・Pagesカスタムドメイン・301ルールの実操作を先行しない。
+- 到達先の設計目標は`www.yurulink.com`のProduction、`staging.yurulink.com`のPreview、Apex→wwwの301。購入先・更新費用・DNS委任・権限委譲の検討結果次第で手順を見直す。
+- 既存`pages.dev` Stagingを継続する。環境別Hugo`baseURL`、OGP/Canonical、Cloudflare Web Analytics（候補）、GA4（測定ID取得済・本番ホスト限定）、New Relic（候補）は設定の設計と実運用を分離する。
