@@ -63,6 +63,7 @@ YouTubeの収集データは公開品質検査に基づいて掲載します。�
 - [公開カタログ仕様](docs/public-catalog-contract-v2.md)
 - [環境・デプロイ](docs/environments.md)
 - [デザイン仕様](docs/design-system-phase2.md)
+- [表示・ナビゲーション回帰防止契約（2026-11-22）](docs/frontend-ui-regression-contract-20261122.md)
 - [Backend](https://github.com/yurulinkdev/yurulink-backend)
 
 ## 主要なページ構成（2026-11-20）
@@ -73,11 +74,20 @@ YouTubeの収集データは公開品質検査に基づいて掲載します。�
 | `/about/` | 独立した「このサイトについて」。ページ下部に「記事・お知らせ」一覧 |
 | `/about/<slug>/` | 記事・お知らせ単体 |
 | `/help/` / `/help/search-guide/` | ヘルプ一覧と検索・絞り込みガイド |
-| `/history/` / `/history/history-YYYY-MM/` | 月別更新履歴（本公開まで記事は作らない） |
+| `/change-log/` / `/change-log/YYYY-MM/` | 月別更新履歴（月1記事、本公開まで記事は作らない） |
 
-旧`/news/welcome/`・`/posts/about/`・`/posts/search-guide/`は採用しません。PCでは左サイドバー、スマホでは画面左上のカテゴリドロワーからページに移動できます。トップの「おしらせ」はPCのみ表示します。
+旧`/news/changelog/`・`/history/`・`/news/welcome/`・`/posts/about/`・`/posts/search-guide/`は採用しません。PCでは左サイドバー、スマホでは画面左上のカテゴリドロワーからページに移動できます。トップの「おしらせ」枠はPC・スマホともに表示しません。
 
 再生時間が**300秒未満**のYouTube動画はサイト内の「ショート」に分類し、「動画」カテゴリ・種類フィルタから除外します（YouTube公式Shortsの判定とは異なります）。再生時間による絞り込みは廃止し、再生時間の並び替えは維持しています。
+
+## フロントエンドUIの回帰防止契約（2026-11-22）
+
+- サムネイル：カードは余白のない16:9、リストはPC 168×94.5px／スマホ128×72px。画像は元の比率を保つ `object-fit:cover` で描画し、YouTube hqdefaultの埋め込み黒帯を除去します。HTML `sizes` は表示形式に合わせます。
+- ヘッダー：モバイルのロゴ＋サイト名は各下層ページで一組。ロゴ・サイト名、または「すべてのコンテンツ」をクリックした場合、カテゴリのLocalStorage記憶をクリアします。その他の保存状態は維持します。
+- 更新履歴：`/change-log/` の月別記事。旧URLは404。初回本番公開前は記事を作成しません。
+- モバイル：左端40px以内からの明瞭な右スワイプでカテゴリーを開き、左スワイプで閉じます。タッチ移動中に認識し、スクロール・Escape・メニューの操作を保ちます。
+
+実装契約・検証手順は[表示・ナビゲーション回帰防止契約](docs/frontend-ui-regression-contract-20261122.md)、テストは `tests/browser/frontend-ux-regression.spec.mjs` を参照してください。
 
 ## Hugo Templateの外部サービス設定
 
