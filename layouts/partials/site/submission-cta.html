@@ -1,0 +1,15 @@
+{{/* 投稿用の公開URLのみをhugo.tomlで管理し、管理者用の編集URLを公開しない。 */}}
+{{ $config := .Site.Params.submission }}
+{{ with $config }}
+  {{ $url := .url | default "" }}
+  {{ $parsed := urls.Parse $url }}
+  {{ if and (.enabled | default false) (eq $parsed.Scheme "https") (eq $parsed.Host "docs.google.com") (hasPrefix $parsed.Path "/forms/d/e/") (hasSuffix $parsed.Path "/viewform") (not $parsed.User) }}
+    <section class="mb-6 rounded-xl border-2 border-accent/50 bg-panel-muted p-3 shadow-sm" aria-label="YuruLinkへリンクを投稿">
+      <a id="contribution-link" href="{{ $parsed.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="flex min-h-12 items-center justify-between gap-3 rounded-lg bg-accent px-4 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="{{ .label | default "リンクを投稿する" }}（Googleフォームが別タブで開きます）">
+        <span class="flex items-center gap-2"><svg aria-hidden="true" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14m-7-7h14"/></svg>{{ .label | default "リンクを投稿する" }}</span>
+        <svg aria-hidden="true" viewBox="0 0 24 24" class="h-4 w-4 shrink-0" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"><path d="M13 5h6v6M19 5l-9 9M19 13v6H5V5h6"/></svg>
+      </a>
+      <p class="mt-2 text-xs leading-relaxed text-muted-ink">{{ .description | default "掲載候補の情報をお寄せください" }}<span class="sr-only">外部のGoogleフォームを開きます。</span></p>
+    </section>
+  {{ end }}
+{{ end }}
