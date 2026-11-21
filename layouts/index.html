@@ -145,18 +145,18 @@
             {{ $playlistURL := printf "https://www.youtube.com/playlist?list=%s" $pid }}
             {{ $label := index $programs .id }}
             <li data-catalog-item data-playlist-card data-kind="playlist" data-platform="youtube" data-category="browse:playlists" data-category-label="プレイリスト" data-category-order="999999" data-category-ids="{{ .id }}" data-playlist-id="{{ $pid }}" data-playlist-channel-name="{{ .channel_name | default "" }}" data-playlist-channel-id="{{ .channel_id | default "" }}" data-title="{{ .title }}" data-search="{{ printf "%s %s プレイリスト" .title (.channel_name | default "") }}">
-              <article class="flex h-full items-center gap-4 overflow-hidden rounded-xl border border-line bg-panel p-4 transition-shadow hover:shadow-md">
+              <article class="catalog-card h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                 {{ $thumb := .thumbnail_url | default (index $playlistFirstThumb .id | default "") }}
                 {{ $thumbnailURL := urls.Parse $thumb }}
                 {{ if and (eq $thumbnailURL.Scheme "https") (eq $thumbnailURL.Host "i.ytimg.com") (not $thumbnailURL.User) }}
-                <a href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer" class="block h-24 w-28 shrink-0 overflow-hidden rounded-lg bg-panel-muted" aria-label="YouTubeのプレイリストを開く">
-                  <img src="{{ $thumb | safeURL }}" alt="" loading="lazy" decoding="async" width="160" height="90" class="h-full w-full object-cover" referrerpolicy="no-referrer">
+                <a href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer" class="catalog-media block aspect-video overflow-hidden bg-panel-muted" aria-label="YouTubeのプレイリストを開く">
+                  <img src="{{ $thumb | safeURL }}" alt="" loading="lazy" decoding="async" width="160" height="90" class="h-full w-full object-contain" referrerpolicy="no-referrer">
                 </a>
                 {{ else }}
-                <div aria-hidden="true" class="flex h-24 w-28 shrink-0 items-center justify-center rounded-lg bg-panel-muted text-3xl text-accent">▤</div>
+                <div aria-hidden="true" class="catalog-media catalog-media-placeholder flex aspect-video w-full items-center justify-center bg-panel-muted text-3xl text-accent">▤</div>
                 {{ end }}
-                <div class="min-w-0">
-                  <p class="catalog-item-meta mb-1 text-xs text-muted-ink">YouTubeプレイリスト{{ with .channel_name }} · {{ . }}{{ end }}</p>
+                <div class="catalog-card-body min-w-0 p-4">
+                  <div class="catalog-meta-line"><p class="catalog-item-meta text-xs text-muted-ink">YouTubeプレイリスト{{ with .channel_name }} · {{ . }}{{ end }}</p>{{ with .published_at }}<time class="catalog-item-date text-xs text-muted-ink" datetime="{{ . }}">公開日: {{ . }}</time>{{ end }}</div>
                   <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
                   <p class="mt-2 text-xs text-muted-ink"><a href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">YouTubeでプレイリストを開く ↗</a></p>
                 </div>
@@ -181,11 +181,11 @@
                 {{ $catOrder := index $categoryOrder $cat | default 999999 }}
                 {{ $search := printf "%s %s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel (delimit $itemLabels " ") }}
                 <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-updated-at="{{ .updated_at | default "" }}" data-person-ids="{{ delimit (.person_ids | default (slice)) " " }}" data-view-count="{{ if isset . "view_count" }}{{ printf "%.0f" (float .view_count) }}{{ end }}" data-like-count="{{ if isset . "like_count" }}{{ printf "%.0f" (float .like_count) }}{{ end }}" data-duration-seconds="{{ if isset . "duration_seconds" }}{{ printf "%.0f" (float .duration_seconds) }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}" data-classification-verified="{{ if $verified }}true{{ else }}false{{ end }}">
-                  <article class="h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
+                  <article class="catalog-card h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
                     {{ if eq .kind "social_profile" }}
                       {{ $avatar := .avatar_url | default "" }}
                       {{ $avatarURL := urls.Parse $avatar }}
-                      <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="social-avatar-wrap block px-4 pt-4" aria-label="SNSプロフィールを開く">
+                      <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="catalog-media social-avatar-wrap flex items-center justify-center px-4 py-3" aria-label="SNSプロフィールを開く">
                         {{ if and (eq $avatarURL.Scheme "https") (eq $avatarURL.Host "pbs.twimg.com") (not $avatarURL.User) }}
                           <img src="{{ $avatar | safeURL }}" alt="" loading="lazy" decoding="async" width="64" height="64" class="social-avatar h-16 w-16 rounded-full bg-panel-muted object-cover" referrerpolicy="no-referrer">
                         {{ else }}
@@ -199,26 +199,67 @@
                         {{ end }}
                       </a>
                     {{ else }}
+                      {{ $itemKind := .kind }}
+                      {{ $hasDuration := isset . "duration_seconds" }}
                       {{ with .thumbnail_url }}
                         {{ $thumbnail := urls.Parse . }}
                         {{ if and (eq $thumbnail.Scheme "https") (eq $thumbnail.Host "i.ytimg.com") (not $thumbnail.User) }}
                           {{/* default.jpg (120x90)を引き伸ばさず、YouTubeの高解像度版を指定する。 */}}
                           {{ $mq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\\.(jpg|webp)$" "mqdefault.$2" . }}
                           {{ $hq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\\.(jpg|webp)$" "hqdefault.$2" . }}
-                          <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="block">
-                            <img src="{{ $mq | safeURL }}" srcset="{{ $mq | safeURL }} 320w, {{ $hq | safeURL }} 480w" sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 33vw" alt="" loading="lazy" decoding="async" width="480" height="270" class="aspect-video w-full bg-panel object-cover" referrerpolicy="no-referrer">
+                          <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="catalog-media relative block aspect-video overflow-hidden bg-panel-muted">
+                            <img src="{{ $mq | safeURL }}" srcset="{{ $mq | safeURL }} 320w, {{ $hq | safeURL }} 480w" sizes="(max-width: 639px) 100vw, (max-width: 1279px) 50vw, 33vw" alt="" loading="lazy" decoding="async" width="480" height="270" class="aspect-video w-full bg-panel-muted object-contain" referrerpolicy="no-referrer">
+                            {{ if and (eq $itemKind "video") $hasDuration }}
+                              <span class="catalog-item-duration" aria-label="再生時間">--:--</span>
+                            {{ end }}
                           </a>
                         {{ end }}
                       {{ end }}
                     {{ end }}
-                    <div class="p-4">
-                    <p class="catalog-item-meta mb-2 text-xs text-muted-ink"><span class="font-semibold">{{ $visibleLabel }}</span>{{ with .platform }} · {{ . }}{{ end }}{{ if eq .kind "video" }} · <span class="catalog-video-format font-medium">{{ if eq (.video_format | default "video") "short" }}ショート{{ else if eq (.video_format | default "video") "live" }}ライブ配信{{ else }}動画{{ end }}</span>{{ end }}{{ if $verified }}{{ if or (eq $cat "official_site") (eq $cat "official_social_profile") (eq $cat "official_video") (eq .provenance "official") }} · 公式{{ else if or (eq $cat "community_site") (eq $cat "community_social_profile") (eq $cat "community_video") (eq .provenance "community") }} · 有志・非公式{{ end }}{{ end }}</p>
+                    <div class="catalog-card-body p-4">
+                    {{ $format := .video_format | default "video" }}
+                    {{ if and (eq .kind "video") (isset . "duration_seconds") (lt (float .duration_seconds) 300) }}{{ $format = "short" }}{{ end }}
+                    {{ $status := .officiality | default (.official_status | default "") }}
+                    {{ $statusVerified := .officiality_verified | default false }}
+                    {{ $statusLabel := "" }}
+                    {{ if $statusVerified }}
+                      {{ if eq $status "official" }}{{ $statusLabel = "公式" }}
+                      {{ else if eq $status "authorized" }}{{ $statusLabel = "公認" }}
+                      {{ else if eq $status "unofficial" }}{{ $statusLabel = "非公式" }}{{ end }}
+                    {{ else if $verified }}
+                      {{ if or (eq $cat "official_site") (eq $cat "official_social_profile") (eq $cat "official_video") (eq .provenance "official") }}{{ $statusLabel = "公式" }}
+                      {{ else if or (eq $cat "community_site") (eq $cat "community_social_profile") (eq $cat "community_video") (eq .provenance "community") }}{{ $statusLabel = "非公式" }}{{ end }}
+                    {{ end }}
+                    <div class="catalog-meta-line">
+                      <p class="catalog-item-meta text-xs text-muted-ink"><span class="font-semibold">{{ $visibleLabel }}</span>{{ with .platform }} · {{ . }}{{ end }}{{ if eq .kind "video" }} · <span class="catalog-video-format font-medium" data-format-label>{{ if eq $format "short" }}ショート{{ else if eq $format "live" }}ライブ配信{{ else }}動画{{ end }}</span>{{ end }}{{ with $statusLabel }} · <span class="catalog-officiality" data-status="{{ $status }}">{{ . }}</span>{{ end }}</p>
+                      {{ with .published_at }}<time class="catalog-item-date text-xs text-muted-ink" datetime="{{ . }}">公開日: {{ . }}</time>{{ end }}
+                    </div>
                     <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
                     {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
-                    {{ with .published_at }}<p class="catalog-item-date mt-3 text-xs text-muted-ink">公開日: {{ . }}</p>{{ end }}
-                    {{ if and (eq .kind "video") (isset . "view_count") }}<p class="catalog-item-views mt-1 text-xs text-muted-ink">再生数: {{ printf "%.0f" (float .view_count) }}</p>{{ end }}
-                    {{ if and (eq .kind "video") (isset . "like_count") }}<p class="catalog-item-likes mt-1 text-xs text-muted-ink">高評価数: {{ printf "%.0f" (float .like_count) }}</p>{{ end }}
-                    {{ if and (eq .kind "video") (isset . "duration_seconds") }}<p class="catalog-item-duration mt-1 text-xs text-muted-ink">再生時間: {{ .duration_seconds }}秒</p>{{ end }}
+                    {{ if eq .kind "video" }}
+                    <p class="catalog-item-stats mt-2 flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-muted-ink">
+                      <span class="catalog-item-views">{{ if isset . "view_count" }}再生数: {{ printf "%.0f" (float .view_count) }}{{ else }}再生数: 未取得{{ end }}</span>
+                      <span class="catalog-item-likes">{{ if isset . "like_count" }}高評価数: {{ printf "%.0f" (float .like_count) }}{{ else }}高評価数: 未取得{{ end }}</span>
+                    </p>
+                    {{ end }}
+                    {{ if eq .kind "social_profile" }}
+                      {{ $socialKey := lower (.platform | default "") }}
+                      {{ if eq $socialKey "twitter" }}{{ $socialKey = "x" }}{{ end }}
+                      {{ $account := .account_name | default (.handle | default "") }}
+                      {{ if not $account }}
+                        {{ $pathSections := split (strings.TrimPrefix "/" $url.Path) "/" }}
+                        {{ $pathFirst := index $pathSections 0 }}
+                        {{ if and $pathFirst (not (in (slice "channel" "watch" "playlist" "status" "posts" "p" "reel") $pathFirst)) }}
+                          {{ $account = printf "@%s" $pathFirst }}
+                        {{ else }}
+                          {{ $account = .title }}
+                        {{ end }}
+                      {{ end }}
+                      <p class="catalog-social-account mt-2 flex items-center gap-1.5 text-xs text-muted-ink">
+                        {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}<img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" width="16" height="16" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 dark:invert" loading="lazy">{{ end }}
+                        <span>{{ $account }}</span>
+                      </p>
+                    {{ end }}
                     </div>
                   </article>
                 </li>
