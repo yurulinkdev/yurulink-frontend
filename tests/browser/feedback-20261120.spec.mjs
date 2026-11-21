@@ -6,7 +6,14 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   await page.goto('/about/');
   await expect(page.getByRole('heading', { name: 'このサイトについて', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: '記事・お知らせ', exact: true })).toBeVisible();
-  await expect(page.locator('#category-buttons a[href*="?category="]').first()).toBeVisible();
+  // 共通Hugoナビはdetailsによる階層構造。非展開のリンクはDOMにあっても非表示。
+  const categoryNav = page.locator('#category-buttons');
+  const siteSocial = categoryNav.locator('details[data-nav-group="site-social"]');
+  const unknown = siteSocial.locator('details[data-nav-group="source:unknown"]');
+  await expect(unknown.locator('a[data-category="browse:web-other"]')).toHaveCount(1);
+  await siteSocial.locator(':scope > summary').click();
+  await unknown.locator(':scope > summary').click();
+  await expect(unknown.locator('a[data-category="browse:web-other"]')).toBeVisible();
   await page.goto('/help/search-guide/');
   await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
   await page.goto('/history/');
