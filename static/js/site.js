@@ -123,7 +123,12 @@
     hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
   });
   const jstText = value => {
-    const time = Date.parse(value || '');
+    const raw = String(value || '').trim();
+    // 日付しか持たないリンクに「09:00」などの推定時刻を付加しない。
+    if (/^\d{4}-\d{2}-\d{2}$/.test(raw)) return validCalendarDate(raw) ? raw : '';
+    // タイムゾーンがない日時は閲覧者端末で異なる日時になるため未取得扱い。
+    if (!/(?:Z|[+-]\d{2}:?\d{2})$/i.test(raw)) return '';
+    const time = Date.parse(raw);
     if (!Number.isFinite(time)) return '';
     const p = Object.fromEntries(jstFormatter.formatToParts(time).map(x => [x.type, x.value]));
     return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
@@ -176,7 +181,7 @@
     if (!node) return;
     const value = jstText(node.getAttribute('datetime'));
     if (!value) { node.textContent = '公開日: 未取得'; return; }
-    node.textContent = '公開日: ' + value;
+    node.textContent = '公開日: ' + value + (value.length === 10 ? '（時刻未取得）' : '');
   });
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
