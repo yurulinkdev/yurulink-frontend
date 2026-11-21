@@ -68,7 +68,7 @@ test('PCのサイドバーロゴも保存カテゴリを解除する', async ({ 
   await page.setViewportSize({width:1280,height:800});
   await page.goto('/?category=browse:web-other');
   await page.goto('/help/');
-  await page.locator('#category-drawer a[data-reset-category]').click();
+  await page.locator('#category-drawer a[aria-label="YuruLink トップページ"]').click();
   await expect(page).toHaveURL(/\/$/);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1'))).toBeNull();
 });
@@ -78,7 +78,7 @@ test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page 
   expect(response?.status()).toBe(200);
   await expect(page.getByRole('heading',{name:'更新履歴',exact:true})).toBeVisible();
   await expect(page.locator('footer a[href="/change-log/"]')).toHaveCount(1);
-  await expect(page.locator('#category-drawer a[href="/change-log/"]')).toHaveCount(1);
+  await expect(page.locator('#category-drawer nav[aria-label="サイト内ページ"] a[href="/change-log/"]')).toHaveCount(1);
   await expect(page.locator('#category-drawer section[aria-label="最近の更新履歴"] li')).toHaveCount(0);
   for (const old of ['/history/','/news/changelog/']) {
     const res = await page.goto(old);
