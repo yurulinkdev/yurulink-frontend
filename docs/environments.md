@@ -43,7 +43,7 @@ FrontendのProduction/PreviewとBackendのBlue/Greenは独立した環境管理�
 
 ## 2026-11-21 ドメイン有効化・Staging独自ホスト接続準備
 
-Cloudflareダッシュボードのユーザー提供画像では `yurulink.com` のゾーンが有効化済み。公開レジストリNSの値やDNSレコード、Pages独自ホストの登録までは確認していない。Productionと混同しないこと。
+Cloudflareダッシュボードのユーザー提供画像では `yurulink.com` のゾーンが有効化済み。独立した[DNS監査 Run 44898082254](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44898082254)で、1.1.1.1と8.8.8.8の両方が `kim.ns.cloudflare.com` と `lakas.ns.cloudflare.com` を返した。管理画面で割り当てられたNSとの厳密な値照合・DNSSEC設定・全DNSレコード・Pages独自ホストの登録は未確認。Productionの有効化と混同しないこと。
 
 Staging `hugo.toml`の `params.noindex = true` と共通HTMLメタの `noindex, nofollow` を実装した。記事も含めたPlaywrightテストを追加した。これは検索エンジン登録の抑止であり、認証・アクセス制限ではない。必要に応じてStagingを非公開にする場合は別途Cloudflare Accessを設計する。
 
