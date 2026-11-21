@@ -16,12 +16,16 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   await expect(unknown.locator('a[data-category="browse:web-other"]')).toBeVisible();
   await page.goto('/help/search-guide/');
   await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
-  await page.goto('/history/');
+  await page.goto('/change-log/');
   await expect(page.getByRole('heading', { name: '更新履歴', exact: true })).toBeVisible();
   // 旧URL・存在しないURLがトップページへ200でフォールバックしないことを検証。
   const removed = await page.goto('/news/welcome/');
   expect(removed?.status()).toBe(404);
   await expect(page.getByRole('heading', { name: 'ページが見つかりません', exact: true })).toBeVisible();
+  const oldLog = await page.goto('/history/');
+  expect(oldLog?.status()).toBe(404);
+  const oldNews = await page.goto('/news/changelog/');
+  expect(oldNews?.status()).toBe(404);
   const unknownPage = await page.goto('/not-found-check-20261121/');
   expect(unknownPage?.status()).toBe(404);
 });
@@ -71,7 +75,7 @@ test('GA4設定済みだがStagingホストでは測定しない・公式Xを表
   await expect(page.locator('footer nav[aria-label*="SNS"] a')).toHaveAttribute('href','https://x.com/YuruLinkDev');
   const updates = page.locator('aside section[aria-label="最近の更新履歴"] li');
   expect(await updates.count()).toBe(0);
-  await expect(page.getByRole('link',{name:'すべての更新履歴'})).toHaveAttribute('href',/history\//);
+  await expect(page.getByRole('link',{name:'すべての更新履歴'})).toHaveAttribute('href',/change-log\//);
 });
 
 test('5分未満はショート・300秒は動画（カテゴリと種類の両方に適用）', async ({ page }) => {
