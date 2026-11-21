@@ -64,6 +64,14 @@
 - Browser Run [44843042255](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44843042255)：**3テスト失敗**。カテゴリー関連の既存アサーション失敗。今回のChatOps導入で新たに発生したものではない。
 - **リクエスト専用Workflowの起動成功と、導入後のBrowser結果は別途Runで確認する**。既存失敗を隠して「全CI成功」とは扱わない。
 
+## 導入後の実測更新（2026-11-21）
+
+- PR [#11](https://github.com/yurulinkdev/yurulink-frontend/pull/11)を`staging`へSquashマージ済み。対象SHA `47f58aa12948c9a9249db15ae654451e2417b0e2`。
+- JSON専用Push → 同一Workflowでの`smoke_staging_readonly`：Actions [Run 44856007489](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007489) **成功**。
+- 通常のコードPushでのSmoke [44856007457](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007457) **成功**、Cloudflare Preview [44856007462](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007462) **成功**、Browser [44856007491](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007491) **失敗（3件）**。以前の3件失敗の修復・対象SHAでの再検証が継続タスク。
+- `preview_staging_readonly`、`browser_staging_readonly`、`full_staging_readonly`のJSON要求からの実成功は、この確認だけでは保証できない。Smoke成功を全アクション成功に拡張しない。
+- 通常3Workflowは専用JSON**のみ**変更したPushを除外するが、リクエストとコードを混在させると通常CIも起動する。Cloudflare PagesのGit自動デプロイを`paths-ignore`で抑制できるとは限らない。
+
 ## リスクと制御
 - JSONは任意のScript、引数、URL、Runner名を受け付けない。実行処理はWorkflow側で固定する。
 - `target_sha`は厳密に検証した`staging`祖先のCommitのみ。実行内容も対象SHAのRepositoryに由来するため、Workflow/ブランチへの書込み権限は強い権限と考え、保護を維持する。
