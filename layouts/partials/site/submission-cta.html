@@ -3,7 +3,7 @@
 {{ with $config }}
   {{ $url := .url | default "" }}
   {{ $parsed := urls.Parse $url }}
-  {{ if and (.enabled | default false) (eq $parsed.Scheme "https") (eq $parsed.Host "docs.google.com") (hasPrefix $parsed.Path "/forms/d/e/") (hasSuffix $parsed.Path "/viewform") (not $parsed.User) }}
+  {{ if and (.enabled | default false) (eq $parsed.Scheme "https") (or (and (eq $parsed.Host "docs.google.com") (hasPrefix $parsed.Path "/forms/d/e/") (hasSuffix $parsed.Path "/viewform")) (and (eq $parsed.Host "forms.gle") (gt (len (strings.TrimPrefix "/" $parsed.Path)) 5) (not (in $parsed.Path "//")))) (not $parsed.User) }}
     <section class="mb-6 rounded-xl border-2 border-accent/50 bg-panel-muted p-3 shadow-sm" aria-label="YuruLinkへリンクを投稿">
       <a id="contribution-link" href="{{ $parsed.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="flex min-h-12 items-center justify-between gap-3 rounded-lg bg-accent px-4 py-3 text-sm font-bold text-white transition-opacity hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" aria-label="{{ .label | default "リンクを投稿する" }}（Googleフォームが別タブで開きます）">
         <span class="flex items-center gap-2"><svg aria-hidden="true" class="h-5 w-5 shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M12 5v14m-7-7h14"/></svg>{{ .label | default "リンクを投稿する" }}</span>
