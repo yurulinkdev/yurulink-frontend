@@ -64,7 +64,7 @@
 
 ### 確認できた事実と限界
 
-- ユーザー提供のCloudflare Dashboard画像で、`yurulink.com`ゾーンに **Your domain is now protected by Cloudflare** と表示された。CloudflareがNS更新を認識したと判断できる。登録事業者、登録期限、現在の正確なレジストリNSの2値、DNSSEC DS、DNSレコード一覧は画像から判定できない。外部DNS照会は今回応答を取得できず、**公開委任先の独立したNS照合は未完了**。
+- ユーザー提供のCloudflare Dashboard画像で、`yurulink.com`ゾーンに **Your domain is now protected by Cloudflare** と表示。さらに[GitHub Actionsの読み取り専用DNS監査（Run 44898082254）](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44898082254)では、Cloudflare 1.1.1.1とGoogle 8.8.8.8が一致して **kim.ns.cloudflare.com / lakas.ns.cloudflare.com** を返し、公開DNS上のCloudflare NS委任が確認できた。ただしこれら2値とCloudflare管理画面の当該ゾーン割当NSの照合、登録事業者、登録期限、DNSSEC DS、DNSレコード一覧は未確認。
 - 画面はCloudflareのゾーンがActiveである根拠であり、`www.yurulink.com`や`staging.yurulink.com`のWeb接続・TLS・公開完了を示すものではない。
 - 2026-11-21のFrontend staging SHA `8ce6150f386ff69fe5b598617304d97c88c1c951` でSmoke・Pages Preview SHA・Playwright 38件全成功を確認した。続いてStaging専用の`noindex`をHugoの設定・共通metaテンプレートへ追加し、トップ／記事ページの検証テストを追加（この変更の最新SHA CIは実行結果で別途判定する）。
 
