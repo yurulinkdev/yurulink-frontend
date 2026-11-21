@@ -17,12 +17,15 @@ trap cleanup EXIT
 
 echo "::group::Default build"
 npm run build
-for path in public/index.html public/about/index.html public/history/index.html public/help/index.html public/submit/index.html; do
+for path in public/index.html public/about/index.html public/change-log/index.html public/help/index.html public/submit/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
 grep -q 'theme-toggle' public/index.html
 grep -q 'theme-auto' public/index.html
+# Stagingの更新履歴は正規URLだけを生成する。
+test ! -e public/history/index.html
+test ! -e public/news/changelog/index.html
 grep -q 'prefers-color-scheme: dark' assets/css/tokens.css
 grep -q "localStorage.removeItem(key)" static/js/theme-control.js
 grep -q 'page-size' public/index.html
@@ -64,7 +67,7 @@ done
 npm run build
 test -s public/index.html
 test -s public/about/index.html
-test -s public/history/index.html
+test -s public/change-log/index.html
 test -s public/about/smoke-ci/index.html
 grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
