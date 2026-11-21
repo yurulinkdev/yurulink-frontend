@@ -30,7 +30,8 @@ test('desktop: list density, page size and JavaScript errors', async ({ page }) 
   const image = first.locator('img');
   if (await image.count()) {
     const rect = await image.boundingBox();
-    expect(rect?.width).toBeLessThanOrEqual(125);
+    // No.4確定仕様: PCリストのサムネイル幅は168px（旧125px上限から変更）。
+    expect(rect?.width).toBeLessThanOrEqual(168);
   }
   await saveEvidence(page, 'desktop-list');
   await page.locator('#page-size').selectOption('50');
