@@ -258,10 +258,10 @@
                           {{ $account = .title }}
                         {{ end }}
                       {{ end }}
-                      <p class="catalog-social-account mt-2 flex items-center gap-1.5 text-xs text-muted-ink">
+                      <a class="catalog-social-account mt-2 flex items-center gap-1.5 text-xs text-accent hover:underline" href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer">
                         {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}<img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" width="16" height="16" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 dark:invert" loading="lazy">{{ end }}
                         <span>{{ $account }}</span>
-                      </p>
+                      </a>
                     {{ end }}
                     </div>
                   </article>
