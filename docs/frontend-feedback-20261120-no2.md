@@ -1,5 +1,8 @@
 # Frontendフィードバック No.2（2026-11-20）
 
+> **履歴文書・2026-11-22更新：** この文書の `/history/` と月別 `history-YYYY-MM` は当時の仕様です。現行の確定仕様は `/change-log/` と月別 `/change-log/YYYY-MM/`（月に1記事）。サムネイルの旧 `object-fit:contain` も現行要件により `cover` に変更しています。最新版は [Frontend UI 回帰防止契約](frontend-ui-regression-contract-20261122.md) を優先してください。
+
+
 実装先：Frontend `staging`、分類定義はBackend `develop` とFrontend複製。main / Productionへの反映・Book3原本の書換え・Google Formの本番変更は行わない。
 
 ## 確定した仕様
