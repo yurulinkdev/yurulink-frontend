@@ -10,7 +10,10 @@
     {{ if and (hasPrefix ($p.id | default "") "youtube-channel:") (not (hasPrefix ($p.name | default "") "YouTube channel UC")) (isset $p "order") }}
       {{ $name := lower $p.name }}
       {{ $channelNameCounts = merge $channelNameCounts (dict $name (add (index $channelNameCounts $name | default 0) 1)) }}
-      {{ $channels = append (dict "id" $p.id "name" $p.name "order" (int ($p.order | default (add $index 1000)))) $channels }}
+      {{ $status := $p.officiality | default ($p.official_status | default "") }}
+      {{ $statusVerified := $p.officiality_verified | default false }}
+      {{ if not (and $statusVerified (in (slice "official" "authorized" "unofficial") $status)) }}{{ $status = "unknown" }}{{ end }}
+      {{ $channels = append (dict "id" $p.id "name" $p.name "status" $status "order" (int ($p.order | default (add $index 1000)))) $channels }}
     {{ end }}
   {{ end }}
   {{ range $index, $p := .collections }}
@@ -41,6 +44,14 @@
   <details class="mt-2" data-nav-group="youtube-channels" open>
     <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">YouTubeチャンネル</summary>
     <div class="ml-3 border-l border-line pl-2">
+      <details class="mt-1" data-nav-group="channel-status">
+        <summary class="cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold hover:bg-panel-muted">公式性から探す</summary>
+        <div class="ml-3 border-l border-line pl-2">
+          {{ range (slice (dict "id" "official" "label" "公式") (dict "id" "authorized" "label" "公認") (dict "id" "unofficial" "label" "非公式") (dict "id" "unknown" "label" "未確認")) }}
+            {{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" (printf "browse:channel-status:%s" .id)) }}
+          {{ end }}
+        </div>
+      </details>
       {{ range $channel := $channels }}
         {{ $playlistsForChannel := slice }}
         {{ range $playlist := $playlists }}
@@ -49,8 +60,9 @@
           {{ end }}
         {{ end }}
         <details class="ml-1 mt-2" data-nav-group="channel:{{ $channel.id }}">
-          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $channel.name }}</summary>
+          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $channel.name }} <span class="ml-1 text-xs font-normal text-muted-ink">({{ if eq $channel.status "official" }}公式{{ else if eq $channel.status "authorized" }}公認{{ else if eq $channel.status "unofficial" }}非公式{{ else }}未確認{{ end }})</span></summary>
           <div class="ml-3 border-l border-line pl-2">
+            {{ partial "site/nav-item.html" (dict "context" $root "label" "このチャンネルのすべて" "category" $channel.id) }}
             {{ partial "site/nav-item.html" (dict "context" $root "label" "動画" "category" (printf "browse:video:%s" $channel.id)) }}
             <details class="mt-2" data-nav-group="playlists:{{ $channel.id }}">
               <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">プレイリスト</summary>
