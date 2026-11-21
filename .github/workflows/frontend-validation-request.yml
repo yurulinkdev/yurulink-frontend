@@ -1,0 +1,142 @@
+name: Frontend staging ChatOps request (read only)
+run-name: Staging ChatOps at ${{ github.sha }}
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - ops/requests/frontend-validation.json
+
+permissions:
+  contents: read
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      action: ${{ steps.request.outputs.action }}
+      request_id: ${{ steps.request.outputs.request_id }}
+      target_sha: ${{ steps.request.outputs.target_sha }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: request
+        name: Validate strict request and staging ancestry
+        shell: bash
+        run: |
+          set -euo pipefail
+          request=ops/requests/frontend-validation.json
+          jq -e '
+            type == "object" and
+            (keys | sort) == ["action","environment","request_id","schema_version","target_sha"] and
+            .schema_version == 1 and
+            .environment == "staging" and
+            (.action == "smoke_staging_readonly" or
+             .action == "preview_staging_readonly" or
+             .action == "browser_staging_readonly" or
+             .action == "full_staging_readonly") and
+            (.request_id | type == "string" and test("^[A-Za-z0-9_-]{1,64}$")) and
+            (.target_sha | type == "string" and test("^[0-9a-f]{40}$"))
+          ' "$request" >/dev/null || {
+            echo "::error::Invalid or unsupported ChatOps request"
+            exit 1
+          }
+          action=$(jq -r .action "$request")
+          request_id=$(jq -r .request_id "$request")
+          target_sha=$(jq -r .target_sha "$request")
+          git cat-file -e "${target_sha}^{commit}" || {
+            echo "::error::Target commit does not exist"
+            exit 1
+          }
+          git merge-base --is-ancestor "$target_sha" "$GITHUB_SHA" || {
+            echo "::error::Target SHA is not an ancestor of the staging request commit"
+            exit 1
+          }
+          {
+            echo "action=$action"
+            echo "request_id=$request_id"
+            echo "target_sha=$target_sha"
+          } >> "$GITHUB_OUTPUT"
+          echo "Request $request_id: $action on staging SHA $target_sha"
+
+  execute:
+    needs: validate
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    steps:
+      - name: Record request correlation
+        shell: bash
+        env:
+          REQUEST_ID: ${{ needs.validate.outputs.request_id }}
+          ACTION: ${{ needs.validate.outputs.action }}
+          TARGET_SHA: ${{ needs.validate.outputs.target_sha }}
+        run: |
+          echo "request_id=$REQUEST_ID"
+          echo "action=$ACTION"
+          echo "target_sha=$TARGET_SHA"
+          echo "request_commit=$GITHUB_SHA"
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ needs.validate.outputs.target_sha }}
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        if: ${{ needs.validate.outputs.action == 'smoke_staging_readonly' || needs.validate.outputs.action == 'browser_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly' }}
+        with:
+          node-version: '22'
+      - uses: peaceiris/actions-hugo@v3
+        if: ${{ needs.validate.outputs.action == 'smoke_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly' }}
+        with:
+          hugo-version: '0.152.2'
+          extended: true
+      - name: Build and run original smoke checks
+        if: ${{ needs.validate.outputs.action == 'smoke_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly' }}
+        shell: bash
+        run: |
+          npm install --no-audit --no-fund
+          bash scripts/smoke-test.sh
+      - name: Wait for exact staging Preview deployment
+        id: preview
+        if: ${{ needs.validate.outputs.action == 'preview_staging_readonly' || needs.validate.outputs.action == 'browser_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly' }}
+        shell: bash
+        env:
+          CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+          CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+          TARGET_SHA: ${{ needs.validate.outputs.target_sha }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Missing CLOUDFLARE_API_TOKEN"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing CLOUDFLARE_ACCOUNT_ID"; exit 1; }
+          result=$(python3 scripts/wait-cloudflare-pages.py \
+            --project yurulink-frontend --branch staging --environment preview \
+            --sha "$TARGET_SHA" --timeout 600 --interval 15)
+          printf '%s\n' "$result"
+          url=$(printf '%s\n' "$result" | sed -n 's/^DEPLOYMENT_URL=//p' | tail -1)
+          case "$url" in
+            https://*.pages.dev/*|https://*.pages.dev) ;;
+            *) echo "::error::Unexpected Cloudflare Pages deployment URL"; exit 1 ;;
+          esac
+          echo "STAGING_URL=$url" >> "$GITHUB_ENV"
+          echo "deployment_url=$url" >> "$GITHUB_OUTPUT"
+      - name: Install Playwright Chromium
+        if: ${{ needs.validate.outputs.action == 'browser_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly' }}
+        shell: bash
+        run: |
+          npm install --no-save --no-audit --no-fund @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Run original browser checks against exact deployment
+        if: ${{ needs.validate.outputs.action == 'browser_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly' }}
+        shell: bash
+        run: npx playwright test --config=playwright.config.mjs
+      - name: Upload browser evidence
+        if: ${{ always() && (needs.validate.outputs.action == 'browser_staging_readonly' || needs.validate.outputs.action == 'full_staging_readonly') }}
+        uses: actions/upload-artifact@v4
+        with:
+          name: chatops-browser-${{ needs.validate.outputs.request_id }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14
