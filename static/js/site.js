@@ -15,8 +15,8 @@
   const typeCheckboxes = [...document.querySelectorAll('#content-type-filter input[name="content-type"]')];
   const typeFilterDisclosure = document.getElementById('content-type-filter');
   const typeFilterStatus = document.getElementById('content-type-filter-status');
-  const typeLabels = {video:'動画',playlist:'プレイリスト',short:'ショート',live:'ライブ'};
-  const validTypes = ['video', 'playlist', 'short', 'live'];
+  const typeLabels = {video:'動画',playlist:'プレイリスト',short:'ショート',live:'ライブ',site:'サイト・ツール',social:'SNS',other:'その他'};
+  const validTypes = ['video', 'playlist', 'short', 'live', 'site', 'social', 'other'];
   const parseTypes = query => new Set((query || '').split(',').filter(value => validTypes.includes(value)));
   const playlistTitle = document.getElementById('selected-category-title');
   const playlistTitleLink = document.getElementById('playlist-title-link');
@@ -117,14 +117,26 @@
     const two = n => String(n).padStart(2, '0');
     return h ? h + ':' + two(m) + ':' + two(s) : m + ':' + two(s);
   };
+  // 表示と日付絞り込みをJSTへ統一。入力はUTCのISO 8601を保持する。
+  const jstFormatter = new Intl.DateTimeFormat('ja-JP', {
+    timeZone: 'Asia/Tokyo', year: 'numeric', month: '2-digit', day: '2-digit',
+    hour: '2-digit', minute: '2-digit', hourCycle: 'h23'
+  });
+  const jstText = value => {
+    const time = Date.parse(value || '');
+    if (!Number.isFinite(time)) return '';
+    const p = Object.fromEntries(jstFormatter.formatToParts(time).map(x => [x.type, x.value]));
+    return `${p.year}-${p.month}-${p.day} ${p.hour}:${p.minute}`;
+  };
+  const jstDate = value => jstText(value).slice(0,10);
   const records = items.map(item => ({
     item,
     ids: new Set(categoryIds(item)),
     query: (item.dataset.search || '').toLocaleLowerCase('ja'),
     title: item.dataset.title || '',
     published: Date.parse(item.dataset.publishedAt || ''),
-    publishedDate: (item.dataset.publishedAt || '').slice(0, 10),
-    updatedDate: (item.dataset.updatedAt || '').slice(0, 10),
+    publishedDate: jstDate(item.dataset.publishedAt),
+    updatedDate: jstDate(item.dataset.updatedAt),
     personIds: new Set((item.dataset.personIds || '').split(/\s+/).filter(Boolean)),
     views: parseViewCount(item.dataset.viewCount),
     likes: parseViewCount(item.dataset.likeCount),
@@ -150,7 +162,21 @@
   records.forEach(({item, duration, kind, platform}) => {
     const node = item.querySelector('.catalog-item-duration');
     if (!node || kind !== 'video' || platform !== 'youtube') return;
-    node.textContent = duration === null ? '再生時間: 未取得' : '再生時間: ' + formatDuration(duration);
+    if (duration === null) { node.hidden = true; return; }
+    node.textContent = formatDuration(duration);
+    node.setAttribute('aria-label', '再生時間 ' + formatDuration(duration));
+  });
+  records.forEach(({item, likes, kind, platform}) => {
+    const node = item.querySelector('.catalog-item-likes');
+    if (!node || kind !== 'video' || platform !== 'youtube') return;
+    node.textContent = likes === null ? '高評価数: 未取得' : '高評価数: ' + formatViewCount.format(likes);
+  });
+  records.forEach(({item}) => {
+    const node = item.querySelector('time.catalog-item-date');
+    if (!node) return;
+    const value = jstText(node.getAttribute('datetime'));
+    if (!value) { node.textContent = '公開日: 未取得'; return; }
+    node.textContent = '公開日: ' + value;
   });
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
@@ -243,12 +269,48 @@
   };
   // 5分未満をサイト内表示上の「ショート」とする（YouTube公式のShorts認定ではない）。
   // 再生時間未取得の場合はBook2のvideo_formatを利用し、300秒ちょうどは通常形式。
-  const formatOf = record => record.kind === 'playlist' ? 'playlist'
-    : record.kind === 'video' && record.platform === 'youtube'
-      ? (record.duration !== null && record.duration < 300 ? 'short'
-        : record.format === 'short' || record.format === 'live' ? record.format : 'video')
-      : 'other';
+  const formatOf = record => {
+    if (record.kind === 'playlist') return 'playlist';
+    if (record.kind === 'video' && record.platform === 'youtube') {
+      // UIラベル、種類フィルタ、サイドバーのカテゴリが必ず同じ判定を使用。
+      // 5分未満はサイト内のショート扱い（YouTube公式Shorts認定ではない）。
+      if (record.duration !== null && record.duration < 300) return 'short';
+      return ['short','live'].includes(record.format) ? record.format : 'video';
+    }
+    if (['website','tool'].includes(record.kind)) return 'site';
+    if (['social_profile','social_post'].includes(record.kind)) return 'social';
+    return 'other';
+  };
+  records.forEach(record => {
+    const node = record.item.querySelector('[data-format-label]');
+    if (node) node.textContent = ({
+      video:'動画', short:'ショート', live:'ライブ配信'
+    })[formatOf(record)] || '動画';
+  });
   const matchesType = record => !selectedTypes.size || selectedTypes.has(formatOf(record));
+  const navType = id => {
+    if (/^browse:video(?::|$)/.test(id)) return 'video';
+    if (/^browse:short(?::|$)/.test(id)) return 'short';
+    if (/^browse:live(?::|$)/.test(id)) return 'live';
+    if (/^browse:playlists(?::|$)/.test(id)) return 'playlist';
+    if (/^browse:web(?::|-|$)/.test(id)) return 'site';
+    if (/^browse:social(?::|-|$)/.test(id)) return 'social';
+    return '';
+  };
+  const syncTypeSelection = nextCategory => {
+    const type = navType(nextCategory);
+    selectedTypes = type ? new Set([type]) : new Set();
+    typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
+    if (type && typeFilterDisclosure) typeFilterDisclosure.open = true;
+  };
+  // 種類フィルタを変更した際、左ナビの「動画/ショート」固定カテゴリが
+  // 残って他種類を無条件に隠す事態を避ける。チャンネル単位の対象は維持。
+  const prepareCategoryForTypeChange = () => {
+    const m = /^browse:(?:video|short|live|playlists):(youtube-channel:[A-Za-z0-9_-]+)$/.exec(category);
+    if (m) category = m[1];
+    else if (/^browse:(?:video|short|live|playlists)(?:$|:)/.test(category)
+      || /^browse:(?:web|social)(?:-|$)/.test(category)) category = '';
+  };
   const matchesCategory = (record, selectedCategory = category) => {
     if (!selectedCategory) return true;
     if (selectedCategory === 'browse:playlists') return record.kind === 'playlist';
@@ -308,6 +370,7 @@
     button.dataset.category = value;
     button.addEventListener('click', () => {
       category = value;
+      syncTypeSelection(category);
       page = 1;
       update();
       document.getElementById('close-categories')?.click();
@@ -399,6 +462,7 @@
       // プレイリスト見出し自体を選んでも、リンク一覧へ切り替える。
       playlistGroup.details.querySelector('summary')?.addEventListener('click', () => {
         category = playlistCategory;
+        syncTypeSelection(category);
         page = 1;
         update();
       });
@@ -475,6 +539,7 @@
         event.preventDefault();
         disclosure.open = true;
         category = 'browse:playlists:' + navGroup.slice('playlists:'.length);
+        syncTypeSelection(category);
         page = 1;
         update();
         return;
@@ -482,6 +547,7 @@
       const button = event.target.closest('button[data-category]');
       if (!button || !buttons.contains(button)) return;
       category = button.dataset.category || '';
+      syncTypeSelection(category);
       page = 1;
       update();
       document.getElementById('close-categories')?.click();
@@ -631,12 +697,14 @@
   };
   typeCheckboxes.forEach(input => input.addEventListener('change', () => {
     selectedTypes = new Set(typeCheckboxes.filter(el => el.checked).map(el => el.value));
+    prepareCategoryForTypeChange();
     page = 1;
     update();
   }));
   document.getElementById('reset-content-type-filter')?.addEventListener('click', () => {
     selectedTypes.clear();
     typeCheckboxes.forEach(input => { input.checked = false; });
+    prepareCategoryForTypeChange();
     page = 1;
     update();
   });
