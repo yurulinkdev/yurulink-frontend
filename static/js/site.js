@@ -470,6 +470,9 @@
       const disclosure = summary?.parentElement;
       const navGroup = disclosure?.dataset.navGroup || '';
       if (disclosure?.tagName === 'DETAILS' && navGroup.startsWith('playlists:')) {
+        // 選択したグループが閉じてナビゲーションを見失わないよう開いたままにする。
+        event.preventDefault();
+        disclosure.open = true;
         category = 'browse:playlists:' + navGroup.slice('playlists:'.length);
         page = 1;
         update();
