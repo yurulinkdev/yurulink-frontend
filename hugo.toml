@@ -30,6 +30,13 @@ bluesky = ""
 threads = ""
 discord = ""
 
+[params.submission]
+# 専用Google Formの回答用URL（編集URLではない）。
+enabled = true
+url = "https://docs.google.com/forms/d/e/1FAIpQLSdEPu603sKgCEiwwlvTFrvIjuV10dvtaRE6WlRHJPCfWQps-g/viewform"
+label = "リンクを投稿する"
+description = "掲載候補の情報をお寄せください"
+
 [params.analytics]
 # GA4ウェブデータストリームの測定ID（G-...）。空欄ならタグと同意UIを出力しません。
 # ID指定時も訪問者の同意後に限りgtag.jsを読み込みます。
