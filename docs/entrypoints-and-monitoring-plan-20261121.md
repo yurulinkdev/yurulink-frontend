@@ -40,3 +40,11 @@ description = "掲載候補をお寄せください"
 
 ## 変更境界
 設計資料のみ。Hugo実装、Webhook発火、New Relic監視の作成、GA4 Data API接続、DNS、Production/mainマージをこの変更では実施していない。
+
+
+## 2026-11-21 文書整合監査
+
+- GA4測定ID`G-8Y659Y3Y8Y`は取得・hugo.toml登録済。ただし本番計測は未検証。Cloudflare Web Analytics先行導入とNew Relic追加はまだ検討段階。各トークン未設定。
+- Discordの新サーバーに移行したWebhook/Forum/thread IDは未確認。旧サーバーの6スレッド送信テストと混同しない。Frontend mainのルーティングDraft PR #10は旧サーバーIDのため、新サポートDiscordへそのままマージしない。
+- ChatOpsは`staging`の`ops/requests/frontend-validation.json` → `frontend-validation-request.yml`で直接実行し、通常のコードPush CIを維持する。2026-11-21のSmoke/Preview成功とBrowser 3件失敗は別々に記録。将来の通知40/50はこれらの確定した結果とrun SHAを紐付ける。
+- ドメイン購入方法・期間は保留。Registrar決済、DNS、外部通知、New Relic、Productionは本設計資料の編集では変更しない。
