@@ -68,7 +68,7 @@
 
 - PR [#11](https://github.com/yurulinkdev/yurulink-frontend/pull/11)を`staging`へSquashマージ済み。対象SHA `47f58aa12948c9a9249db15ae654451e2417b0e2`。
 - JSON専用Push → 同一Workflowでの`smoke_staging_readonly`：Actions [Run 44856007489](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007489) **成功**。
-- 通常のコードPushでのSmoke [44856007457](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007457) **成功**、Cloudflare Preview [44856007462](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007462) **成功**、Browser [44856007491](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007491) **失敗（3件）**。以前の3件失敗の修復・対象SHAでの再検証が継続タスク。
+- 通常のコードPushでのSmoke [44856007457](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007457) **成功**、Cloudflare Preview [44856007462](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007462) **成功**。Browser [44856007491](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/44856007491)は**3 failed・1 flaky・34 passed**。ログで非展開リンクを可視と期待するAboutテスト、チャンネル/プレイリスト複数所属テストのクリックタイムアウト、プレイリスト見出しクリック後のURL不一致を確認。カテゴリ選択維持テストは初回失敗・リトライ成功。実際のUI不具合とテストの期待値ずれを切り分けて修正する。
 - `preview_staging_readonly`、`browser_staging_readonly`、`full_staging_readonly`のJSON要求からの実成功は、この確認だけでは保証できない。Smoke成功を全アクション成功に拡張しない。
 - 通常3Workflowは専用JSON**のみ**変更したPushを除外するが、リクエストとコードを混在させると通常CIも起動する。Cloudflare PagesのGit自動デプロイを`paths-ignore`で抑制できるとは限らない。
 
