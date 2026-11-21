@@ -34,3 +34,9 @@
 - Googleフォームの回答受付停止やカテゴリ選択肢更新は、既存Backend管理経路で実行する。
 - Google Formsの応答数や制限、Book3の長期保存/バックアップはBackendの投稿基盤で管理。
 - GASによる設問同期の二重実装はしない。Frontendは画面表示だけを担当する。
+
+## 実API読戻しの確認（2026-11-21）
+- Backendの読取専用Form監査 [Run 44913758815](https://github.com/yurulinkdev/yurulink-backend/actions/runs/44913758815) で、`responder_url_matches_expected=true`を確認。**iframeの長い公開回答URLは実フォームの公式responderUriと一致**。
+- [Run 44913527529](https://github.com/yurulinkdev/yurulink-backend/actions/runs/44913527529) ではFormの`linkedSheetId`が期待Book3 IDと一致し、`is_published=true`、`is_accepting_responses=true`、設問6件を確認。
+- [Book3 dry-run 44913275656](https://github.com/yurulinkdev/yurulink-backend/actions/runs/44913275656) で既存10件を読み、9件既存照合・新規候補1件、書込なし。
+- 未完了：短縮URL`forms.gle/hgYcATGs2oHEbf9v9`との一致確認、送信した実回答がBook3の正しいタブへ届くこと、pendingへの書込み・審査・Book4公開E2E。
