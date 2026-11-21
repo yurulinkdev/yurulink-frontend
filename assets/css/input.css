@@ -30,7 +30,7 @@ body { background: var(--page); color: var(--text); }
   overflow: hidden;
   background: var(--panel-muted);
 }
-.catalog-card .catalog-media img:not(.social-avatar) {
+.catalog-card .catalog-media:not(.social-avatar-wrap) img {
   display: block;
   width: 100%;
   height: 100%;
@@ -74,7 +74,7 @@ body { background: var(--page); color: var(--text); }
   padding: 0;
   align-self: center;
 }
-.catalog-list-view [data-catalog-item] .catalog-media img:not(.social-avatar) {
+.catalog-list-view [data-catalog-item] .catalog-media:not(.social-avatar-wrap) img {
   width: 100%; height: 100%; object-fit: contain;
 }
 .catalog-list-view [data-catalog-item] .catalog-card-body {
