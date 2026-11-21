@@ -39,3 +39,14 @@ FrontendのProduction/PreviewとBackendのBlue/Greenは独立した環境管理�
 2026-11-21のFrontend staging SHA `47f58aa12948c9a9249db15ae654451e2417b0e2`で、リクエストJSON Pushによる**同一Workflow内の検証**を実証（Run `44856007489`）。通常コードPushのSmokeとCloudflare Preview SHA一致も成功した一方、Browser（Run `44856007491`）には3件失敗が残る。Productionへの昇格条件は満たしていない。
 
 ドメイン`yurulink.com`は取得方法・期間を含めて検討中。将来の`www.yurulink.com`（main）、`staging.yurulink.com`（staging）、Apexの301は**設計目標**であり実設定ではない。現在の`pages.dev`ホストを変更していない。
+
+
+## 2026-11-21 ドメイン有効化・Staging独自ホスト接続準備
+
+Cloudflareダッシュボードのユーザー提供画像では `yurulink.com` のゾーンが有効化済み。公開レジストリNSの値やDNSレコード、Pages独自ホストの登録までは確認していない。Productionと混同しないこと。
+
+Staging `hugo.toml`の `params.noindex = true` と共通HTMLメタの `noindex, nofollow` を実装した。記事も含めたPlaywrightテストを追加した。これは検索エンジン登録の抑止であり、認証・アクセス制限ではない。必要に応じてStagingを非公開にする場合は別途Cloudflare Accessを設計する。
+
+現状の `baseURL` は旧Previewホストのまま。Pagesへ `staging.yurulink.com` をCustom Domain登録した後、**DNSのCNAMEを `staging.yurulink-frontend.pages.dev` に設定し、Proxiedを維持**する。実TLS・Stagingビルド同一性を検証した後に、Stagingの `baseURL` を新ホストへ切り替える。
+
+Cloudflareとの直接連携はないため、Pages登録・DNS操作は未実施。www/ProductionおよびApexリダイレクトは明示承認を待つ。詳細手順は[ドメイン導入手順](domain-and-frontend-feedback-no3-20261120.md)。
