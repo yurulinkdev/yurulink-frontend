@@ -58,3 +58,25 @@
 - ユーザーは「ドメイン購入は方法論を含めて検討中、購入したら連絡する」と明言。Cloudflare Registrar／1年購入を**確定事項として扱わない**。ドメイン登録・DNS変更・Pagesカスタムドメイン・301ルールの実操作を先行しない。
 - 到達先の設計目標は`www.yurulink.com`のProduction、`staging.yurulink.com`のPreview、Apex→wwwの301。購入先・更新費用・DNS委任・権限委譲の検討結果次第で手順を見直す。
 - 既存`pages.dev` Stagingを継続する。環境別Hugo`baseURL`、OGP/Canonical、Cloudflare Web Analytics（候補）、GA4（測定ID取得済・本番ホスト限定）、New Relic（候補）は設定の設計と実運用を分離する。
+
+
+## 2026-11-21 Cloudflareでドメイン有効化を確認（ユーザー提供画面）
+
+### 確認できた事実と限界
+
+- ユーザー提供のCloudflare Dashboard画像で、`yurulink.com`ゾーンに **Your domain is now protected by Cloudflare** と表示された。CloudflareがNS更新を認識したと判断できる。登録事業者、登録期限、現在の正確なレジストリNSの2値、DNSSEC DS、DNSレコード一覧は画像から判定できない。外部DNS照会は今回応答を取得できず、**公開委任先の独立したNS照合は未完了**。
+- 画面はCloudflareのゾーンがActiveである根拠であり、`www.yurulink.com`や`staging.yurulink.com`のWeb接続・TLS・公開完了を示すものではない。
+- 2026-11-21のFrontend staging SHA `8ce6150f386ff69fe5b598617304d97c88c1c951` でSmoke・Pages Preview SHA・Playwright 38件全成功を確認した。続いてStaging専用の`noindex`をHugoの設定・共通metaテンプレートへ追加し、トップ／記事ページの検証テストを追加（この変更の最新SHA CIは実行結果で別途判定する）。
+
+### Staging独自ドメイン接続の正しい手順（未実施）
+
+1. Cloudflare Dashboardで`yurulink.com`の状態がActive、現在のNS名がXserver設定と一致、既存DNSのMX/TXT/CAA/DS等に意図しない変更がないことを確認。
+2. **Workers & Pages → yurulink-frontend → Custom domains → Set up a domain** から `staging.yurulink.com` を追加・Activate。**最初にDNSへ直接CNAMEを追加するのではなくPages側で登録**する。
+3. Cloudflare DNS Recordsに自動作成された`staging`のCNAMEを探し、宛先を**`staging.yurulink-frontend.pages.dev`**へ変更。**Proxied（オレンジ雲）必須**。Cloudflare公式ではDNS onlyだとProductionの`main`へ向く可能性がある。
+4. HTTPSの証明書発行後に`https://staging.yurulink.com/`および`/about/`へアクセスし、既存`https://staging.yurulink-frontend.pages.dev/`と表示・コンテンツが一致すること、robots metaの`noindex`、GA4本番向け通信なし、HTTP 404、端末別表示を検証。
+5. 独自ドメインの受入が通った後に、**Staging専用のHugo baseURLを`https://staging.yurulink.com/`へ変更**し、canonical/OGPの絶対URL、SNSカード、内部リンクを再検証。旧`pages.dev`のCI URLは維持してよいが、canonicalは独自ホストに統一する。
+6. `www.yurulink.com` / apex301 / `main`マージ・Production初回有効化は、別途ユーザー承認後に実行する。ドメイン管理画面の有効化だけをもって本番切替を実施しない。
+
+**操作経路の制限**：この会話の連携機能にはCloudflareゾーン／Pages Custom domainsを直接操作する接続がない。したがって上記DNSやPagesの実設定は未実施。GitHub Actionsに保存済みのCloudflare API TokenをDNS管理に流用・追加権限付与して回避することも行わない。
+
+公式：https://developers.cloudflare.com/pages/how-to/custom-branch-aliases/ 、https://developers.cloudflare.com/pages/configuration/custom-domains/。
