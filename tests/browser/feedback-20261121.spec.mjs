@@ -72,7 +72,7 @@ test('No4: プレイリストはグリッドカード、リストでは横長サ
   const width=await media.evaluate(el=>el.getBoundingClientRect().width);
   expect(width).toBeGreaterThanOrEqual(125);
   const img=media.locator('img');
-  if(await img.count()) await expect(img).toHaveCSS('object-fit','contain');
+  if(await img.count()) await expect(img).toHaveCSS('object-fit','cover');
 });
 
 test('No4: リストは分類と日時を同じ行に置き、再生数と高評価数を次行へ', async ({ page }) => {
@@ -90,7 +90,7 @@ test('No4: リストは分類と日時を同じ行に置き、再生数と高評
   const duration=thumb.locator('.catalog-item-duration');
   await expect(duration).toBeVisible();
   await expect(duration).toHaveCSS('position','absolute');
-  await expect(thumb.locator('img')).toHaveCSS('object-fit','contain');
+  await expect(thumb.locator('img')).toHaveCSS('object-fit','cover');
   const date=card.locator('time.catalog-item-date');
   if(await date.count()) await expect(date).toHaveText(/公開日: \d{4}-\d\d-\d\d \d\d:\d\d/);
 });
