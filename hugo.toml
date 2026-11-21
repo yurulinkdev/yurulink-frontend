@@ -33,7 +33,7 @@ discord = ""
 [params.submission]
 # 専用Google Formの回答用URL（編集URLではない）。
 enabled = true
-url = "https://docs.google.com/forms/d/e/1FAIpQLSdEPu603sKgCEiwwlvTFrvIjuV10dvtaRE6WlRHJPCfWQps-g/viewform"
+url = "https://forms.gle/hgYcATGs2oHEbf9v9"
 label = "リンクを投稿する"
 description = "掲載候補の情報をお寄せください"
 
