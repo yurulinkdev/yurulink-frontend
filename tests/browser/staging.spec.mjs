@@ -507,7 +507,7 @@ test('real metadata: 5分未満を含むショートとライブの表示分類'
 
 test('channel playlist heading opens the link directory', async ({ page }) => {
   await openCatalog(page);
-  const channel = page.locator('#category-buttons details > div > details > summary').first();
+  const channel = page.locator('#category-buttons details[data-nav-group^="channel:"] > summary').first();
   await channel.click();
   const summary = page.locator('#category-buttons details details details > summary', {hasText:'プレイリスト'}).first();
   await summary.click();
