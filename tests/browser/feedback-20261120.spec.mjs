@@ -18,8 +18,12 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
   await page.goto('/history/');
   await expect(page.getByRole('heading', { name: '更新履歴', exact: true })).toBeVisible();
-  await page.goto('/news/welcome/');
-  await expect(page.locator('main h1')).toHaveCount(0);
+  // 旧URL・存在しないURLがトップページへ200でフォールバックしないことを検証。
+  const removed = await page.goto('/news/welcome/');
+  expect(removed?.status()).toBe(404);
+  await expect(page.getByRole('heading', { name: 'ページが見つかりません', exact: true })).toBeVisible();
+  const unknownPage = await page.goto('/not-found-check-20261121/');
+  expect(unknownPage?.status()).toBe(404);
 });
 
 test('初回だけカテゴリを強調', async ({ page }) => {
