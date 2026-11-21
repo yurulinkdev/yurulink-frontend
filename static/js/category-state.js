@@ -10,6 +10,9 @@
   const store = (name, value) => {
     try { localStorage.setItem(name, value); } catch { /* private mode / disabled storage */ }
   };
+  const remove = name => {
+    try { localStorage.removeItem(name); } catch { /* private mode / disabled storage */ }
+  };
   let savedOpen = null;
   try {
     const value = JSON.parse(read(groupsKey) || 'null');
@@ -36,7 +39,9 @@
         }
       }
     }
-    store(key, value);
+    // 空カテゴリは「すべてのコンテンツ」。保存値も削除して、次の来訪で復元しない。
+    if (value) store(key, value);
+    else remove(key);
   };
   const get = () => read(key) || '';
   const query = new URL(location.href).searchParams;
@@ -44,6 +49,12 @@
   const initial = query.has('category') ? (query.get('category') || '') : get();
   sync(initial);
 
+  // ロゴ・サイト名からトップへ戻る操作でも選択中のカテゴリだけ解除する。
+  // URL遷移の前に同期的に実行し、他の表示設定・展開状態は保持する。
+  document.addEventListener('click', event => {
+    const home = event.target.closest('a[data-reset-category]');
+    if (home) sync('');
+  });
   nav.addEventListener('click', event => {
     const link = event.target.closest('[data-category]');
     if (!link || !nav.contains(link)) return;
@@ -55,5 +66,5 @@
       store(groupsKey, JSON.stringify(groups.filter(item => item.open).map(item => item.dataset.navGroup)));
     });
   }
-  window.YuruLinkCategoryState = { get, sync };
+  window.YuruLinkCategoryState = { get, sync, reset: () => sync('') };
 })();
