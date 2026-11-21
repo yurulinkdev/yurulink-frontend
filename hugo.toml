@@ -10,6 +10,9 @@ enableRobotsTXT = true
 brand_logo = "brand/yurulink-symbol-master.svg"
 # サイドバー最下部の任意の補足文。空欄では表示しません。
 sidebar_notice = ""
+
+# Preview/Stagingの検索エンジン登録を抑止。Productionのmainとは独立した設定。
+noindex = true
 # OGP/Twitterカードに使用する画像。static/以下の相対パスを指定します。
 og_image = "ogp/yurulink-light.png"
 
