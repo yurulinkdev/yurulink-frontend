@@ -12,6 +12,7 @@
     <a class="block rounded-lg px-3 py-2 hover:bg-panel-muted" href="{{ "history/" | relURL }}">更新履歴</a>
     <a class="block rounded-lg px-3 py-2 hover:bg-panel-muted" href="{{ "help/" | relURL }}">ヘルプ</a>
   </nav>
+  {{ partial "site/submission-cta.html" . }}
   <p id="categories-intro-anchor" class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">カテゴリー・番組</p>
   <nav id="category-buttons" class="space-y-1" aria-label="リンク集のカテゴリー">
     {{ partial "site/category-fallback.html" . }}
