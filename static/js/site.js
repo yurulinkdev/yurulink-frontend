@@ -8,7 +8,7 @@
   const empty = document.getElementById('no-results');
   const paginations = [document.getElementById('pagination-top'), document.getElementById('pagination')].filter(Boolean);
   const sortSelect = document.getElementById('sort-order');
-  const validSorts = ['newest','oldest','title-asc','title-desc','views-desc','views-asc','duration-desc','duration-asc'];
+  const validSorts = ['newest','oldest','title-asc','title-desc','views-desc','views-asc','likes-desc','duration-desc','duration-asc'];
   let sort = validSorts.includes(new URL(location.href).searchParams.get('sort')) ? new URL(location.href).searchParams.get('sort') : 'newest';
   const pageSizeSelect = document.getElementById('page-size');
   const buttons = document.getElementById('category-buttons');
@@ -127,6 +127,7 @@
     updatedDate: (item.dataset.updatedAt || '').slice(0, 10),
     personIds: new Set((item.dataset.personIds || '').split(/\s+/).filter(Boolean)),
     views: parseViewCount(item.dataset.viewCount),
+    likes: parseViewCount(item.dataset.likeCount),
     duration: parseDuration(item.dataset.durationSeconds),
     kind: item.dataset.kind || '',
     platform: item.dataset.platform || '',
@@ -536,6 +537,14 @@
         if (aVideo !== bVideo) return aVideo ? -1 : 1;
       }
       if (av && a.duration !== b.duration) return sort === 'duration-desc' ? b.duration - a.duration : a.duration - b.duration;
+      return a.title.localeCompare(b.title, 'ja');
+    }
+    if (sort === 'likes-desc') {
+      // 高評価数を取得できた動画だけを順位に含め、未取得を0と扱わない。
+      const validA = a.kind === 'video' && a.platform === 'youtube' && Number.isSafeInteger(a.likes);
+      const validB = b.kind === 'video' && b.platform === 'youtube' && Number.isSafeInteger(b.likes);
+      if (validA !== validB) return validA ? -1 : 1;
+      if (validA && a.likes !== b.likes) return b.likes - a.likes;
       return a.title.localeCompare(b.title, 'ja');
     }
     if (sort === 'views-desc' || sort === 'views-asc') {
