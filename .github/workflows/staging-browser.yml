@@ -4,6 +4,8 @@ on:
   workflow_dispatch:
   push:
     branches: [staging, main]
+    paths-ignore:
+      - 'ops/requests/frontend-validation.json'
 
 permissions:
   contents: read
