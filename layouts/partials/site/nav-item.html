@@ -4,9 +4,9 @@
 {{- $context := .context -}}
 {{- $classes := "block w-full rounded-lg px-3 py-2 text-left text-sm hover:bg-panel-muted focus-visible:outline" -}}
 {{- if $context.IsHome -}}
-  <button class="{{ $classes }}" data-category="{{ $category }}" type="button">{{ $label }}</button>
+  <button class="{{ $classes }}" data-category="{{ $category }}" {{ if not $category }}data-reset-category{{ end }} type="button">{{ $label }}</button>
 {{- else -}}
   {{- $target := "" | relURL -}}
   {{- if $category -}}{{- $target = printf "%s?category=%s" $target ($category | urlquery) | safeURL -}}{{- end -}}
-  <a class="{{ $classes }}" data-category="{{ $category }}" href="{{ $target }}">{{ $label }}</a>
+  <a class="{{ $classes }}" data-category="{{ $category }}" {{ if not $category }}data-reset-category{{ end }} href="{{ $target }}">{{ $label }}</a>
 {{- end -}}
