@@ -2,7 +2,7 @@
   <nav aria-label="フッターナビゲーション" class="flex flex-wrap items-center gap-4">
     <a href="{{ "about/" | relURL }}" class="hover:underline">このサイトについて</a>
     <a href="{{ "about/#articles" | relURL }}" class="hover:underline">{{ .Site.Params.navigation.posts_label | default "記事・お知らせ" }}</a>
-    <a href="{{ "history/" | relURL }}" class="hover:underline">更新履歴</a>
+    <a href="{{ "change-log/" | relURL }}" class="hover:underline">更新履歴</a>
     <a href="{{ "help/" | relURL }}" class="hover:underline">ヘルプ</a>
   </nav>
   <nav class="mt-3 flex flex-wrap gap-2" aria-label="YuruLink公式SNS">{{ partial "site/social-links.html" . }}</nav>
