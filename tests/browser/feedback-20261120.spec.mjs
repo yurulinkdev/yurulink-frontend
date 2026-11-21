@@ -141,7 +141,9 @@ test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評�
   const form = page.locator('#contribution-link');
   await expect(form).toBeVisible();
   await expect(form).toContainText('リンクを投稿する');
-  await expect(form).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
+  await expect(form).toHaveAttribute('href','/submit/');
+  await page.goto('/submit/');
+  await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
   await expect(page.locator('aside a[href="https://x.com/YuruLinkDev"] img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
   const video = page.locator('li[data-catalog-item][data-kind="video"]').first();
   await expect(video.locator('.catalog-video-format')).toContainText(/動画|ショート|ライブ配信/);
