@@ -53,6 +53,13 @@ test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
   await expect(page.locator('#sort-order')).toHaveValue('duration-desc');
 });
 
+test('Stagingは公開するが検索エンジンへは登録しない', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  await page.goto('/about/');
+  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+});
+
 test('GA4設定済みだがStagingホストでは測定しない・公式Xを表示', async ({ page }) => {
   await page.goto('/about/');
   await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
