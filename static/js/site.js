@@ -187,7 +187,8 @@
       kind: node.dataset.collectionKind || '',
       channelName: node.dataset.channelName || '',
       channelId: node.dataset.channelId || '',
-      official: node.dataset.officialChannel === 'false' ? false : true
+      official: node.dataset.officialChannel === 'false' ? false : true,
+      officiality: ['official','authorized','unofficial'].includes(node.dataset.officiality) ? node.dataset.officiality : 'unknown'
     }
   ]));
   const primaryMeta = new Map();
@@ -211,6 +212,10 @@
   const virtualLabels = new Map([
     ['browse:video', 'YouTube動画（すべて）'],
     ['browse:playlists', 'プレイリスト（すべて）'],
+    ['browse:channel-status:official', '公式チャンネル'],
+    ['browse:channel-status:authorized', '公認チャンネル'],
+    ['browse:channel-status:unofficial', '非公式チャンネル'],
+    ['browse:channel-status:unknown', '公式性未確認チャンネル'],
     ['browse:short', 'ショート（すべて）'],
     ['browse:live', 'ライブ（すべて）'],
     ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
@@ -295,6 +300,7 @@
     if (/^browse:playlists(?::|$)/.test(id)) return 'playlist';
     if (/^browse:web(?::|-|$)/.test(id)) return 'site';
     if (/^browse:social(?::|-|$)/.test(id)) return 'social';
+    if (/^browse:note(?::|-|$)/.test(id)) return 'other';
     return '';
   };
   const syncTypeSelection = nextCategory => {
@@ -303,13 +309,14 @@
     typeCheckboxes.forEach(input => { input.checked = selectedTypes.has(input.value); });
     if (type && typeFilterDisclosure) typeFilterDisclosure.open = true;
   };
+  if (!params.has('types') && navType(category)) syncTypeSelection(category);
   // 種類フィルタを変更した際、左ナビの「動画/ショート」固定カテゴリが
   // 残って他種類を無条件に隠す事態を避ける。チャンネル単位の対象は維持。
   const prepareCategoryForTypeChange = () => {
     const m = /^browse:(?:video|short|live|playlists):(youtube-channel:[A-Za-z0-9_-]+)$/.exec(category);
     if (m) category = m[1];
     else if (/^browse:(?:video|short|live|playlists)(?:$|:)/.test(category)
-      || /^browse:(?:web|social)(?:-|$)/.test(category)) category = '';
+      || /^browse:(?:web|social|note)(?:-|$)/.test(category)) category = '';
   };
   const matchesCategory = (record, selectedCategory = category) => {
     if (!selectedCategory) return true;
@@ -334,6 +341,14 @@
     }
     // プレイリストそのものは一覧画面、個別プレイリストは所属動画を表示する。
     if (record.kind === 'playlist' && selectedCategory.startsWith('youtube-playlist:')) return false;
+    // コレクション自身は元のItemの所属IDを持たないため、チャンネル親子関係も検索対象に含める。
+    if (record.kind === 'playlist' && record.playlistChannelId === selectedCategory) return true;
+    if (selectedCategory.startsWith('browse:channel-status:')) {
+      const status = selectedCategory.slice('browse:channel-status:'.length);
+      const ids = [...record.ids].filter(id => id.startsWith('youtube-channel:'));
+      if (record.kind === 'playlist' && record.playlistChannelId) ids.push(record.playlistChannelId);
+      return ids.some(id => (categoryMetadata.get(id)?.officiality || 'unknown') === status);
+    }
     if (record.ids.has(selectedCategory)) return true;
     if (selectedCategory === 'browse:single') return formatOf(record) === 'video'
       && ![...record.ids].some(id => id.startsWith('youtube-channel:') || id.startsWith('youtube-playlist:'));
