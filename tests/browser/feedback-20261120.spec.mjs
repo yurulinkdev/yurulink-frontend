@@ -134,3 +134,45 @@ test('GA4 Production専用ホスト制限はページの設定に存在', async 
   await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
 });
+
+
+test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評価順', async ({ page }) => {
+  await page.goto('/');
+  const form = page.locator('#contribution-link');
+  await expect(form).toBeVisible();
+  await expect(form).toContainText('リンクを投稿する');
+  await expect(form).toHaveAttribute('href','https://docs.google.com/forms/d/e/1FAIpQLSdEPu603sKgCEiwwlvTFrvIjuV10dvtaRE6WlRHJPCfWQps-g/viewform');
+  await expect(page.locator('aside a[href="https://x.com/YuruLinkDev"] img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
+  const video = page.locator('li[data-catalog-item][data-kind="video"]').first();
+  await expect(video.locator('.catalog-video-format')).toContainText(/動画|ショート|ライブ配信/);
+  await page.locator('#sort-order').selectOption('likes-desc');
+  await expect.poll(()=>new URL(page.url()).searchParams.get('sort')).toBe('likes-desc');
+  await page.reload();
+  await expect(page.locator('#sort-order')).toHaveValue('likes-desc');
+});
+
+test('SNSのブランドアイコンと通知ベクターはローカル静的アセット', async ({ request }) => {
+  for (const path of ['icons/social/x.svg','icons/social/instagram.svg','brand/notifications/development.svg','brand/notifications/operations.svg','brand/notifications/monitoring.svg']) {
+    const response = await request.get('/'+path);
+    expect(response.status(),path).toBe(200);
+    expect(await response.text()).toContain('<svg');
+  }
+});
+
+test('高評価順は未取得を0高評価とせず末尾に置く', async ({ page }) => {
+  await page.goto('/');
+  await page.setContent(`
+    <input id="query"><span id="selected-category"></span><span id="count"></span>
+    <select id="sort-order"><option value="newest">新着</option><option value="likes-desc">高評価順</option></select>
+    <div id="category-buttons"></div>
+    <div id="catalog">
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="A" data-search="A" data-like-count="30">A</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="B" data-search="B" data-like-count="120">B</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-category="video" data-title="C" data-search="C" data-like-count="">C</div>
+    </div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
+  `);
+  await page.addScriptTag({url:'/js/site.js'});
+  await page.locator('#sort-order').selectOption('likes-desc');
+  const actual = await page.locator('[data-catalog-item]:visible').evaluateAll(nodes=>nodes.map(n=>n.dataset.title));
+  expect(actual).toEqual(['B','A','C']);
+});
