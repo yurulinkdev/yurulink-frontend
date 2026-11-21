@@ -22,6 +22,9 @@
             <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="playlist" class="accent-accent">プレイリスト</label>
             <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="short" class="accent-accent">ショート</label>
             <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="live" class="accent-accent">ライブ</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="site" class="accent-accent">サイト・ツール</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="social" class="accent-accent">SNS</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="other" class="accent-accent">その他</label>
             <button type="button" id="reset-content-type-filter" class="rounded-md border border-line px-2 py-1 text-xs hover:bg-panel-muted">解除</button>
             <p class="w-full text-xs text-muted-ink">未選択ならすべて表示。種類の指定はOR条件です。5分未満のYouTube動画は「ショート」に分類します。</p>
           </fieldset>
@@ -87,7 +90,7 @@
           {{ end }}
           <div id="category-definitions" hidden>
             {{ range $catalog.programs }}
-              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}" data-category-type="program" data-official-channel="{{ if isset . "order" }}true{{ else }}false{{ end }}"></span>
+              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}" data-category-type="program" data-official-channel="{{ if isset . "order" }}true{{ else }}false{{ end }}" data-officiality="{{ if .officiality_verified }}{{ if in (slice "official" "authorized" "unofficial") (.officiality | default .official_status | default "") }}{{ .officiality | default .official_status }}{{ else }}unknown{{ end }}{{ else }}unknown{{ end }}"></span>
             {{ end }}
             {{ range $catalog.collections }}
               <span data-category-definition="{{ .id }}" data-label="{{ index $programs .id }}" data-order="{{ index $categoryOrder .id }}" data-category-type="collection" data-collection-kind="{{ .kind }}" data-channel-name="{{ .channel_name | default "" }}" data-channel-id="{{ .channel_id | default "" }}"></span>
