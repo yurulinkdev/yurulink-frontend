@@ -130,7 +130,12 @@ test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', 
   await expect(about).toHaveAttribute('aria-current','true');
   await about.click();
   await expect(page).toHaveURL(/category=browse%3Aweb-other/);
-  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]')).toHaveAttribute('aria-current','true');
+  // 3,600件以上のDOMを持つCIではHugoナビの復元完了まで10秒を超えることがある。
+  // 一時的な属性チェックではなく、実カテゴリと保存値の双方の復元を待つ。
+  await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')), {timeout:30000})
+    .toBe('browse:web-other');
+  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]'))
+    .toHaveAttribute('aria-current','true', {timeout:30000});
 });
 
 test('GA4 Production専用ホスト制限はページの設定に存在', async ({ page }) => {
@@ -149,6 +154,8 @@ test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評�
   await page.goto('/submit/');
   await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
   await expect(page.locator('aside a[href="https://x.com/YuruLinkDev"] img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
+  // ここからは投稿ページではなくカタログの並び替え・動画メタ情報を検証する。
+  await page.goto('/');
   const video = page.locator('li[data-catalog-item][data-kind="video"]').first();
   await expect(video.locator('.catalog-video-format')).toContainText(/動画|ショート|ライブ配信/);
   await page.locator('#sort-order').selectOption('likes-desc');
