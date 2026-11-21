@@ -4,8 +4,11 @@ test('No4: Google Formは指定の公開回答URLを案内し、編集URLを露�
   await page.goto('/');
   const cta=page.locator('aside #contribution-link');
   await expect(cta).toBeVisible();
-  await expect(cta).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
-  await expect(cta).toHaveAttribute('rel',/noopener/);
+  await expect(cta).toHaveAttribute('href','/submit/');
+  // CTAはサイト内/submit/へ誘導し、外部公開フォームURLは投稿画面に配置する。
+  await page.goto('/submit/');
+  await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
+  await expect(page.locator('#submission-external-link')).toHaveAttribute('rel',/noopener/);
   await expect(page.locator('a[href*="/forms/d/1W7ZMlY4pcQk1zWOL3s47StzndF5OxZG-PzRFS63-mSU/edit"]')).toHaveCount(0);
 });
 
