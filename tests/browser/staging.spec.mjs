@@ -179,8 +179,8 @@ test('multiple category memberships: playlist and channel both filter the same i
       <span data-category-definition="youtube-playlist:pl1" data-label="特集[番組A]" data-order="20"></span>
     </div>
     <div id="category-buttons"></div><div id="catalog">
-      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one youtube-playlist:pl1" data-category-label="番組A" data-category-order="10" data-title="動画A" data-search="動画A">動画A</div>
-      <div data-catalog-item data-category="youtube-channel:one" data-category-ids="youtube-channel:one" data-category-label="番組A" data-category-order="10" data-title="動画B" data-search="動画B">動画B</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-duration-seconds="300" data-category="youtube-channel:one" data-category-ids="youtube-channel:one youtube-playlist:pl1" data-category-label="番組A" data-category-order="10" data-title="動画A" data-search="動画A">動画A</div>
+      <div data-catalog-item data-kind="video" data-platform="youtube" data-duration-seconds="300" data-category="youtube-channel:one" data-category-ids="youtube-channel:one" data-category-label="番組A" data-category-order="10" data-title="動画B" data-search="動画B">動画B</div>
     </div><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
   `);
   const errors = [];
@@ -194,9 +194,9 @@ test('multiple category memberships: playlist and channel both filter the same i
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(1);
   await expect(page.locator('[data-catalog-item]:visible')).toHaveAttribute('data-title', '動画A');
   await expect(page).toHaveURL(/category=youtube-playlist/);
-  // チャンネル項目も二段階の折りたたみ配下にある。
+  // 共通ナビと同じく、チャンネル配下の「動画」を選択して2件へ戻す。
   await page.locator('#category-buttons summary', { hasText: '番組A', exact: true }).click();
-  await page.locator('#category-buttons button[data-category="youtube-channel:one"]').click();
+  await page.locator('#category-buttons button[data-category="browse:video:youtube-channel:one"]').click();
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(2);
 });
 
