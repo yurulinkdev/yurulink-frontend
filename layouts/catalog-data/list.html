@@ -1,0 +1,279 @@
+{{ define "main" }}
+      <section class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
+        <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
+          <div>
+            <p class="mb-1 text-xs text-muted-ink">閲覧中のカテゴリー</p>
+            <h1 id="selected-category" class="text-xl font-semibold sm:text-2xl"><span id="selected-category-title">すべてのコンテンツ</span><a id="playlist-title-link" href="#" target="_blank" rel="noopener noreferrer" class="text-accent underline underline-offset-4" hidden>プレイリストを開く</a></h1>
+          </div>
+          <div class="flex flex-wrap items-center gap-3"><p id="count" class="text-sm text-muted-ink" aria-live="polite"></p><label class="text-sm text-muted-ink">並び順 <select id="sort-order" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="コンテンツの並び順"><option value="newest">公開日：新しい順</option><option value="oldest">公開日：古い順</option><option value="title-asc">タイトル：昇順</option><option value="title-desc">タイトル：降順</option><option value="views-desc">再生数：多い順</option><option value="views-asc">再生数：少ない順</option><option value="likes-desc">高評価数：多い順</option><option value="duration-desc">再生時間：長い順</option><option value="duration-asc">再生時間：短い順</option></select></label><label class="text-sm text-muted-ink">表示件数 <select id="page-size" class="rounded-lg border border-line bg-panel px-2 py-1.5 text-ink" aria-label="1ページの表示件数"><option value="20">20件</option><option value="50">50件</option><option value="100">100件</option></select></label><div role="group" aria-label="リンク一覧の表示形式" class="inline-flex gap-1"><button type="button" data-catalog-view="grid" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="true">カード</button><button type="button" data-catalog-view="list" class="catalog-view-button rounded-lg border border-line px-3 py-1.5 text-sm" aria-pressed="false">リスト</button></div></div>
+        </div>
+        {{/* details/summary は標準HTMLで開閉できる。フィルタの選択値は折りたたんでも保持する。 */}}
+        <details id="content-type-filter" class="content-type-disclosure mb-4 rounded-lg border border-line bg-panel text-sm">
+          <summary class="flex cursor-pointer select-none items-center justify-between gap-3 px-4 py-3 font-semibold text-ink focus-visible:outline" aria-label="種類で絞り込みを展開または折りたたむ">
+            <span class="flex min-w-0 flex-wrap items-center gap-2">
+              <span>種類で絞り込み（複数選択可）</span>
+              <span id="content-type-filter-status" class="text-xs font-normal text-muted-ink">すべて表示</span>
+            </span>
+            <svg class="content-type-chevron h-5 w-5 shrink-0 text-muted-ink" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </summary>
+          <fieldset class="flex flex-wrap items-center gap-x-4 gap-y-3 border-t border-line px-4 py-4" aria-label="コンテンツの種類で絞り込み">
+            <legend class="sr-only">表示するコンテンツの種類</legend>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="video" class="accent-accent">動画</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="playlist" class="accent-accent">プレイリスト</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="short" class="accent-accent">ショート</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="live" class="accent-accent">ライブ</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="site" class="accent-accent">サイト・ツール</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="social" class="accent-accent">SNS</label>
+            <label class="inline-flex cursor-pointer items-center gap-1.5"><input type="checkbox" name="content-type" value="other" class="accent-accent">その他</label>
+            <button type="button" id="reset-content-type-filter" class="rounded-md border border-line px-2 py-1 text-xs hover:bg-panel-muted">解除</button>
+            <p class="w-full text-xs text-muted-ink">未選択ならすべて表示。種類の指定はOR条件です。5分未満のYouTube動画は「ショート」に分類します。</p>
+          </fieldset>
+        </details>
+        <nav id="pagination-top" class="mb-4 flex flex-wrap items-center justify-center gap-2" aria-label="ページ切り替え（上部）"></nav>
+        {{ $catalog := .Site.Data.public.catalog }}
+        {{ if and $catalog (eq (int ($catalog.schema_version | default 0)) 2) }}
+          {{ $programs := dict }}
+          {{ $categoryOrder := dict }}
+          {{ range $index, $program := $catalog.programs }}
+            {{ $programs = merge $programs (dict $program.id $program.name) }}
+            {{ $order := $program.order | default (add (mul $index 10) 10) }}
+            {{ $categoryOrder = merge $categoryOrder (dict $program.id $order) }}
+          {{ end }}
+          {{ range $index, $collection := $catalog.collections }}
+            {{ $label := $collection.title }}
+            {{ if and (eq $collection.kind "playlist") $collection.channel_name }}
+              {{ $label = printf "%s[%s]" $collection.title $collection.channel_name }}
+            {{ end }}
+            {{ $programs = merge $programs (dict $collection.id $label) }}
+            {{ $order := $collection.order | default (add (mul (add $index (len $catalog.programs)) 10) 10) }}
+            {{ $categoryOrder = merge $categoryOrder (dict $collection.id $order) }}
+          {{ end }}
+          {{/* サイドバーの分類IDとは別に、カードの所属番組名を多対多関係から解決する。 */}}
+          {{ $trustedProgramLabels := dict }}
+          {{ range $catalog.programs }}
+            {{ if not (hasPrefix .name "YouTube channel UC") }}
+              {{ $trustedProgramLabels = merge $trustedProgramLabels (dict .id .name) }}
+            {{ end }}
+          {{ end }}
+          {{ $collectionChannelLabels := dict }}
+          {{ range $catalog.collections }}
+            {{ if .channel_name }}
+              {{ $collectionChannelLabels = merge $collectionChannelLabels (dict .id .channel_name) }}
+            {{ end }}
+          {{ end }}
+          {{ $itemProgramLabels := dict }}
+          {{ $itemProgramLabels := dict }}
+          {{ range $catalog.item_programs }}
+            {{ $p := .program_id }}
+            {{ $i := .item_id }}
+            {{ with index $trustedProgramLabels $p }}
+              {{ $prior := index $itemProgramLabels $i | default (slice) }}
+              {{ $itemProgramLabels = merge $itemProgramLabels (dict $i (uniq (append . $prior))) }}
+            {{ end }}
+          {{ end }}
+          {{ range $catalog.memberships }}
+            {{ $i := .item_id }}
+            {{ with index $collectionChannelLabels .collection_id }}
+              {{ $prior := index $itemProgramLabels $i | default (slice) }}
+              {{ $itemProgramLabels = merge $itemProgramLabels (dict $i (uniq (append . $prior))) }}
+            {{ end }}
+          {{ end }}
+          {{/* Build many-to-many category membership once, retaining legacy primary category. */}}
+          {{ $itemCategories := dict }}
+          {{ range $catalog.item_programs }}
+            {{ $existing := index $itemCategories .item_id | default (slice) }}
+            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append .program_id $existing))) }}
+          {{ end }}
+          {{ range $catalog.memberships }}
+            {{ $existing := index $itemCategories .item_id | default (slice) }}
+            {{ $itemCategories = merge $itemCategories (dict .item_id (uniq (append .collection_id $existing))) }}
+          {{ end }}
+          <div id="category-definitions" hidden>
+            {{ range $catalog.programs }}
+              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}" data-category-type="program" data-official-channel="{{ if isset . "order" }}true{{ else }}false{{ end }}" data-channel-group="{{ .channel_group | default "other" }}" data-officiality="{{ if .officiality_verified }}{{ if in (slice "official" "authorized" "unofficial") (.officiality | default .official_status | default "") }}{{ .officiality | default .official_status }}{{ else }}unknown{{ end }}{{ else }}unknown{{ end }}"></span>
+            {{ end }}
+            {{ range $catalog.collections }}
+              <span data-category-definition="{{ .id }}" data-label="{{ index $programs .id }}" data-order="{{ index $categoryOrder .id }}" data-category-type="collection" data-collection-kind="{{ .kind }}" data-channel-name="{{ .channel_name | default "" }}" data-channel-id="{{ .channel_id | default "" }}"></span>
+            {{ end }}
+          </div>
+          {{/* Playlist collectionはItemを増やさず、画面上で独立したリンクカードへ投影する。 */}}
+          {{ $playlistCards := slice }}
+          {{ range $catalog.collections }}
+            {{ if and (eq .kind "playlist") (hasPrefix .id "youtube-playlist:") }}
+              {{ $playlistCards = append . $playlistCards }}
+            {{ end }}
+          {{ end }}
+          {{ $tax := .Site.Data.taxonomy }}
+          {{/* 設問の大・小カテゴリ定義をビルドしたHTMLに安全なdata属性として渡し、UIの表示文言を単一の分類マスターへ集約する。 */}}
+          <div id="taxonomy-definitions" hidden>
+            {{ with $tax }}
+              {{ range .categories }}
+                {{ $groupId := .id }}
+                <span data-taxonomy-group="{{ .id }}" data-label="{{ .label }}"></span>
+                {{ range .children }}
+                  <span data-taxonomy-id="{{ .id }}" data-parent-id="{{ $groupId }}" data-label="{{ .label }}"></span>
+                {{ end }}
+              {{ end }}
+            {{ end }}
+          </div>
+          {{ $categories := dict }}
+          {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
+          {{/* 公開カタログが信頼できる出演者マスターを持つ場合だけ選択肢を表示。 */}}
+          <div id="people-definitions" hidden>
+            {{ range ($catalog.people | default (slice)) }}
+              <span data-person-id="{{ .id }}" data-label="{{ .name }}"></span>
+            {{ end }}
+          </div>
+          <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">
+          {{/* YouTubeプレイリストのOGP（サムネイル）を優先し、未収録なら所属動画の画像を使用。 */}}
+          {{ $playlistFirstThumb := dict }}
+          {{ $thumbsByItem := dict }}
+          {{ range $catalog.items }}
+            {{ $img := .thumbnail_url | default "" }}
+            {{ $parsed := urls.Parse $img }}
+            {{ if and (eq $parsed.Scheme "https") (eq $parsed.Host "i.ytimg.com") (not $parsed.User) }}
+              {{ $thumbsByItem = merge $thumbsByItem (dict .id $img) }}
+            {{ end }}
+          {{ end }}
+          {{ range $catalog.memberships }}
+            {{ $id := .collection_id }}
+            {{ if not (index $playlistFirstThumb $id) }}
+              {{ with index $thumbsByItem .item_id }}
+                {{ $playlistFirstThumb = merge $playlistFirstThumb (dict $id .) }}
+              {{ end }}
+            {{ end }}
+          {{ end }}
+          {{ range $playlistCards }}
+            {{ $pid := strings.TrimPrefix "youtube-playlist:" .id }}
+            {{ $playlistURL := printf "https://www.youtube.com/playlist?list=%s" $pid }}
+            {{ $label := index $programs .id }}
+            <li data-catalog-item data-playlist-card data-kind="playlist" data-platform="youtube" data-category="browse:playlists" data-category-label="プレイリスト" data-category-order="999999" data-category-ids="{{ .id }}" data-playlist-id="{{ $pid }}" data-playlist-channel-name="{{ .channel_name | default "" }}" data-playlist-channel-id="{{ .channel_id | default "" }}" data-title="{{ .title }}" data-search="{{ printf "%s %s プレイリスト" .title (.channel_name | default "") }}">
+              <article class="catalog-card h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
+                {{ $thumb := .thumbnail_url | default (index $playlistFirstThumb .id | default "") }}
+                {{ $thumbnailURL := urls.Parse $thumb }}
+                {{ if and (eq $thumbnailURL.Scheme "https") (eq $thumbnailURL.Host "i.ytimg.com") (not $thumbnailURL.User) }}
+                <a href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer" class="catalog-media block aspect-video overflow-hidden bg-panel-muted" aria-label="YouTubeのプレイリストを開く">
+                  <img src="{{ $thumb | safeURL }}" data-thumbnail-image sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1279px) 50vw, 33vw" alt="" loading="lazy" decoding="async" width="320" height="180" class="h-full w-full object-cover" referrerpolicy="no-referrer">
+                </a>
+                {{ else }}
+                <div aria-hidden="true" class="catalog-media catalog-media-placeholder flex aspect-video w-full items-center justify-center bg-panel-muted text-3xl text-accent">▤</div>
+                {{ end }}
+                <div class="catalog-card-body min-w-0 p-4">
+                  <div class="catalog-meta-line"><p class="catalog-item-meta text-xs text-muted-ink">YouTubeプレイリスト{{ with .channel_name }} · {{ . }}{{ end }}</p>{{ with .published_at }}<time class="catalog-item-date text-xs text-muted-ink" datetime="{{ . }}">公開日: {{ . }}</time>{{ end }}</div>
+                  <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
+                  <p class="mt-2 text-xs text-muted-ink"><a href="{{ $playlistURL | safeURL }}" target="_blank" rel="noopener noreferrer" class="text-accent hover:underline">YouTubeでプレイリストを開く ↗</a></p>
+                </div>
+              </article>
+            </li>
+          {{ end }}
+          {{ range $catalog.items }}
+            {{ if and (eq .status "published") .title .url }}
+              {{ $url := urls.Parse .url }}
+              {{ if and (eq $url.Scheme "https") (not $url.User) $url.Host }}
+                {{ $cat := .category_id | default .kind }}
+                {{ $related := index $itemCategories .id | default (slice) }}
+                {{ $allCategories := uniq (append $cat $related) }}
+                {{ $catLabel := index $categories $cat | default (index $programs $cat | default $cat) }}
+                {{ $verifiedLeaf := in (slice "official_site" "community_site" "official_social_profile" "community_social_profile" "official_video" "community_video" "open_mic_video" "guest_video") $cat }}
+                {{ $verified := or (.classification_verified | default false) $verifiedLeaf }}
+                {{ $itemLabels := index $itemProgramLabels .id | default (slice) }}
+                {{ $visibleLabel := $catLabel }}
+                {{ if and (eq .kind "video") (gt (len $itemLabels) 0) }}
+                  {{ $visibleLabel = delimit (first 2 $itemLabels) "・" }}
+                {{ end }}
+                {{ $catOrder := index $categoryOrder $cat | default 999999 }}
+                {{ $search := printf "%s %s %s %s %s" .title (.description | default "") (.platform | default "") $catLabel (delimit $itemLabels " ") }}
+                <li data-catalog-item data-category="{{ $cat }}" data-category-ids="{{ delimit $allCategories " " }}" data-category-label="{{ $catLabel }}" data-category-order="{{ $catOrder }}" data-kind="{{ .kind }}" data-platform="{{ .platform }}" data-provenance="{{ .provenance }}" data-search="{{ $search }}" data-title="{{ .title }}" data-published-at="{{ .published_at | default "" }}" data-updated-at="{{ .updated_at | default "" }}" data-person-ids="{{ delimit (.person_ids | default (slice)) " " }}" data-view-count="{{ if isset . "view_count" }}{{ printf "%.0f" (float .view_count) }}{{ end }}" data-like-count="{{ if isset . "like_count" }}{{ printf "%.0f" (float .like_count) }}{{ end }}" data-duration-seconds="{{ if isset . "duration_seconds" }}{{ printf "%.0f" (float .duration_seconds) }}{{ end }}" data-video-format="{{ .video_format | default "video" }}" data-video-relation="{{ .video_relation | default "" }}" data-program-labels="{{ delimit $itemLabels "・" }}" data-classification-verified="{{ if $verified }}true{{ else }}false{{ end }}">
+                  <article class="catalog-card h-full overflow-hidden rounded-xl border border-line bg-panel transition-shadow hover:shadow-md">
+                    {{ if eq .kind "social_profile" }}
+                      {{ $avatar := .avatar_url | default "" }}
+                      {{ $avatarURL := urls.Parse $avatar }}
+                      <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="catalog-media social-avatar-wrap flex items-center justify-center px-4 py-3" aria-label="SNSプロフィールを開く">
+                        {{ if and (eq $avatarURL.Scheme "https") (eq $avatarURL.Host "pbs.twimg.com") (not $avatarURL.User) }}
+                          <img src="{{ $avatar | safeURL }}" alt="" loading="lazy" decoding="async" width="64" height="64" class="social-avatar h-16 w-16 rounded-full bg-panel-muted object-cover" referrerpolicy="no-referrer">
+                        {{ else }}
+                          {{ $socialKey := lower (.platform | default "") }}
+                          {{ if eq $socialKey "twitter" }}{{ $socialKey = "x" }}{{ end }}
+                          {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}
+                            <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-panel-muted" aria-hidden="true"><img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" alt="" width="32" height="32" class="h-8 w-8 dark:invert" loading="lazy"></span>
+                          {{ else }}
+                            <span class="social-avatar-placeholder inline-flex h-16 w-16 items-center justify-center rounded-full bg-panel-muted text-sm font-bold text-accent" aria-hidden="true">SNS</span>
+                          {{ end }}
+                        {{ end }}
+                      </a>
+                    {{ else }}
+                      {{ $itemKind := .kind }}
+                      {{ $hasDuration := isset . "duration_seconds" }}
+                      {{ with .thumbnail_url }}
+                        {{ $thumbnail := urls.Parse . }}
+                        {{ if and (eq $thumbnail.Scheme "https") (eq $thumbnail.Host "i.ytimg.com") (not $thumbnail.User) }}
+                          {{/* mqdefault=320×180、hqdefault=480×360(黒帯あり)。表示枠16:9へcoverし、元の画素比を変えず黒帯だけトリミングする。 */}}
+                          {{ $mq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\\.(jpg|webp)$" "mqdefault.$2" . }}
+                          {{ $hq := replaceRE "(default|mqdefault|hqdefault|sddefault|maxresdefault)\\.(jpg|webp)$" "hqdefault.$2" . }}
+                          <a href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer" class="catalog-media relative block aspect-video overflow-hidden bg-panel-muted">
+                            <img src="{{ $mq | safeURL }}" srcset="{{ $mq | safeURL }} 320w, {{ $hq | safeURL }} 480w" data-thumbnail-image sizes="(max-width: 639px) calc(100vw - 2rem), (max-width: 1279px) 50vw, 33vw" alt="" loading="lazy" decoding="async" width="320" height="180" class="h-full w-full object-cover" referrerpolicy="no-referrer">
+                            {{ if and (eq $itemKind "video") $hasDuration }}
+                              <span class="catalog-item-duration" aria-label="再生時間">--:--</span>
+                            {{ end }}
+                          </a>
+                        {{ end }}
+                      {{ end }}
+                    {{ end }}
+                    <div class="catalog-card-body p-4">
+                    {{ $format := .video_format | default "video" }}
+                    {{ if and (eq .kind "video") (isset . "duration_seconds") (lt (float .duration_seconds) 300) }}{{ $format = "short" }}{{ end }}
+                    {{ $status := .officiality | default (.official_status | default "") }}
+                    {{ $statusVerified := .officiality_verified | default false }}
+                    {{ $statusLabel := "" }}
+                    {{ if $statusVerified }}
+                      {{ if eq $status "official" }}{{ $statusLabel = "公式" }}
+                      {{ else if eq $status "authorized" }}{{ $statusLabel = "公認" }}
+                      {{ else if eq $status "unofficial" }}{{ $statusLabel = "非公式" }}{{ end }}
+                    {{ else if $verified }}
+                      {{ if or (eq $cat "official_site") (eq $cat "official_social_profile") (eq $cat "official_video") (eq .provenance "official") }}{{ $statusLabel = "公式" }}
+                      {{ else if or (eq $cat "community_site") (eq $cat "community_social_profile") (eq $cat "community_video") (eq .provenance "community") }}{{ $statusLabel = "非公式" }}{{ end }}
+                    {{ end }}
+                    <div class="catalog-meta-line">
+                      <p class="catalog-item-meta text-xs text-muted-ink"><span class="font-semibold">{{ $visibleLabel }}</span>{{ with .platform }} · {{ . }}{{ end }}{{ if eq .kind "video" }} · <span class="catalog-video-format font-medium" data-format-label>{{ if eq $format "short" }}ショート{{ else if eq $format "live" }}ライブ配信{{ else }}動画{{ end }}</span>{{ end }}{{ with $statusLabel }} · <span class="catalog-officiality" data-status="{{ $status }}">{{ . }}</span>{{ end }}</p>
+                      {{ with .published_at }}<time class="catalog-item-date text-xs text-muted-ink" datetime="{{ . }}">公開日: {{ . }}</time>{{ end }}
+                    </div>
+                    <h2 class="text-base font-semibold leading-relaxed"><a class="hover:underline" href="{{ .url | safeURL }}" target="_blank" rel="noopener noreferrer">{{ .title }}</a></h2>
+                    {{ if eq .kind "social_profile" }}{{ with (.profile_bio | default .description) }}<p class="catalog-item-description social-bio mt-2 line-clamp-4 whitespace-pre-line text-sm text-muted-ink">{{ . | plainify | truncate 280 }}</p>{{ end }}{{ else }}{{ with .description }}<p class="catalog-item-description mt-2 line-clamp-3 text-sm text-muted-ink">{{ . | plainify | truncate 160 }}</p>{{ end }}{{ end }}
+                    {{ if eq .kind "video" }}
+                    <p class="catalog-item-stats mt-2 flex flex-wrap items-center gap-x-4 gap-y-0.5 text-xs text-muted-ink">
+                      <span class="catalog-item-views">{{ if isset . "view_count" }}再生数: {{ printf "%.0f" (float .view_count) }}{{ else }}再生数: 未取得{{ end }}</span>
+                      <span class="catalog-item-likes">{{ if isset . "like_count" }}高評価数: {{ printf "%.0f" (float .like_count) }}{{ else }}高評価数: 未取得{{ end }}</span>
+                    </p>
+                    {{ end }}
+                    {{ if eq .kind "social_profile" }}
+                      {{ $socialKey := lower (.platform | default "") }}
+                      {{ if eq $socialKey "twitter" }}{{ $socialKey = "x" }}{{ end }}
+                      {{ $account := .account_name | default (.handle | default "") }}
+                      {{ if not $account }}
+                        {{ $pathSections := split (strings.TrimPrefix "/" $url.Path) "/" }}
+                        {{ $pathFirst := index $pathSections 0 }}
+                        {{ if and $pathFirst (not (in (slice "channel" "watch" "playlist" "status" "posts" "p" "reel") $pathFirst)) }}
+                          {{ $account = printf "@%s" $pathFirst }}
+                        {{ else }}
+                          {{ $account = .title }}
+                        {{ end }}
+                      {{ end }}
+                      <a class="catalog-social-account mt-2 flex items-center gap-1.5 text-xs text-accent hover:underline" href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer">
+                        {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}<img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" width="16" height="16" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 dark:invert" loading="lazy">{{ end }}
+                        <span>{{ $account }}</span>
+                      </a>
+                    {{ end }}
+                    </div>
+                  </article>
+                </li>
+              {{ end }}
+            {{ end }}
+          {{ end }}
+          </ul>
+          <nav id="pagination" class="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label="ページ切り替え"></nav>
+          <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
+        {{ else }}
+          <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">統合形式の公開カタログを準備中です。</p>
+        {{ end }}
+      </section>
+{{ end }}

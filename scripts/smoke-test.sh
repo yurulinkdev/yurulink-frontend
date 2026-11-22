@@ -89,4 +89,10 @@ test ! -e .github/workflows/compare-staging.yml
 ! grep -Fq 'yurulink-frontend-staging' .github/workflows/cloudflare-inventory-request.yml
 echo "::endgroup::"
 
+# First paint must never serialize thousands of cards into index.html.
+test -s public/catalog-data/index.html
+grep -q 'id="catalog-loading"' public/index.html || grep -q 'id=catalog-loading' public/index.html
+test "$( (grep -o 'data-catalog-item' public/index.html || true) | wc -l)" -eq 0
+test "$(grep -o 'data-catalog-item' public/catalog-data/index.html | wc -l)" -gt 100
+grep -q 'YuruLinkへようこそ' public/index.html
 echo "Smoke test passed."

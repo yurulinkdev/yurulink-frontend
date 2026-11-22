@@ -3,7 +3,7 @@
 {{- $description := .Description | default (.Summary | plainify | truncate 155) | default (.Site.Params.description | default "ゆる学徒コンテンツの非公式リンク集") -}}
 <title>{{ $title }}</title>
 <meta name="description" content="{{ $description }}">
-{{- if .Site.Params.noindex }}
+{{- if or .Site.Params.noindex .Params.noindex }}
 <meta name="robots" content="noindex, nofollow">
 {{- end }}
 <link rel="canonical" href="{{ .Permalink }}">

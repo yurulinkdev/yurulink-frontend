@@ -1,7 +1,30 @@
-(() => {
+(async () => {
   const catalog = document.getElementById('catalog');
   if (!catalog) return;
-  const items = [...catalog.querySelectorAll('[data-catalog-item]')];
+  const loading = document.getElementById('catalog-loading');
+  // First paint only contains the small landing shell. Fetch the full, generated
+  // catalog as an inert template so thousands of cards never join the live DOM.
+  // This preserves the original Hugo markup and all classification semantics.
+  let cardTemplate;
+  let items;
+  try {
+    const response = await fetch('/catalog-data/', {credentials:'same-origin'});
+    if (!response.ok) throw new Error('Catalog HTTP ' + response.status);
+    const html = await response.text();
+    const opening = /<ul\b[^>]*\bid\s*=\s*(?:"catalog"|'catalog'|catalog)(?=\s|>)[^>]*>/i.exec(html);
+    if (!opening) throw new Error('Catalog listing not found');
+    const start = opening.index + opening[0].length;
+    const end = html.indexOf('</ul>', start);
+    if (end < start) throw new Error('Catalog closing tag not found');
+    cardTemplate = document.createElement('template');
+    cardTemplate.innerHTML = html.slice(start, end);
+    items = [...cardTemplate.content.querySelectorAll('[data-catalog-item]')];
+    if (!items.length) throw new Error('Catalog is empty');
+  } catch (error) {
+    console.error('YuruLink: deferred catalog load failed', error);
+    if (loading) loading.firstChild.textContent = 'リンク一覧を読み込めませんでした。通信状態を確認して再読み込みするか、';
+    return;
+  }
   const search = document.getElementById('query');
   const selected = document.getElementById('selected-category');
   const count = document.getElementById('count');
@@ -715,14 +738,14 @@
     visibleRecords.forEach(formatVisibleRecord);
     const visible = visibleRecords.map(record => record.item);
     applyImageSizes(visible);
-    const visibleSet = new Set(visible);
-    items.forEach(item => {
-      const hidden = !visibleSet.has(item);
-      if (item.hidden !== hidden) item.hidden = hidden;
-    });
-    // 以前は全3,000件超のDOMを毎回移動していた。表示対象（最大100件）だけ並べ替える。
+    // Return the previous page's cards to inert storage before adding the next
+    // page. Only pageSize (20/50/100) card DOM nodes exist in the live document.
+    while (catalog.firstChild) cardTemplate.content.append(catalog.firstChild);
     const fragment = document.createDocumentFragment();
-    visible.forEach(item => fragment.append(item));
+    visible.forEach(item => {
+      item.hidden = false;
+      fragment.append(item);
+    });
     catalog.append(fragment);
     catalog.classList.add('catalog-ready');
     const label = categoryLabels.get(category) || virtualLabels.get(category)
@@ -816,4 +839,9 @@
   update();
   // 初期URLでリスト表示の記憶を復元。既に非表示になった全件画像を走査しない。
   applyView(initialView);
-})();
+  if (loading) loading.hidden = true;
+})().catch(error => {
+  console.error('YuruLink: catalog initialization failed', error);
+  const loading = document.getElementById('catalog-loading');
+  if (loading) loading.textContent = 'リンク一覧の初期化に失敗しました。再読み込みするか、HTML一覧を直接開いてください。';
+});
