@@ -20,7 +20,16 @@ Cloudflare Pagesは`yurulink-frontend`という**単一プロジェクト**で�
 - 依存関係：Lockfileがある場合は`npm ci`、ない場合は`npm install`を選択
 - Hugoの設定入口：`hugo.toml`、`assets/css/`、`layouts/`
 
-`staging`には`noindex=true`とPreview URL用`baseURL`を設定しています。Productionへ同じ設定をそのまま持ち込むと、canonical・OGP・robots等が不適切になります。**本番反映前にブランチ／ビルド環境別に`baseURL`・検索制御・計測ホスト条件を切り替え、Cloudflare側の実ビルド設定と一致させます。**
+**2026-11-23実装**：Cloudflare Pagesの既存ビルドコマンド `npm run css:build && hugo --minify` は変更しません。`npm run css:build` の先頭で `scripts/prepare-site-build.mjs` を実行し、Pages標準変数 `CF_PAGES_BRANCH` を判定します。デフォルトはStaging安全側です。GitHub Actionsは `GITHUB_REF_NAME`、ローカル確認は `YURULINK_SITE_TARGET=production|staging` を使用できます。ビルド作業ディレクトリの `hugo.toml` だけを書き換え、GitHub上の設定ファイルは変更しません。
+
+| ビルド判定 | canonical/OGP用baseURL | robots設定 | 投稿フォーム |
+| --- | --- | --- | --- |
+| main / production | `https://yurulink-frontend.pages.dev/` | index許可 | **一時停止**（Backendの審査E2E待ち） |
+| staging / Preview / 不明 | `https://staging.yurulink-frontend.pages.dev/` | noindex | 既存の検証用フォームを維持 |
+
+`www.yurulink.com`へのPages Custom Domain接続・TLS・DNS・リダイレクトが未検証なので、初回main同期時点では既存のPages Productionホストを正規URLにします。接続確認後にProduction baseURLを `https://www.yurulink.com/` に変更し、GA4のホスト許可とOGP・canonical・robotsを再検証します。外部URLの現在の稼働を推測で確定扱いしません。
+
+`scripts/verify-site-environments.mjs` でProduction/Previewの両方を静的ビルドし、canonical・OGP・noindex・投稿フォームの非公開化・Welcome分離をCIで検証します。
 
 ## サービスの相互作用
 
