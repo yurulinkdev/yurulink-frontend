@@ -63,3 +63,17 @@ sequenceDiagram
 - Cloudflare Pagesではビルド時の `CF_PAGES_BRANCH` を `head/meta.html` が参照してカードを切り替えます。既存Cloudflareビルドコマンドに変更を加える必要はありません。ブランチ `main` は正式版、それ以外は検証版。環境変数の読取許可を `hugo.toml` の `security.funcs.getenv` に限定追加しました。
 - この改修は**OGPのみ**を自動分岐します。URL・canonical・`noindex` 等の環境分離とカスタムドメイン接続は従来の確認・承認境界を維持し、mainへ同期する際に別途点検します。
 - 画像は採用済みのHTML-to-Imageライト版にHTML/CSSで検証ラベルを合成し、Playwright Chromiumで1200×630 PNGに描画。生成AIの新規画像生成はしません。制作原本・配布物はAutomationLabとDrive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120` に同期します。
+
+
+### Production初期公開のビルド・受付ゲート（2026-11-23）
+
+現時点でCloudflare Pages `yurulink-frontend` の `domains` 一覧に登録されているのは `yurulink-frontend.pages.dev` のみです。PagesのProduction branchは`main`、Previewは`staging`。独自ドメイン `www.yurulink.com` はPagesのCustom Domainに未登録のため、最初のProduction公開では既存のPagesホストをcanonical/OGPに採用し、独自ドメイン接続後に切り替えます。
+
+Pagesの既存コマンド `npm run css:build && hugo --minify` は変更せず、`css:build` 冒頭の `scripts/prepare-site-build.mjs` が `CF_PAGES_BRANCH`（Actionsは`GITHUB_REF_NAME`）を読み、ビルド作業ディレクトリ内の `hugo.toml` を環境に応じて更新します。GitHubリポジトリの元ファイルは更新しません。
+
+- `main`: `baseURL=https://yurulink-frontend.pages.dev/`、`params.noindex=false`。投稿審査の全体E2Eが未完了のため、フォーム埋め込み・投稿リンクは無効化します。
+- `staging`／各Preview: `baseURL=https://staging.yurulink-frontend.pages.dev/`、`params.noindex=true`。検証フォームは有効のままです。
+- OGPの`STAGING`ラベルは既存の`head/meta.html`と`config/staging/hugo.toml`に従い、上記URL切替と両立します。URLと画像の両方を混同しないようにします。
+- ローカル再現：`YURULINK_SITE_TARGET=production npm run build` ／`YURULINK_SITE_TARGET=staging npm run build`。CIは`scripts/verify-site-environments.mjs`で両方の生成HTMLを検査します。
+
+公開後のGoogle Form受付再開には、回答受付・Book3→SubmissionMaster→Book4審査の実動作確認が必要です。Discord通知・DNS・旧独立Staging Pagesプロジェクトの削除は今回の同期対象に含めません。
