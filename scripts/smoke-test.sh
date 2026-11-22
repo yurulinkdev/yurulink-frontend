@@ -73,4 +73,11 @@ grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
 grep -q "catalog-list-view" assets/css/input.css
 grep -q "catalog-item-date" layouts/index.html
+# main固有のDiscord通知資産をstagingへ保持した場合の静的安全検証。
+echo "::group::Discord notification route validation"
+node --check ops/notifications/notify-discord.js
+node --check ops/notifications/validate-routes.js
+node ops/notifications/validate-routes.js
+echo "::endgroup::"
+
 echo "Smoke test passed."
