@@ -8,7 +8,7 @@
 | Preview（Staging） | `yurulink-frontend` | `staging` | https://staging.yurulink-frontend.pages.dev/ |
 | PR Preview | `yurulink-frontend` | 開発ブランチ | デプロイごとのURL |
 
-旧独立プロジェクト `yurulink-frontend-staging` は廃止対象です。削除操作はCloudflareアカウントの管理者が行います。削除完了は未確認です。
+旧独立プロジェクト `yurulink-frontend-staging` は廃止・ユーザー削除待ちです。2026-11-22のGitHub check-runでは、同じ `staging` SHAに現行PagesのPreviewと旧プロジェクトの両方がデプロイ成功を報告しました。旧プロジェクトのGit連携が残っているため、`staging` Pushで重複デプロイされます。GitHub Actionsから旧Pagesへ直接デプロイする経路はなく、旧プロジェクトの削除完了は未確認です。
 
 ## ビルド設定
 
@@ -29,6 +29,14 @@
 
 FrontendのProduction/PreviewとBackendのBlue/Greenは独立した環境管理です。Frontendの本番反映やDNS変更は別途承認を要します。障害時は検証済みデプロイまたはGitコミットへ戻します。
 
+## 旧独立Pagesプロジェクトの廃止
+
+- [x] Stagingの通常CI・Playwrightは現行 `yurulink-frontend` のPreviewを対象にする。`playwright.config.mjs` の環境変数未設定時のURLも現行Previewに統一。
+- [x] 旧Pagesとの比較用Workflow・スクリプトは廃止。Cloudflare棚卸しWorkflowのAPI取得対象は現行Pagesだけとする。
+- [ ] Cloudflare管理画面で旧プロジェクトのCustom Domains・依存DNS・環境変数・Git連携を確認し、必要な設定を現行Pagesに移行する（実値を資料へ記録しない）。
+- [ ] **ユーザーが** `yurulink-frontend-staging` を削除する。現行 `yurulink-frontend` は削除しない。
+- [ ] 削除後に現行Pagesの `staging` Preview、GitHub ActionsのSHA一致、ブラウザ表示を再確認する。削除前のCI成功は削除後の疎通保証ではない。
+
 ## Stagingのチャット起点検証
 
 `staging`は継続開発の主経路として利用します。通常のコードPush時のSmoke／Cloudflare Preview SHA一致／Playwrightは従来どおり自動実行します。チャット経由で特定のコードCommitを再検証したい場合は、[`ops/requests/frontend-validation.json`](../ops/requests/frontend-validation.json) の変更Pushにより、[直接実行Workflow](../.github/workflows/frontend-validation-request.yml)を起動します。リクエストのみのPush時は通常の3本のCIを重複実行しません。操作種別・対象SHA・結果確認・未解決の回帰テストは [Staging ChatOps運用手順](staging-chatops.md) を参照してください。
@@ -47,6 +55,6 @@ Cloudflareダッシュボードのユーザー提供画像では `yurulink.com` 
 
 Staging `hugo.toml`の `params.noindex = true` と共通HTMLメタの `noindex, nofollow` を実装した。記事も含めたPlaywrightテストを追加した。これは検索エンジン登録の抑止であり、認証・アクセス制限ではない。必要に応じてStagingを非公開にする場合は別途Cloudflare Accessを設計する。
 
-現状の `baseURL` は旧Previewホストのまま。Pagesへ `staging.yurulink.com` をCustom Domain登録した後、**DNSのCNAMEを `staging.yurulink-frontend.pages.dev` に設定し、Proxiedを維持**する。実TLS・Stagingビルド同一性を検証した後に、Stagingの `baseURL` を新ホストへ切り替える。
+現状の `baseURL` は現行単一PagesプロジェクトのPreviewホスト `https://staging.yurulink-frontend.pages.dev/`。Pagesへ `staging.yurulink.com` をCustom Domain登録した後、**DNSのCNAMEを `staging.yurulink-frontend.pages.dev` に設定し、Proxiedを維持**する。実TLS・Stagingビルド同一性を検証した後に、Stagingの `baseURL` を新ホストへ切り替える。
 
 Cloudflareとの直接連携はないため、Pages登録・DNS操作は未実施。www/ProductionおよびApexリダイレクトは明示承認を待つ。詳細手順は[ドメイン導入手順](domain-and-frontend-feedback-no3-20261120.md)。

@@ -8,7 +8,7 @@ export default defineConfig({
   reporter: [['list'], ['html', { outputFolder: 'playwright-report', open: 'never' }]],
   outputDir: 'test-results',
   use: {
-    baseURL: process.env.STAGING_URL || 'https://yurulink-frontend-staging.pages.dev/',
+    baseURL: process.env.STAGING_URL || 'https://staging.yurulink-frontend.pages.dev/',
     browserName: 'chromium',
     headless: true,
     trace: 'retain-on-failure',

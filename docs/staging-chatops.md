@@ -55,7 +55,7 @@
 - `.github/workflows/frontend-smoke.yml`：通常の`staging`／`main` PushとPR時のSmoke継続。
 - `.github/workflows/cloudflare-preview-verify.yml`：通常の`staging` Pushで指定SHAのPreview確認継続。
 - `.github/workflows/staging-browser.yml`：通常の`staging` PushでPlaywright E2E継続。
-- `.github/workflows/compare-staging.yml`：旧StagingとPreviewの比較。旧独立Cloudflare Pagesプロジェクト廃止予定のため、新ChatOpsアクションへは含めない。削除は別判断。
+- 旧独立PagesとPreviewの比較Workflow・スクリプトは移行済みのため廃止。比較対象の旧URLにはアクセスせず、現行Pagesプロジェクトの同一SHA Previewを直接検証する。
 
 ## 導入前のベースライン（2026-11-21）
 - コミット：`84235b95d21156ebde41a52c75030bb7589b7475`。

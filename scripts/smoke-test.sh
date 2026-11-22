@@ -80,4 +80,13 @@ node --check ops/notifications/validate-routes.js
 node ops/notifications/validate-routes.js
 echo "::endgroup::"
 
+# 単一Pagesプロジェクトへの移行後は旧StagingのURLや比較処理に依存しない。
+echo "::group::Single Pages project routing"
+node --check playwright.config.mjs
+grep -Fq "baseURL: process.env.STAGING_URL || 'https://staging.yurulink-frontend.pages.dev/'" playwright.config.mjs
+test ! -e scripts/compare-staging.mjs
+test ! -e .github/workflows/compare-staging.yml
+! grep -Fq 'yurulink-frontend-staging' .github/workflows/cloudflare-inventory-request.yml
+echo "::endgroup::"
+
 echo "Smoke test passed."
