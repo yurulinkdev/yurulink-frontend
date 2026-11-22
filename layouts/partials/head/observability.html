@@ -1,0 +1,10 @@
+{{/* サイト設定からRUMサービスを独立に有効化。値が空ならスクリプトを出力しない。 */}}
+{{- if not hugo.IsServer -}}
+  {{- with .Site.Params.analytics.new_relic_browser_snippet -}}
+    {{- . | safeHTML -}}
+  {{- end -}}
+  {{- $cfToken := .Site.Params.analytics.cloudflare_web_analytics_token | default "" -}}
+  {{- if gt (len (findRE "^[a-fA-F0-9]{32}$" $cfToken)) 0 -}}
+    <script defer src="https://static.cloudflareinsights.com/beacon.min.js" data-cf-beacon='{"token":"{{ $cfToken }}"}'></script>
+  {{- end -}}
+{{- end -}}

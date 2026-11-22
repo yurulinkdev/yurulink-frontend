@@ -3,6 +3,8 @@ name: Verify Cloudflare Pages preview deployment
 on:
   push:
     branches: [staging]
+    paths-ignore:
+      - 'ops/requests/frontend-validation.json'
   workflow_dispatch:
     inputs:
       commit_sha:

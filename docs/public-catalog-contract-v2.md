@@ -1,73 +1,94 @@
-# YuruLink 公開カタログ仕様 — 統合形式
+# YuruLink公開カタログ仕様 — schema_version: 2
 
-**状態：統合形式を正式採用。** フロントエンドの読み込み処理は開発ブランチに実装済みです。バックエンドの実データ連携とStaging検証は未完了です。内部の `schema_version: 2` は機械的な識別子として維持します。
+## 目的と適用範囲
 
-## 対象と分類
+Frontendは`data/public/catalog.json`にある**検証済みの統合形式JSON**を読み込み、リンク実体、番組、プレイリストやテーマ、これらの多対多関係を表示します。`schema_version: 2`は互換性識別子として維持します。
 
-公式サイト、有志ツール、記事、SNSプロフィール、動画、ポッドキャストなどの関連リンクを扱います。**`kind`（何か）、`platform`（どこにあるか）、`provenance`（公式性）を混同しない**ことが重要です。
+分類は相互に独立した軸です。
 
-## データ構造
+- `kind`：何のコンテンツか（動画、記事、サイト、SNS等）
+- `platform`：どのプラットフォームに掲載されているか
+- `provenance`：確認された出自・公式性の基本分類
+- `category_id`：審査・分類したコンテンツの葉ID（任意）
+- `video_format`：Backendが収集した動画形式の属性
+- `channel_group`：Book1由来のチャンネルの**ナビ表示分類**
 
-| 配列 | 内容 | 必須項目・関連 |
+投稿者がフォームで「公式」を選んでも`provenance=official`や`officiality_verified=true`に自動変換しません。
+
+## 最上位オブジェクト
+
+| キー | 型・主な必須項目 | 用途 |
 | --- | --- | --- |
-| `items` | 重複しないリンク実体 | `id`, `title`, `url`, `kind`, `platform`, `provenance`, `status` |
-| `programs` | 番組・活動 | `id`, `name`。任意: `description`, `parent_id`, `order` |
-| `collections` | プレイリスト・テーマ・編集集合 | `id`, `title`, `kind`。任意: `program_id`, `parent_id`, `description`, `order`, `channel_name` |
-| `memberships` | リンクと集合の多対多関係 | `item_id`, `collection_id`。任意: `position` |
-| `item_programs` | リンクと番組の多対多関係 | `item_id`, `program_id` |
+| `schema_version` | 数値`2` | 形式識別子 |
+| `generated_at` | ISO 8601日時 | スナップショット生成時刻 |
+| `items` | 配列。`id`、`title`、`url`、`kind`、`platform`、`provenance`、`status` | リンク実体 |
+| `programs` | 配列。`id`、`name` | 番組・活動・チャンネル表示情報 |
+| `collections` | 配列。`id`、`title`、`kind` | プレイリスト・テーマ・編集集合 |
+| `item_programs` | 配列。`item_id`、`program_id` | リンクと番組の多対多関係 |
+| `memberships` | 配列。`item_id`、`collection_id` | リンクと集合の多対多関係 |
 
-`items` の任意項目は `description`, `published_at`, `updated_at`, `thumbnail_url`, `tags` です。集合の `kind` は当面 `playlist`, `topic`, `curated` とします。番組は掲載プラットフォームとは別の編集上の分類です。
+`programs`には`description`、`parent_id`、`order`、`channel_group`等、`collections`には`program_id`、`parent_id`、`description`、`order`、`channel_name`等を任意に持てます。`memberships.position`が取得できる場合は所属内の並び順に使用できます。
 
-### 列挙値
+`items`の任意フィールド例：`description`、`thumbnail_url`、`published_at`、`updated_at`、`tags`、`category_id`、`view_count`、`like_count`、`duration_seconds`、`statistics_fetched_at`、`video_format`、`video_format_source`、`video_relation`、`person_ids`、`avatar_url`、`profile_bio`。欠損したフィールドを数値ゼロや未確認の人物・公式性で補いません。
 
-- `kind`: `video`, `article`, `website`, `tool`, `social_profile`, `podcast_episode`, `other`
-- `platform`: `youtube`, `x`, `instagram`, `spotify`, `web`, `other`
-- `provenance`: `official`, `community`, `unknown`（ホスト名だけで公式と判定しない）
-- `status`: `published`, `unlisted`（公開JSONには `published` のみ）
+### 列挙値・取り扱い
 
-## JSON例
+- `items[].kind`：`video`、`article`、`website`、`tool`、`social_profile`、`social_post`、`podcast_episode`、`other`
+- `items[].platform`：`youtube`、`x`、`instagram`、`note`、`spotify`、`web`、`other`
+- `provenance`：`official`、`community`、`unknown`。名前やドメイン名だけで公式性を推測しない
+- `status`：`published`、`unlisted`。公開JSONには`published`のレコードのみ含める
+- `collections[].kind`：`playlist`、`topic`、`curated`
+- `video_format`：`video`、`short`、`live`。サイト内で300秒未満を「ショート」と表示するUI規則とは別物
 
-以下は説明用の架空データであり、公開データではありません。
+## JSONの構造例
 
 ```json
 {
   "schema_version": 2,
-  "generated_at": "2026-11-11T00:00:00Z",
-  "programs": [{"id": "program:example", "name": "サンプル番組"}],
-  "collections": [{"id": "collection:example", "title": "サンプルプレイリスト", "kind": "playlist", "program_id": "program:example"}],
-  "items": [
-    {"id": "youtube:example", "title": "サンプル動画", "url": "https://www.youtube.com/watch?v=example", "kind": "video", "platform": "youtube", "provenance": "unknown", "status": "published"},
-    {"id": "web:example", "title": "サンプルツール", "url": "https://example.org/tool", "kind": "tool", "platform": "web", "provenance": "community", "status": "published"},
-    {"id": "x:example", "title": "サンプルSNSプロフィール", "url": "https://x.com/example", "kind": "social_profile", "platform": "x", "provenance": "unknown", "status": "published"}
-  ],
+  "generated_at": "2026-11-22T00:00:00Z",
+  "programs": [{"id": "program:example", "name": "番組A", "order": 10}],
+  "collections": [{"id": "collection:example", "title": "プレイリストA", "kind": "playlist"}],
+  "items": [{"id": "youtube:example", "title": "動画A", "url": "https://www.youtube.com/watch?v=example", "kind": "video", "platform": "youtube", "provenance": "unknown", "status": "published"}],
   "memberships": [{"item_id": "youtube:example", "collection_id": "collection:example"}],
   "item_programs": [{"item_id": "youtube:example", "program_id": "program:example"}]
 }
 ```
 
-## 検証・公開ルール
+この例は構造説明のための架空データです。
 
-1. URLはHTTP(S)のみ許可します。サムネイルの外部ホストも検証し、危険なURLスキームを拒否します。
-2. 種別ごとのID一意性、参照先の存在、所属関係の重複、`parent_id` の循環を検証します。
-3. YouTubeは安定したソースIDを利用し、一般リンクには永続的な公開IDを付与します。URL正規化では追跡パラメータだけを慎重に除去し、識別に必要なパスやパラメータを維持します。URL変更だけでIDを変えません。
-4. 未承認投稿、内部シートID、メールアドレス、認証情報、審査メモ、非公開レコードは出力しません。
-5. 投稿と公開承認を分離し、公式性の分類は明示的に審査します。
-6. Book2の動画とプレイリスト所属情報は保持し、照合が完了するまでBook4の正規化は追加的に実施します。
-7. リンク単位の検索結果を得るため、Pagefindのカスタムレコードや個別詳細ページを検討します。全件を単一HTMLに並べただけではリンク単位の検索になりません。
-8. バックエンドは決定的な順序のJSONを生成し、件数・参照整合性・重複を検証してから原子的に公開します。
-9. フロントエンドは `data/public/catalog.json` を読み込みます。旧動画専用形式へのフォールバックは使用しません。投稿を契機に本番へ自動公開しません。
+## 生成・検証・配信
 
-## 未決定事項
+```mermaid
+flowchart LR
+    B2["Book2<br/>動画・所属"] --> B4["Book4<br/>リンク・編集情報"]
+    A["審査済み投稿"] --> B4
+    B4 --> V["Backend<br/>schema_version・参照整合性・URL検証"]
+    V --> C["catalog.json"]
+    C --> H["Hugoで静的HTML生成"]
+    H --> CF["Cloudflare Pages<br/>Preview / Production"]
+```
 
-- `provenance` に外部の検証済み情報源やリンク単位の編集承認フラグが必要か。
-- Book3のどの項目を公開用 `items` に変換し、どの項目を非公開のまま保持するか。
-- 外部リンクのサムネイルを表示するか、追跡・画像切れを避けてプラットフォームアイコンを使うか。
+- URLは原則HTTP(S)のみ、画像URLは許可ホスト・安全性を検査します。
+- IDは配列ごとに一意、`item_programs`／`memberships`の参照先は実在すること、所属重複と親階層の循環がないことを検査します。
+- 非公開ステータス、未承認フォーム回答、個人情報、審査メモ、認証情報を出力しません。
+- `order`はBook1等の管理順に従い、同値では名称順を用います。`channel_name`が取得できるプレイリストのみチャンネル名を表示し、推測で架空の所属を作りません。
+- BackendによるArtifact生成、Frontendの`staging`配送、`main`／Production公開は別ゲートです。単にJSONを生成したことを公開完了としません。
 
-## 左側カテゴリー表示の並び順とプレイリスト名
+## 表示と検索の契約
 
-- Book1の管理対象行順を優先し、公開カタログ生成時に `programs[].order` / `collections[].order` へ昇順の数値を付与する。例: 10, 20, 30。行順を変更したら再生成で反映する。順序の正本はSheets、Frontendではない。
-- `order` が欠ける古いJSONでは配列の順番を代用する。カテゴリ表示は `order` の昇順で、同値なら名称順。
-- YouTubeチャンネルの表示名は `programs[].name` をそのまま使う。
-- プレイリストは `collections[].title` と `collections[].channel_name` から `プレイリスト名[チャンネル名]` を表示する。チャンネル名が未解決の場合はプレイリスト名のみとし、架空のチャンネル名を補わない。
-- `channel_name` はYouTube側の所属チャンネルを示す表示用属性で、`program_id`（番組の編集分類）と混同しない。
-- 現行のBook1→Book4生成処理は、この順序と所属チャンネル名をまだ出力していない。Frontend側は受け入れ対応済みだが、Sheets連動にはBackendの改修が必要。
+- ナビの正本はBackend`config/taxonomy.v1.json`の`navigation`で、Frontend`data/taxonomy.json`へ同期します。上位カテゴリは「YouTube動画」と「その他サイト・SNS」、それとは独立して「すべてのコンテンツ」を表示します。
+- `programs[].channel_group`（`official`／`related`／`other`）はチャンネルのナビ配置先です。これだけで公式性を証明しません。各チャンネル内には動画・プレイリスト・ショート・ライブの下位導線を持てます。
+- `browse:*`はFrontend固有の仮想フィルタIDであり、JSONの`items[].category_id`に保存しません。
+- 検索はタイトル、説明、掲載先、カテゴリ、関連番組名の部分一致を基本とし、URLの`q`で共有可能です。種類フィルタ`types`、カテゴリ`category`、日付`date_field`・`from`・`to`、出演者`people`、並び順`sort`を組み合わせます。
+- 出演者の公開可能な情報がある場合だけ`people[]`と`items[].person_ids[]`で表し、未確認の出演者や関係は生成しません。
+- 再生数／高評価数は取得時点のスナップショットであり、リアルタイム値ではありません。非負の安全な整数を扱い、未取得を`0`と混同しません。`sort=views-desc`／`views-asc`は未取得と非対象リンクを末尾に置きます。
+- Frontendの`formatOf(record)`は、再生時間300秒未満のYouTube動画を画面上の「ショート」と扱います。`video_format`や`video_format_source`を逆書込みしません。300秒ちょうどはこの時間条件によるショートではありません。
+- 投稿日・更新日は`published_at`／`updated_at`を区別し、画面表示・日付フィルタには`Asia/Tokyo`の境界を使います。`statistics_fetched_at`はコンテンツ更新日ではありません。
+- Instagram公開投稿・リールは`kind=social_post`／`platform=instagram`、noteの記事・シリーズは`kind=article`／`platform=note`で区別できます。一般公開投稿は管理者審査を経由します。
+
+## 関連契約
+
+- [カテゴリ構造・性能](frontend-refactoring-performance-category-20261122.md)
+- [UI・ナビゲーション回帰](frontend-ui-regression-contract-20261122.md)
+- [Backend Book4のデータ契約](https://github.com/yurulinkdev/yurulink-backend/blob/develop/docs/book4-public-catalog-plan.md)
+- [Backendコンテンツ分類](https://github.com/yurulinkdev/yurulink-backend/blob/develop/docs/content-classification-policy.md)

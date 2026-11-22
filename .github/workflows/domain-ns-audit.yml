@@ -1,0 +1,57 @@
+name: Audit public DNS delegation (read-only)
+
+on:
+  push:
+    branches: [staging]
+    paths:
+      - '.github/workflows/domain-ns-audit.yml'
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  ns-audit:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check Cloudflare delegation using independent public resolvers
+        shell: bash
+        run: |
+          set -euo pipefail
+          if ! command -v dig >/dev/null 2>&1; then
+            sudo apt-get update -qq
+            sudo apt-get install -y -qq dnsutils
+          fi
+          domain=yurulink.com
+          results=()
+          for resolver in 1.1.1.1 8.8.8.8; do
+            echo "== Public DNS @$resolver: $domain NS =="
+            ns="$(dig +time=5 +tries=2 +short NS "$domain" @"$resolver" | tr '[:upper:]' '[:lower:]' | sed 's/\.$//' | sed '/^$/d' | sort -u)"
+            printf '%s\n' "$ns"
+            if [[ -z "$ns" ]]; then
+              echo "::error::No NS response from @$resolver"
+              exit 1
+            fi
+            count="$(printf '%s\n' "$ns" | wc -l)"
+            if (( count < 2 )); then
+              echo "::error::Unexpectedly few authoritative NS records"
+              exit 1
+            fi
+            while IFS= read -r host; do
+              if [[ ! "$host" =~ ^[a-z0-9-]+\.ns\.cloudflare\.com$ ]]; then
+                echo "::error::Non-Cloudflare NS returned by @$resolver: $host"
+                exit 1
+              fi
+            done <<< "$ns"
+            results+=("$ns")
+          done
+          if [[ "${results[0]}" != "${results[1]}" ]]; then
+            echo "::warning::Public resolvers have different NS sets; propagation may still be in progress."
+            exit 1
+          fi
+          echo "PUBLIC_NS_CLOUDFLARE_CONFIRMED=true"
+          echo "== Optional staging record (not required yet) =="
+          dig +time=5 +tries=2 +short CNAME staging.yurulink.com @1.1.1.1 || true
+          echo "== Optional www record (not required yet) =="
+          dig +time=5 +tries=2 +short CNAME www.yurulink.com @1.1.1.1 || true

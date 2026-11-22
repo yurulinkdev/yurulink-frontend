@@ -3,11 +3,18 @@ name: Frontend smoke test
 on:
   push:
     branches: [main, staging, feat/catalog-v2-taxonomy-ui]
+    paths-ignore:
+      - 'ops/requests/frontend-validation.json'
   pull_request:
   workflow_dispatch:
 
 permissions:
   contents: read
+
+# 連続pushで過去SHAのHugoビルドを重ねず、最新ブランチを優先する。
+concurrency:
+  group: frontend-smoke-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   smoke:
@@ -26,3 +33,5 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build and smoke test
         run: bash scripts/smoke-test.sh
+      - name: Verify Preview and Production SEO and submission gates
+        run: node scripts/verify-site-environments.mjs

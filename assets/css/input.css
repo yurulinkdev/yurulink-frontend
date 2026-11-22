@@ -13,14 +13,117 @@
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-text);
 }
-html { font-family: system-ui, -apple-system, "Hiragino Kaku Gothic ProN", "Noto Sans JP", sans-serif; }
+html { font-family: var(--font-ui); font-size: var(--type-body); line-height: var(--type-body-leading); }
 body { background: var(--page); color: var(--text); }
+.brand-wordmark { font-family: var(--font-brand); font-size: var(--type-brand); font-weight: 700; line-height: var(--type-brand-leading); letter-spacing: -.02em; }
 [hidden] { display: none !important; }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
-html { line-height: 1.7; }
-.catalog-list-view { grid-template-columns: minmax(0, 1fr) !important; }
-.catalog-list-view [data-catalog-item] article { padding: .85rem 1rem; }
-.catalog-list-view [data-catalog-item] h2 { line-height: 1.5; }
+/* 本文行間は組版トークンで一括管理。 */
+/* 一覧は同じカードDOMを共有し、grid/listでレイアウトだけ切替える。 */
+/* 初期ページの巨大DOMから画面外カードのレイアウト／描画を後回しにする。
+   JSの絞り込みで非表示になる要素は[hidden]を優先し、可視分のみ描画する。 */
+#catalog > [data-catalog-item] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+#catalog.catalog-list-view > [data-catalog-item] {
+  contain-intrinsic-size: auto 100px;
+}
+.catalog-card { display: flex; flex-direction: column; min-width: 0; }
+.catalog-card .catalog-media {
+  display: flex;
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: var(--panel-muted);
+}
+/* YouTubeのhqdefaultは480x360に16:9の映像をレターボックス化する。
+   coverは画素比を保ちつつ帯を切り落とし、カード端まで画像を配置する。 */
+.catalog-card .catalog-media:not(.social-avatar-wrap) img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  object-position: center;
+}
+.catalog-card .catalog-media-placeholder { min-height: 0; }
+.catalog-card .catalog-media.social-avatar-wrap { padding: .75rem; }
+.catalog-card .social-avatar-wrap .social-avatar { width: 64px; height: 64px; object-fit: cover; }
+.catalog-card .social-avatar-wrap .social-avatar-placeholder { width: 64px; height: 64px; }
+.catalog-card .catalog-card-body { min-width: 0; }
+.catalog-meta-line { display: flex; flex-wrap: wrap; align-items: center; column-gap: .75rem; row-gap: .125rem; }
+.catalog-meta-line .catalog-item-meta { margin: 0; }
+.catalog-item-date { white-space: nowrap; font-variant-numeric: tabular-nums; }
+.catalog-item-stats { font-variant-numeric: tabular-nums; }
+.catalog-item-duration {
+  position: absolute; z-index: 1; right: .4rem; bottom: .4rem;
+  border-radius: .2rem; background: rgb(0 0 0 / .84); color: #fff;
+  padding: .1rem .3rem; font-size: .75rem; font-weight: 700;
+  line-height: 1.25; white-space: nowrap; pointer-events: none;
+  font-variant-numeric: tabular-nums;
+}
+.catalog-social-account { overflow-wrap: anywhere; }
+.catalog-officiality { font-weight: 600; }
+.catalog-list-view {
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: .375rem;
+}
+.catalog-list-view [data-catalog-item] .catalog-card {
+  display: grid;
+  grid-template-columns: 168px minmax(0,1fr);
+  align-items: center;
+  min-height: 96px;
+  border-radius: .5rem;
+  box-shadow: none;
+}
+.catalog-list-view [data-catalog-item] .catalog-media {
+  width: 168px;
+  height: auto;
+  aspect-ratio: 16 / 9;
+  overflow: hidden;
+  padding: 0;
+  align-self: center;
+}
+.catalog-list-view [data-catalog-item] .catalog-media:not(.social-avatar-wrap) img {
+  width: 100%; height: 100%; object-fit: cover; object-position: center;
+}
+.catalog-list-view [data-catalog-item] .catalog-card-body {
+  padding: .35rem .875rem;
+  min-width: 0;
+}
+/* メディアのないカードは先頭の本文を全列表示。高コストな:has探索を避ける。 */
+.catalog-list-view [data-catalog-item] .catalog-card > .catalog-card-body:first-child { grid-column: 1 / -1; }
+.catalog-list-view [data-catalog-item] h2 {
+  font-size: .875rem; line-height: 1.4;
+  display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+.catalog-list-view .catalog-item-meta,
+.catalog-list-view .catalog-item-date { font-size: .6875rem; }
+.catalog-list-view .catalog-item-description { display: none; }
+.catalog-list-view .catalog-item-stats,
+.catalog-list-view .catalog-social-account { margin-top: .125rem; font-size: .6875rem; }
+.catalog-list-view [data-kind="social_profile"] .catalog-media.social-avatar-wrap {
+  display: flex; align-items: center; justify-content: center;
+  height: 94.5px;
+}
+.catalog-list-view [data-kind="social_profile"] .catalog-media .social-avatar {
+  width: 64px; height: 64px; object-fit: cover; border-radius: 50%;
+}
+.catalog-list-view .catalog-item-description.social-bio { display: none; }
+@media (max-width: 639px) {
+  .catalog-list-view [data-catalog-item] .catalog-card {
+    grid-template-columns: 128px minmax(0,1fr);
+    min-height: 78px;
+  }
+  .catalog-list-view [data-catalog-item] .catalog-media { width: 128px; height: 72px; }
+  .catalog-list-view [data-catalog-item] .catalog-card-body { padding: .3rem .5rem; }
+  .catalog-list-view [data-kind="social_profile"] .catalog-media.social-avatar-wrap { height: 72px; }
+  .catalog-list-view [data-kind="social_profile"] .catalog-media .social-avatar,
+  .catalog-list-view [data-kind="social_profile"] .social-avatar-placeholder { width: 48px; height: 48px; }
+}
 .catalog-view-button[aria-pressed="true"] { background: var(--panel-muted); color: var(--text); border-color: var(--accent); }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto !important; transition-duration: .01ms !important; animation-duration: .01ms !important; } }
 
@@ -35,3 +138,67 @@ html { line-height: 1.7; }
 .article-prose pre { overflow-x: auto; border-radius: .6rem; background: var(--panel-muted); padding: 1rem; }
 .article-prose code { overflow-wrap: anywhere; }
 .article-prose img { max-width: 100%; height: auto; }
+
+/* 折りたたみフィルタの開閉サインを全ブラウザで明示する */
+.content-type-disclosure > summary { list-style: none; }
+.content-type-disclosure > summary::-webkit-details-marker { display: none; }
+.content-type-disclosure .content-type-chevron { transition: transform .15s ease; }
+.content-type-disclosure[open] .content-type-chevron { transform: rotate(180deg); }
+
+/* 初回訪問時だけ表示する分類導線。視線誘導は控えめにし、操作を妨げない。 */
+.onboarding-highlight {
+  outline: 3px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: .5rem;
+  background: var(--panel-muted);
+}
+.onboarding-hint {
+  z-index: 60;
+  display: flex;
+  gap: 12px;
+  align-items: start;
+  border: 1px solid var(--accent);
+  border-radius: 12px;
+  background: var(--panel);
+  color: var(--ink);
+  box-shadow: 0 12px 32px rgb(0 0 0 / .18);
+  pointer-events: none; /* 既存ナビゲーションのクリックを妨げない */
+  padding: 12px 14px;
+  font-size: .875rem;
+  line-height: 1.5;
+}
+.onboarding-hint--mobile {
+  position: absolute;
+  top: calc(100% + 9px);
+  left: 12px;
+  right: 12px;
+  width: auto;
+  max-width: none;
+}
+.onboarding-hint--mobile::before {
+  content: "";
+  position: absolute;
+  top: -7px;
+  left: 28px;
+  width: 12px;
+  height: 12px;
+  background: var(--panel);
+  transform: rotate(45deg);
+  border-top: 1px solid var(--accent);
+  border-left: 1px solid var(--accent);
+  pointer-events: none;
+}
+.onboarding-hint--desktop {
+  position: relative;
+  width: min(21rem, 100%);
+  max-width: 100%;
+  margin: 0 0 12px;
+}
+.onboarding-hint p { margin: 0; flex: 1; }
+.onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; pointer-events: auto; }
+
+/* モバイルのドロワー起動ジェスチャーは縦スクロールを維持して横パンを使わない。 */
+@media (max-width: 1023px) {
+  html, body { overscroll-behavior-x: none; }
+  #main-content, #category-drawer { touch-action: pan-y; }
+}

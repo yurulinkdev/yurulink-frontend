@@ -64,12 +64,10 @@ jobs:
           for endpoint in \
             "accounts/$CLOUDFLARE_ACCOUNT_ID" \
             "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects" \
-            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend" \
-            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend-staging"; do
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend"; do
             case "$endpoint" in
               */pages/projects) name="projects-list";;
               */pages/projects/yurulink-frontend) name="production-project";;
-              */pages/projects/yurulink-frontend-staging) name="legacy-staging-project";;
               *) name="account";;
             esac
             status=$(curl --silent --show-error --retry 2 -o inventory/api-response.json -w '%{http_code}' \
@@ -92,7 +90,7 @@ jobs:
                 domains
               }]' inventory/api-response.json > inventory/projects-details.json
               ok=1
-            elif [ "$name" = "production-project" ] || [ "$name" = "legacy-staging-project" ]; then
+            elif [ "$name" = "production-project" ]; then
               jq '{name: .result.name, subdomain: .result.subdomain,
                 production_branch: .result.production_branch,
                 source_type: .result.source.type,
@@ -114,7 +112,7 @@ jobs:
         shell: bash
         run: |
           set -euo pipefail
-          for project in yurulink-frontend yurulink-frontend-staging; do
+          for project in yurulink-frontend; do
             status=$(curl --silent --show-error -o inventory/deployments-response.json -w '%{http_code}' \
               -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
               "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$project/deployments?per_page=20")
@@ -139,9 +137,7 @@ jobs:
             inventory/projects-summary.txt
             inventory/projects-details.json
             inventory/production-project.json
-            inventory/legacy-staging-project.json
             inventory/yurulink-frontend-deployments.json
-            inventory/yurulink-frontend-staging-deployments.json
           retention-days: 7
           if-no-files-found: error
       - name: Validate Discord event routes

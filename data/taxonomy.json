@@ -5,7 +5,14 @@
     "uncategorized_id": "uncategorized",
     "tags": "zero_or_more",
     "submitted_classification": "suggestion_only",
-    "public_classification": "admin_approved_only"
+    "public_classification": "admin_approved_only",
+    "provenance_values": [
+      "official",
+      "community",
+      "unknown"
+    ],
+    "provenance_rule": "reviewer_verified_only",
+    "submitted_categories": "zero_or_more_suggestions"
   },
   "categories": [
     {
@@ -31,6 +38,18 @@
         {
           "id": "membership_service",
           "label": "会員サービス"
+        },
+        {
+          "id": "official_site",
+          "label": "公式関連サイト"
+        },
+        {
+          "id": "community_site",
+          "label": "有志・非公式サイト"
+        },
+        {
+          "id": "unverified_site",
+          "label": "公式性未確認サイト"
         }
       ]
     },
@@ -43,8 +62,32 @@
           "label": "SNSプロフィール"
         },
         {
+          "id": "x_post",
+          "label": "Xの投稿（単体）"
+        },
+        {
+          "id": "instagram_post",
+          "label": "Instagramの投稿（単体）"
+        },
+        {
+          "id": "instagram_reel",
+          "label": "Instagramのリール"
+        },
+        {
           "id": "community",
           "label": "コミュニティ・交流先"
+        },
+        {
+          "id": "official_social_profile",
+          "label": "公式SNSアカウント"
+        },
+        {
+          "id": "community_social_profile",
+          "label": "有志・非公式SNSアカウント"
+        },
+        {
+          "id": "unverified_social_profile",
+          "label": "公式性未確認SNSアカウント"
         }
       ]
     },
@@ -63,6 +106,14 @@
         {
           "id": "article",
           "label": "記事"
+        },
+        {
+          "id": "note_article",
+          "label": "noteの記事"
+        },
+        {
+          "id": "note_series",
+          "label": "noteのシリーズ・マガジン"
         }
       ]
     },
@@ -105,6 +156,26 @@
         {
           "id": "video_playlist",
           "label": "動画プレイリスト"
+        },
+        {
+          "id": "official_video",
+          "label": "公式動画（確認済み）"
+        },
+        {
+          "id": "community_video",
+          "label": "有志制作の動画"
+        },
+        {
+          "id": "open_mic_video",
+          "label": "オープンマイク動画"
+        },
+        {
+          "id": "guest_video",
+          "label": "ゲスト出演の動画"
+        },
+        {
+          "id": "related_video_unverified",
+          "label": "関連動画（公式性未確認）"
         }
       ]
     },
@@ -140,5 +211,102 @@
       "label": "ゆる学徒カフェ",
       "kind": "place"
     }
-  ]
+  ],
+  "navigation": {
+    "youtube": {
+      "label": "YouTube動画",
+      "groups": [
+        {
+          "id": "official",
+          "label": "公式チャンネル"
+        },
+        {
+          "id": "related",
+          "label": "コラボ・公認・関連"
+        },
+        {
+          "id": "other",
+          "label": "その他"
+        }
+      ]
+    },
+    "other": {
+      "label": "その他サイト・SNS",
+      "groups": [
+        {
+          "id": "web",
+          "label": "Webサイト",
+          "children": [
+            {
+              "id": "browse:web-official",
+              "label": "公式・公認"
+            },
+            {
+              "id": "browse:web-community",
+              "label": "非公式"
+            }
+          ]
+        },
+        {
+          "id": "social",
+          "label": "SNS",
+          "children": [
+            {
+              "id": "browse:social-official",
+              "label": "公式/関係者"
+            },
+            {
+              "id": "browse:social-other",
+              "label": "その他"
+            }
+          ]
+        }
+      ]
+    },
+    "book1_channel_group_labels": {
+      "official": "公式チャンネル",
+      "related": "コラボ・関係者・公認",
+      "other": "その他"
+    }
+  },
+  "submission_category": {
+    "mode": "two-dropdown",
+    "parent": {
+      "title": "親カテゴリ",
+      "required": true,
+      "options": [
+        {
+          "id": "youtube",
+          "label": "YouTube動画"
+        },
+        {
+          "id": "web",
+          "label": "Webサイト"
+        },
+        {
+          "id": "social",
+          "label": "SNS"
+        }
+      ]
+    },
+    "child": {
+      "title": "子カテゴリ",
+      "required": true,
+      "options": [
+        {
+          "id": "official",
+          "label": "公式"
+        },
+        {
+          "id": "related",
+          "label": "関連"
+        },
+        {
+          "id": "unofficial",
+          "label": "非公式"
+        }
+      ]
+    },
+    "review_rule": "suggestion_only_not_verified_officiality"
+  }
 }

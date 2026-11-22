@@ -1,5 +1,7 @@
 # Cloudflare Pages Staging / Production 構成移行計画
 
+> **履歴資料（2026-11-17の移行検証）**：以下に記載する旧Pages維持・両サイト比較は当時の工程です。2026-11-22時点では単一PagesプロジェクトのPreview検証済み、旧独立 `yurulink-frontend-staging` はユーザーによる削除待ちです。現行運用の正本は [environments.md](environments.md) を参照してください。
+
 ## 目標
 - Pagesプロジェクト `yurulink-frontend` のProduction branchをGitHub `main` にする。
 - GitHub `staging` は同じPagesプロジェクトのPreview deploymentとして運用する。

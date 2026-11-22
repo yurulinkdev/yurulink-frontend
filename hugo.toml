@@ -1,4 +1,61 @@
+baseURL = "https://staging.yurulink-frontend.pages.dev/"
+# サイトの公開URL。導入先に合わせて指定します。
 title = "YuruLink"
 defaultContentLanguage = "ja"
 disableKinds = ["taxonomy", "term", "RSS"]
 enableRobotsTXT = true
+
+[params]
+# ヘッダーとナビゲーションで使うブランドシンボル。static/以下の相対パスを指定します。
+brand_logo = "brand/yurulink-symbol-master.svg"
+# サイドバー最下部の任意の補足文。空欄では表示しません。
+sidebar_notice = ""
+
+# Preview/Stagingの検索エンジン登録を抑止。Productionのmainとは独立した設定。
+noindex = true
+# OGP/Twitterカードに使用する画像。static/以下の相対パスを指定します。
+og_image = "ogp/yurulink-light.png"
+# ブランドアクセント。ブラウザーUIの theme-color に設定（Open Graph の独自色指定ではない）。
+theme_color = "#A35B46"
+
+[params.navigation]
+# お知らせと記事の一覧表示名（公開URLは/about/です）。
+posts_label = "記事・お知らせ"
+
+[params.social]
+# サイト自身が運営するSNSプロフィールのURL。出演者や参照元のSNSは設定しません。
+# HTTPSのURLだけを出力し、未設定のサービスは非表示にします。
+x = "https://x.com/YuruLinkDev"
+instagram = ""
+youtube = ""
+bluesky = ""
+threads = ""
+discord = ""
+
+[params.submission]
+# 専用Google Formの回答用URL（編集URLではない）。
+enabled = true
+url = "https://forms.gle/hgYcATGs2oHEbf9v9"
+label = "リンクを投稿する"
+description = "掲載候補の情報をお寄せください"
+# 同一Formの公式回答URL（埋込iframe用。短縮URLとの同一性は本番前に要照合）。
+embed_enabled = true
+embed_url = "https://docs.google.com/forms/d/e/1FAIpQLSdEPu603sKgCEiwwlvTFrvIjuV10dvtaRE6WlRHJPCfWQps-g/viewform"
+
+[params.analytics]
+# GA4ウェブデータストリームの測定ID（G-...）。空欄ならタグと同意UIを出力しません。
+# ID指定時も訪問者の同意後に限りgtag.jsを読み込みます。
+ga4_measurement_id = "G-8Y659Y3Y8Y"
+# この測定IDを有効にする公開ホスト名。StagingのアクセスをProduction集計に混ぜません。
+ga4_hostnames = ["www.yurulink.com"]
+# Cloudflare Web Analyticsの手動埋込用サイトトークン。空欄なら無効です。
+# ホスティング先と無関係に利用できます。CDN側の自動挿入と重複させないでください。
+cloudflare_web_analytics_token = ""
+# New Relic Browserの公式画面から取得したCopy/Pasteスニペットを指定します。
+# 貼付けるコード全体は信頼できるサイト管理者だけが設定してください。
+# 空欄なら無効。複数行の場合はTOMLの複数行リテラル文字列を使用できます。
+new_relic_browser_snippet = ""
+
+# Pagesの実デプロイブランチをHugoテンプレートから安全に参照するための限定許可。
+[security.funcs]
+getenv = ["^HUGO_", "^CI$", "^CF_PAGES_BRANCH$"]

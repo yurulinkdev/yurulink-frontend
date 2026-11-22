@@ -1,0 +1,66 @@
+name: Frontend browser verification
+
+on:
+  workflow_dispatch:
+  push:
+    branches: [staging, main]
+    paths-ignore:
+      - 'ops/requests/frontend-validation.json'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: browser-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  browser:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Wait for this commit's Cloudflare Preview
+        if: github.ref_name == 'staging'
+        shell: bash
+        run: |
+          set -euo pipefail
+          result=$(python3 scripts/wait-cloudflare-pages.py \
+            --project yurulink-frontend --branch staging --environment preview \
+            --sha "$GITHUB_SHA" --timeout 600 --interval 15)
+          printf '%s\n' "$result"
+          url=$(printf '%s\n' "$result" | sed -n 's/^DEPLOYMENT_URL=//p' | tail -1)
+          test -n "$url"
+          echo "STAGING_URL=$url" >> "$GITHUB_ENV"
+      - name: Wait for matching Cloudflare Production deployment
+        if: github.ref_name == 'main'
+        shell: bash
+        run: |
+          set -euo pipefail
+          result=$(python3 scripts/wait-cloudflare-pages.py \
+            --project yurulink-frontend --branch main --environment production \
+            --sha "$GITHUB_SHA" --timeout 600 --interval 15)
+          printf '%s\n' "$result"
+          echo "STAGING_URL=https://yurulink-frontend.pages.dev/" >> "$GITHUB_ENV"
+      - name: Install Playwright
+        run: |
+          npm install --no-save --no-audit --no-fund @playwright/test
+          npx playwright install --with-deps chromium
+      - name: Verify deployed site in Chromium
+        run: npx playwright test --config=playwright.config.mjs
+      - name: Upload screenshots, HTML and test report
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-evidence-${{ github.ref_name }}
+          path: |
+            test-results/
+            playwright-report/
+          if-no-files-found: warn
+          retention-days: 14

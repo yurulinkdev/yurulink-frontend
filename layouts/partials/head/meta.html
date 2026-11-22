@@ -1,11 +1,44 @@
+{{- $pagesBranch := os.Getenv "CF_PAGES_BRANCH" -}}
+{{- $isPreviewOGP := or (and (ne $pagesBranch "") (ne $pagesBranch "main")) (and (eq $pagesBranch "") (eq hugo.Environment "staging")) -}}
 {{- $title := .Site.Title -}}
 {{- if not .IsHome -}}{{- $title = printf "%s | %s" .Title .Site.Title -}}{{- end -}}
 {{- $description := .Description | default (.Summary | plainify | truncate 155) | default (.Site.Params.description | default "ゆる学徒コンテンツの非公式リンク集") -}}
 <title>{{ $title }}</title>
 <meta name="description" content="{{ $description }}">
-<link rel="canonical" href="{{ .Permalink }}">
+{{- if or .Site.Params.noindex .Params.noindex }}
+<meta name="robots" content="noindex, nofollow">
+{{- end }}
+{{- $canonical := .Permalink -}}
+{{- if eq .Section "welcome" }}{{ $canonical = .Site.Home.Permalink }}{{ end }}
+<link rel="canonical" href="{{ $canonical }}">
+{{- $brandColor := .Site.Params.theme_color | default "#A35B46" -}}
+<meta name="theme-color" content="{{ $brandColor }}">
+<meta name="msapplication-TileColor" content="{{ $brandColor }}">
+<meta property="og:locale" content="ja_JP">
+<meta property="og:site_name" content="{{ .Site.Title }}">
 <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
-<meta property="og:url" content="{{ .Permalink }}">
-<meta name="twitter:card" content="summary">
+<meta property="og:url" content="{{ $canonical }}">
+<meta name="twitter:card" content="summary_large_image">
+
+{{/* アイコンとOGPは採用シンボルに統一。OGP本文はHugo設定で切替可能。 */}}
+<link rel="icon" type="image/svg+xml" href="{{ "brand/yurulink-symbol-master.svg" | relURL }}">
+<link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32.png" | relURL }}">
+<link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | relURL }}">
+{{- $ogImage := .Site.Params.og_image | default "ogp/yurulink-light.png" -}}
+{{/* Cloudflare Pagesのビルド設定が「hugo --minify」のままでもブランチで誤配信しない。明示 --environment staging にも対応。 */}}
+{{- if $isPreviewOGP -}}
+  {{- $ogImage = "ogp/yurulink-staging.png" -}}
+{{- else if eq $pagesBranch "main" -}}
+  {{- $ogImage = "ogp/yurulink-light.png" -}}
+{{- end -}}
+{{- $ogAlt := "ゆる関連を繋ぐ。ゆる言語学ラジオ関連コンテンツへの統合リンク — YuruLink" -}}
+{{- if $isPreviewOGP -}}{{- $ogAlt = printf "%s（STAGING・検証環境）" $ogAlt -}}{{- end -}}
+<meta property="og:image" content="{{ $ogImage | absURL }}">
+<meta property="og:image:type" content="image/png">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="{{ $ogAlt }}">
+<meta name="twitter:image" content="{{ $ogImage | absURL }}">
+<meta name="twitter:image:alt" content="{{ $ogAlt }}">

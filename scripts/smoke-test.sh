@@ -2,7 +2,7 @@
 set -euo pipefail
 
 cleanup() {
-  rm -f content/posts/smoke-ci.md
+  rm -f content/about/smoke-ci.md
   if [[ -d "${BACKUP_DIR:-}" ]]; then
     for file in catalog.json videos.json; do
       if [[ -f "$BACKUP_DIR/$file" ]]; then
@@ -17,15 +17,57 @@ trap cleanup EXIT
 
 echo "::group::Default build"
 npm run build
-for path in public/index.html public/posts/index.html public/news/index.html; do
+for path in public/index.html public/welcome/index.html public/catalog/index.html public/about/index.html public/change-log/index.html public/help/index.html public/submit/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
-grep -q 'theme-select' public/index.html
+grep -q 'theme-toggle' public/index.html
+grep -q 'theme-auto' public/index.html
+# Stagingの更新履歴は正規URLだけを生成する。
+test ! -e public/history/index.html
+test ! -e public/news/changelog/index.html
+grep -q 'prefers-color-scheme: dark' assets/css/tokens.css
+grep -q "localStorage.removeItem(key)" static/js/theme-control.js
+grep -q 'page-size' public/catalog/index.html
+grep -q 'pagination' public/catalog/index.html
+# Welcome route and root must be light, standalone pages with a single main CTA.
+grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/index.html
+grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/welcome/index.html
+! grep -q 'id="query"' public/index.html
+! grep -q 'id="catalog"' public/index.html
+! grep -q 'catalog-data/' public/index.html
+# Root must remain Welcome even for old query-based catalog bookmarks.
+! grep -q 'legacy-catalog-redirect' public/index.html
+! grep -q 'js/site.js' public/index.html
+test ! -e static/js/legacy-catalog-redirect.js
+grep -Eq 'href=("/catalog/"|/catalog/)([ >])' public/index.html
+! grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/catalog/index.html
+# 投稿ページはGoogle側フォームのみ埋め込み、管理用フォームURLは含めない。
+if [[ "${CF_PAGES_BRANCH:-${GITHUB_REF_NAME:-staging}}" == "main" ]]; then
+  ! grep -q 'submission-form-frame' public/submit/index.html
+  ! grep -q 'submission-external-link' public/submit/index.html
+else
+  grep -q 'submission-form-frame' public/submit/index.html
+  grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
+fi
+! grep -q 'forms/d/1W7ZMlY4pcQk1zWOL3s47StzndF5OxZG-PzRFS63-mSU/edit' public/submit/index.html
+# ドロワーのキーボード操作と非表示時のフォーカス抑止を静的検査
+grep -q "event.key === 'Escape'" static/js/theme-control.js
+grep -q "event.key !== 'Tab'" static/js/theme-control.js
+grep -q 'drawer.inert' static/js/theme-control.js
+node --check static/js/site.js
+# First paint must never serialize thousands of cards into index.html.
+test -s public/catalog-data/index.html
+grep -q 'id="catalog-loading"' public/catalog/index.html || grep -q 'id=catalog-loading' public/catalog/index.html
+test "$( (grep -o 'data-catalog-item' public/catalog/index.html || true) | wc -l)" -eq 0
+test "$(grep -o 'data-catalog-item' public/catalog-data/index.html | wc -l)" -gt 100
+grep -q 'YuruLinkへようこそ' public/index.html
+! grep -q 'YuruLinkへようこそ' public/catalog/index.html
+echo "YURULINK_HTML_BYTES:"; wc -c public/index.html public/welcome/index.html public/catalog/index.html public/catalog-data/index.html
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
-cat > content/posts/smoke-ci.md <<'EOF'
+cat > content/about/smoke-ci.md <<'EOF'
 ---
 title: "Smoke CI 記事"
 date: 2026-11-13
@@ -36,11 +78,11 @@ description: "自動テスト用の一時記事"
 本文のテストです。
 EOF
 npm run build
-test -s public/posts/smoke-ci/index.html
-grep -q 'Smoke CI 記事' public/posts/smoke-ci/index.html
-grep -q 'テスト見出し' public/posts/smoke-ci/index.html
-grep -Eq 'rel=("canonical"|canonical)([ >])' public/posts/smoke-ci/index.html || { echo '::error::Missing canonical'; exit 1; }
-grep -q 'og:title' public/posts/smoke-ci/index.html
+test -s public/about/smoke-ci/index.html
+grep -q 'Smoke CI 記事' public/about/smoke-ci/index.html
+grep -q 'テスト見出し' public/about/smoke-ci/index.html
+grep -Eq 'rel=("canonical"|canonical)([ >])' public/about/smoke-ci/index.html || { echo '::error::Missing canonical'; exit 1; }
+grep -q 'og:title' public/about/smoke-ci/index.html
 echo "::endgroup::"
 
 echo "::group::Build without catalog JSON"
@@ -50,9 +92,44 @@ for file in catalog.json videos.json; do
 done
 npm run build
 test -s public/index.html
-test -s public/posts/index.html
-test -s public/news/index.html
-test -s public/posts/smoke-ci/index.html
-grep -q '統合形式の公開カタログを準備中' public/index.html
+test -s public/about/index.html
+test -s public/change-log/index.html
+test -s public/about/smoke-ci/index.html
+grep -q '統合形式の公開カタログを準備中' public/catalog/index.html
+! grep -q 'id="catalog"' public/index.html
 echo "::endgroup::"
+grep -q "catalog-list-view" assets/css/input.css
+grep -q "catalog-item-date" layouts/catalog-data/list.html
+# main固有のDiscord通知資産をstagingへ保持した場合の静的安全検証。
+echo "::group::Discord notification route validation"
+node --check ops/notifications/notify-discord.js
+node --check ops/notifications/validate-routes.js
+node ops/notifications/validate-routes.js
+echo "::endgroup::"
+
+# 単一Pagesプロジェクトへの移行後は旧StagingのURLや比較処理に依存しない。
+echo "::group::Single Pages project routing"
+node --check playwright.config.mjs
+grep -Fq "baseURL: process.env.STAGING_URL || 'https://staging.yurulink-frontend.pages.dev/'" playwright.config.mjs
+test ! -e scripts/compare-staging.mjs
+test ! -e .github/workflows/compare-staging.yml
+! grep -Fq 'yurulink-frontend-staging' .github/workflows/cloudflare-inventory-request.yml
+echo "::endgroup::"
+
 echo "Smoke test passed."
+
+# Cloudflare Pagesは通常Hugoをproduction環境で呼び出しても、プレビューはCF_PAGES_BRANCHで確実に区別する。
+echo "::group::Branch-specific OGP"
+CF_PAGES_BRANCH=staging npm run build
+grep -Fq "ogp/yurulink-staging.png" public/index.html
+grep -Fq "ogp/yurulink-staging.png" public/about/index.html
+grep -Fq "STAGING" public/index.html
+test -s public/ogp/yurulink-staging.png
+CF_PAGES_BRANCH=main npm run build
+grep -Fq "ogp/yurulink-light.png" public/index.html
+! grep -Fq "ogp/yurulink-staging.png" public/index.html
+hugo --minify --environment staging >/dev/null
+grep -Fq "ogp/yurulink-staging.png" public/index.html
+hugo --minify --environment production >/dev/null
+grep -Fq "ogp/yurulink-light.png" public/index.html
+echo "::endgroup::"
