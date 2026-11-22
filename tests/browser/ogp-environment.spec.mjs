@@ -9,7 +9,7 @@ test('ブランチ別OGPが正しい画像を参照する', async ({ page, reque
   expect(image).toBeTruthy();
   expect(twitter).toBe(image);
   const host = new URL(page.url()).hostname;
-  const inPreview = host !== 'yurulink-frontend.pages.dev' && host !== 'www.yurulink.com' && !['127.0.0.1','localhost'].includes(host);
+  const inPreview = host.startsWith('staging.') || host.endsWith('.yurulink-frontend.pages.dev');
   if (inPreview) {
     expect(image).toContain('/ogp/yurulink-staging.png');
     expect(alt).toContain('STAGING');
@@ -19,7 +19,7 @@ test('ブランチ別OGPが正しい画像を参照する', async ({ page, reque
   }
   const res = await request.get(image);
   expect(res.ok()).toBeTruthy();
-  expect(res.headers()['content-type']).toMatch(/^image\/png/);
+  expect(res.headers()['content-type']).toContain('image/png');
   const bytes = await res.body();
   expect(bytes.subarray(0, 8).toString('hex')).toBe('89504e470d0a1a0a');
 });
