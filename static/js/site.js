@@ -247,6 +247,13 @@
   ]) {
     if (taxonomyLabels.has(taxId)) virtualLabels.set(virtualId,taxonomyLabels.get(taxId));
   }
+  // 正本taxonomyのnavから出力されたHugoリンクの表示名を、選択時の見出しへ反映する。
+  // 従来の葉カテゴリ名称（「公式性未確認サイト」等）が最新メニューに混ざらない。
+  for (const node of buttons?.querySelectorAll('[data-category]') || []) {
+    const id = node.dataset.category || '';
+    const label = node.textContent.trim();
+    if (id.startsWith('browse:') && label) virtualLabels.set(id, label);
+  }
   // 手動確認済みIDとBook1収集対象の区別を保つ。登録チャンネル＝公式とは断定しない。
   let registeredChannelIds = new Set();
   const webKinds = new Set(['website','tool']);
