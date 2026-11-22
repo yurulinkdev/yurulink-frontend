@@ -345,7 +345,7 @@ test('high view count: numeric rendering and sorting preserve the elephant video
   const elephant=page.locator('[data-catalog-item][data-title*="象は鼻が長い"][data-view-count]').filter({
     has: page.locator('a[href*="yzTqAU_kiKM"]')
   }).first();
-  await expect(elephant).toHaveAttribute('data-view-count', /^\\d+$/);
+  await expect(elephant).toHaveAttribute('data-view-count', /^\d+$/);
   const count = Number(await elephant.getAttribute('data-view-count'));
   expect(count).toBeGreaterThan(1000000);
   await expect(elephant.locator('.catalog-item-views')).toContainText(new Intl.NumberFormat('ja-JP').format(count));
@@ -354,7 +354,7 @@ test('high view count: numeric rendering and sorting preserve the elephant video
   const counts=await page.evaluate(() => window.YuruLinkCatalogItems
     .filter(node=>node.dataset.kind==='video' && node.dataset.platform==='youtube')
     .map(node=>node.dataset.viewCount).filter(Boolean));
-  expect(counts.every(value=>/^\\d+$/.test(value))).toBe(true);
+  expect(counts.every(value=>/^\d+$/.test(value))).toBe(true);
   expect(Math.max(...counts.map(Number))).toBeGreaterThanOrEqual(count);
 });
 
