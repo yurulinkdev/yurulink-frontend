@@ -51,7 +51,7 @@ test('real published likes sort on /catalog/ uses every loaded video and preserv
     const records = window.YuruLinkCatalogItems || [];
     const likes = records.filter(node =>
       node.dataset.kind === 'video' && node.dataset.platform === 'youtube' &&
-      /^\\d+$/.test(node.dataset.likeCount || ''))
+      /^\d+$/.test(node.dataset.likeCount || ''))
       .map(node => Number(node.dataset.likeCount))
       .filter(n => Number.isSafeInteger(n));
     return {total:records.length, matched:likes.length, max:Math.max(...likes)};
