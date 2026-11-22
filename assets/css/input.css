@@ -84,7 +84,8 @@ body { background: var(--page); color: var(--text); }
   padding: .35rem .875rem;
   min-width: 0;
 }
-.catalog-list-view [data-catalog-item] .catalog-card:not(:has(> .catalog-media)) > .catalog-card-body { grid-column: 1 / -1; }
+/* メディアのないカードは先頭の本文を全列表示。高コストな:has探索を避ける。 */
+.catalog-list-view [data-catalog-item] .catalog-card > .catalog-card-body:first-child { grid-column: 1 / -1; }
 .catalog-list-view [data-catalog-item] h2 {
   font-size: .875rem; line-height: 1.4;
   display: -webkit-box; -webkit-box-orient: vertical; -webkit-line-clamp: 2;
