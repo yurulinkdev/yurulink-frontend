@@ -60,9 +60,12 @@ test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
 
 test('Stagingは公開するが検索エンジンへは登録しない', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/catalog/');
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
+  if (production) await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  else await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
   await gotoAndWaitForCatalog(page,'/about/');
-  await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
+  if (production) await expect(page.locator('meta[name="robots"]')).toHaveCount(0);
+  else await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 });
 
 test('GA4設定済みだがStagingホストでは測定しない・公式Xを表示', async ({ page }) => {
@@ -148,12 +151,17 @@ test('GA4 Production専用ホスト制限はページの設定に存在', async 
 
 test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評価順', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/catalog/');
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
   const form = page.locator('#contribution-link');
-  await expect(form).toBeVisible();
-  await expect(form).toContainText('リンクを投稿する');
-  await expect(form).toHaveAttribute('href','/submit/');
+  if (production) await expect(form).toHaveCount(0);
+  else {
+    await expect(form).toBeVisible();
+    await expect(form).toContainText('リンクを投稿する');
+    await expect(form).toHaveAttribute('href','/submit/');
+  }
   await gotoAndWaitForCatalog(page,'/submit/');
-  await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
+  if (production) await expect(page.locator('#submission-external-link')).toHaveCount(0);
+  else await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
   await expect(page.locator('aside a[href="https://x.com/YuruLinkDev"] img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
   // ここからは投稿ページではなくカタログの並び替え・動画メタ情報を検証する。
   await gotoAndWaitForCatalog(page,'/catalog/');
