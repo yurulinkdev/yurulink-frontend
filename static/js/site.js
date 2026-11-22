@@ -82,22 +82,25 @@
   if (sortSelect) sortSelect.value = sort;
   if (pageSizeSelect) pageSizeSelect.value = String(pageSize);
   const viewKey = 'yurulink-catalog-view';
-  const applyView = value => {
-    const view = value === 'list' ? 'list' : 'grid';
-    catalog.classList.toggle('catalog-list-view', view === 'list');
-    // sizesは実際のCSS幅に合わせる。カード画像と168/128pxリストで
-    // ブラウザが誤った解像度（または黒帯を含む版）を選ぶのを防ぐ。
-    const sizes = view === 'list'
+  let currentView = 'grid';
+  const applyImageSizes = visibleItems => {
+    const sizes = currentView === 'list'
       ? '(max-width: 639px) 128px, 168px'
       : '(max-width: 639px) calc(100vw - 2rem), (max-width: 1279px) 50vw, 33vw';
-    catalog.querySelectorAll('img[data-thumbnail-image]').forEach(image => {
-      image.sizes = sizes;
+    // 3,600件すべてではなく、現在描画する最大100件だけに適用する。
+    visibleItems.forEach(item => {
+      const image = item.querySelector('img[data-thumbnail-image]');
+      if (image && image.sizes !== sizes) image.sizes = sizes;
     });
-    viewButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.catalogView === view)));
+  };
+  const applyView = value => {
+    currentView = value === 'list' ? 'list' : 'grid';
+    catalog.classList.toggle('catalog-list-view', currentView === 'list');
+    applyImageSizes([...catalog.querySelectorAll('[data-catalog-item]:not([hidden])')]);
+    viewButtons.forEach(button => button.setAttribute('aria-pressed', String(button.dataset.catalogView === currentView)));
   };
   let initialView = 'grid';
   try { initialView = localStorage.getItem(viewKey) || 'grid'; } catch { /* storage disabled */ }
-  applyView(initialView);
   viewButtons.forEach(button => button.addEventListener('click', () => {
     applyView(button.dataset.catalogView);
     try { localStorage.setItem(viewKey, button.dataset.catalogView); } catch { /* storage disabled */ }
@@ -166,31 +169,6 @@
     playlistChannelId: item.dataset.playlistChannelId || '',
     playlistChannelName: item.dataset.playlistChannelName || ''
   }));
-  // 数値フォーマットをDOM生成時に統一する。
-  records.forEach(({item,views,kind,platform}) => {
-    const node = item.querySelector('.catalog-item-views');
-    if (!node || kind !== 'video' || platform !== 'youtube') return;
-    node.textContent = views === null ? '再生数: 未取得' : '再生数: ' + formatViewCount.format(views);
-  });
-  records.forEach(({item, duration, kind, platform}) => {
-    const node = item.querySelector('.catalog-item-duration');
-    if (!node || kind !== 'video' || platform !== 'youtube') return;
-    if (duration === null) { node.hidden = true; return; }
-    node.textContent = formatDuration(duration);
-    node.setAttribute('aria-label', '再生時間 ' + formatDuration(duration));
-  });
-  records.forEach(({item, likes, kind, platform}) => {
-    const node = item.querySelector('.catalog-item-likes');
-    if (!node || kind !== 'video' || platform !== 'youtube') return;
-    node.textContent = likes === null ? '高評価数: 未取得' : '高評価数: ' + formatViewCount.format(likes);
-  });
-  records.forEach(({item}) => {
-    const node = item.querySelector('time.catalog-item-date');
-    if (!node) return;
-    const value = jstText(node.getAttribute('datetime'));
-    if (!value) { node.textContent = '公開日: 未取得'; return; }
-    node.textContent = '公開日: ' + value + (value.length === 10 ? '（時刻未取得）' : '');
-  });
   const categoryMetadata = new Map([...document.querySelectorAll('[data-category-definition]')].map(node => [
     node.dataset.categoryDefinition,
     {
@@ -201,7 +179,8 @@
       channelName: node.dataset.channelName || '',
       channelId: node.dataset.channelId || '',
       official: node.dataset.officialChannel === 'false' ? false : true,
-      officiality: ['official','authorized','unofficial'].includes(node.dataset.officiality) ? node.dataset.officiality : 'unknown'
+      officiality: ['official','authorized','unofficial'].includes(node.dataset.officiality) ? node.dataset.officiality : 'unknown',
+      channelGroup: ['official','related','other'].includes(node.dataset.channelGroup) ? node.dataset.channelGroup : 'other'
     }
   ]));
   const primaryMeta = new Map();
@@ -224,6 +203,9 @@
   ]));
   const virtualLabels = new Map([
     ['browse:video', 'YouTube動画（すべて）'],
+    ['browse:youtube-group:official', '公式チャンネル'],
+    ['browse:youtube-group:related', 'コラボ・公認・関連'],
+    ['browse:youtube-group:other', 'その他'],
     ['browse:playlists', 'プレイリスト（すべて）'],
     ['browse:channel-status:official', '公式チャンネル'],
     ['browse:channel-status:authorized', '公認チャンネル'],
@@ -299,12 +281,41 @@
     if (['social_profile','social_post'].includes(record.kind)) return 'social';
     return 'other';
   };
-  records.forEach(record => {
-    const node = record.item.querySelector('[data-format-label]');
-    if (node) node.textContent = ({
-      video:'動画', short:'ショート', live:'ライブ配信'
-    })[formatOf(record)] || '動画';
-  });
+  // 初期描画のため全カードへ同期DOM書込する旧処理を廃止。
+  // 表示対象20〜100件だけを初回表示時に整形し、その後は再処理しない。
+  const formatVisibleRecord = record => {
+    const item = record.item;
+    if (item.dataset.uiFormatted === '1') return;
+    const durationNode = item.querySelector('.catalog-item-duration');
+    if (durationNode && isVideo(record)) {
+      if (record.duration === null) durationNode.hidden = true;
+      else {
+        const duration = formatDuration(record.duration);
+        durationNode.textContent = duration;
+        durationNode.setAttribute('aria-label', '再生時間 ' + duration);
+      }
+    }
+    if (isVideo(record)) {
+      const views = item.querySelector('.catalog-item-views');
+      if (views) views.textContent = record.views === null
+        ? '再生数: 未取得' : '再生数: ' + formatViewCount.format(record.views);
+      const likes = item.querySelector('.catalog-item-likes');
+      if (likes) likes.textContent = record.likes === null
+        ? '高評価数: 未取得' : '高評価数: ' + formatViewCount.format(record.likes);
+      const formatLabel = item.querySelector('[data-format-label]');
+      if (formatLabel) formatLabel.textContent = ({
+        video:'動画', short:'ショート', live:'ライブ配信'
+      })[formatOf(record)] || '動画';
+    }
+    const date = item.querySelector('time.catalog-item-date');
+    if (date) {
+      const value = jstText(date.getAttribute('datetime'));
+      date.textContent = value
+        ? '公開日: ' + value + (value.length === 10 ? '（時刻未取得）' : '')
+        : '公開日: 未取得';
+    }
+    item.dataset.uiFormatted = '1';
+  };
   const matchesType = record => !selectedTypes.size || selectedTypes.has(formatOf(record));
   const navType = id => {
     if (/^browse:video(?::|$)/.test(id)) return 'video';
@@ -356,6 +367,16 @@
     if (record.kind === 'playlist' && selectedCategory.startsWith('youtube-playlist:')) return false;
     // コレクション自身は元のItemの所属IDを持たないため、チャンネル親子関係も検索対象に含める。
     if (record.kind === 'playlist' && record.playlistChannelId === selectedCategory) return true;
+    if (selectedCategory.startsWith('browse:youtube-group:')) {
+      const group = selectedCategory.slice('browse:youtube-group:'.length);
+      if (!['official','related','other'].includes(group)) return false;
+      if (record.kind !== 'playlist' && !isVideo(record)) return false;
+      const ids = [...record.ids].filter(id => id.startsWith('youtube-channel:'));
+      if (record.kind === 'playlist' && record.playlistChannelId) ids.push(record.playlistChannelId);
+      const groups = ids.map(id => categoryMetadata.get(id)?.channelGroup || 'other');
+      // 未登録動画・未分類動画は「その他」。Book1の分類漏れは自動公式判定しない。
+      return groups.length ? groups.includes(group) : group === 'other';
+    }
     if (selectedCategory.startsWith('browse:channel-status:')) {
       const status = selectedCategory.slice('browse:channel-status:'.length);
       const ids = [...record.ids].filter(id => id.startsWith('youtube-channel:'));
@@ -678,7 +699,10 @@
     const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && record.query.includes(q)).sort(compareItems);
     const pages = Math.max(1, Math.ceil(matching.length/pageSize));
     page = Math.min(Math.max(1,page),pages);
-    const visible = matching.slice((page-1)*pageSize,page*pageSize).map(record => record.item);
+    const visibleRecords = matching.slice((page-1)*pageSize,page*pageSize);
+    visibleRecords.forEach(formatVisibleRecord);
+    const visible = visibleRecords.map(record => record.item);
+    applyImageSizes(visible);
     const visibleSet = new Set(visible);
     items.forEach(item => {
       const hidden = !visibleSet.has(item);
@@ -688,6 +712,7 @@
     const fragment = document.createDocumentFragment();
     visible.forEach(item => fragment.append(item));
     catalog.append(fragment);
+    catalog.classList.add('catalog-ready');
     const label = categoryLabels.get(category) || virtualLabels.get(category)
       || (category.startsWith('browse:playlists:') ? 'プレイリスト一覧' : '')
       || (category.startsWith('browse:video:') ? '動画' : '')
@@ -777,4 +802,6 @@
     update();
   });
   update();
+  // 初期URLでリスト表示の記憶を復元。既に非表示になった全件画像を走査しない。
+  applyView(initialView);
 })();
