@@ -45,3 +45,12 @@ OGP・ヒーロー・フォームヘッダーの文字、装飾、テーマ別�
 - 将来の装飾パーツはSVGまたはHTML/CSSを原則。ラスタイラストは元データを保護してディザリングなしで減色し、単純な形状ではベクタートレースして出力の目視確認を行う。意図されたグラデーション・陰影・半透明は許可。AutomationLab `visuals/prepare-image-part.py` 参照。
 
 PreviewのCIとOGPタグ配信の確認は実行後に別途報告する。OGPコピーの承認は初期Production切替の事前承認と同一ではない。
+
+## 2026-11-23 OGPライト改訂
+
+- 現行採用OGPのライト配色と左右分割構図、ロゴSVGをそのまま維持し、上部の「関連コンテンツ」の眉見出しのみ非表示。
+- メイン文言「**ゆる関連を繋ぐ。**」、補足文言「**ゆる言語学ラジオ関連コンテンツへの統合リンク**」に変更。
+- 制作正本はAutomationLab `visuals/presets.json` と `template.html/template.css`。Playwright ChromiumによるHTML-to-Image（1200×630）。画像生成AIによる新規の描画は禁止。
+- 公開 `static/ogp/yurulink-light.png` とGoogle Drive YuruLink_Assetsの2026-11-23版を同一PNGバイト列で同期。アクセント `#A35B46`、背景 `#FBF9F6`、主文字 `#342B28`。
+- [運営方針（運営者側GitHub）](https://github.com/Halhira/WebSite/blob/main/docs/yurulink/principle.md)に基づく非公式の統合リンク集としての表現。
+- `og:image`、`twitter:image`、`og:image:alt`、`twitter:image:alt`、`theme-color` を更新。Production `main` は未変更。

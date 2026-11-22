@@ -15,6 +15,8 @@ sidebar_notice = ""
 noindex = true
 # OGP/Twitterカードに使用する画像。static/以下の相対パスを指定します。
 og_image = "ogp/yurulink-light.png"
+# ブランドアクセント。ブラウザーUIの theme-color に設定（Open Graph の独自色指定ではない）。
+theme_color = "#A35B46"
 
 [params.navigation]
 # お知らせと記事の一覧表示名（公開URLは/about/です）。

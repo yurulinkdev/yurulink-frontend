@@ -72,3 +72,13 @@ Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用�
 - [Google Forms埋め込み](docs/submission-embed-staging.md)
 - [計測サービスの設定](docs/observability-evaluation.md)
 - [Backendリポジトリ](https://github.com/yurulinkdev/yurulink-backend)
+
+## 運営方針とブランド画像
+
+YuruLinkはゆる界隈の関連コンテンツを集約する**非公式の統合リンク集**です。過去の活動やいわゆる「黒歴史」も公開範囲・権利を尊重して対象とし、利用者の情報提供をもとに集合知として継続的に整備します。運営方針の原本は運営者Ryohei側GitHubの[principle.md](https://github.com/Halhira/WebSite/blob/main/docs/yurulink/principle.md)です。
+
+- OGP：ライトモード配色の `static/ogp/yurulink-light.png`（1200×630）。メイン「ゆる関連を繋ぐ。」、補足「ゆる言語学ラジオ関連コンテンツへの統合リンク」。眉見出し「関連コンテンツ」は表示しません。
+- 基調色：アクセント `#A35B46`、背景 `#FBF9F6`、主文字 `#342B28`。標準のHTML `theme-color` は `hugo.toml` の `params.theme_color` を参照します。Open Graphには標準のテーマカラー属性がないため独自の `og:color` は追加しません。
+- 画像制作は**HTML-to-Image（HTML/CSS/SVG → Playwright Chromium → PNG）を必須**とし、新規の生成AIによる描画は行いません。承認済みSVGを共通マスターとし、ロゴを独立して描き直しません。
+- 編集正本：AutomationLabの[HTML-to-Imageツールキット](https://github.com/yurulinkdev/yurulink-automation-lab/tree/feat/brand-html-image-pipeline-20261119/visuals)。同期先：Google Drive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120`。配置画像とREADME・制作ソースを合わせて更新します。
+- 本変更は`staging`への反映です。`main`およびProductionの初期変更は別途承認を要します。
