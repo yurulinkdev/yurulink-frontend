@@ -53,7 +53,7 @@
 
 ## 進捗チェック
 
-- [x] Google Drive正本 `AGENTS.md`・`Project.md` 読取
+- [x] 環境設定・関連仕様・本番反映の承認境界を確認
 - [x] `main` / `staging` SHAと差分監査
 - [x] 既存の`main`固有機能の保持方法を決定
 - [x] `main`無変更の統合準備ブランチを作成

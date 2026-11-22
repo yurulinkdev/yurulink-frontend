@@ -68,5 +68,3 @@ Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用�
 - [Google Forms埋め込み](docs/submission-embed-staging.md)
 - [計測サービスの設定](docs/observability-evaluation.md)
 - [Backendリポジトリ](https://github.com/yurulinkdev/yurulink-backend)
-
-全体の設計判断は[Google Drive Project.md](https://drive.google.com/file/d/1JP3WYfMBarxcHTjimjYW8330el9msYSD/view)を参照してください。
