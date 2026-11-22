@@ -45,6 +45,7 @@ grep -q 'id="catalog-loading"' public/index.html || grep -q 'id=catalog-loading'
 test "$( (grep -o 'data-catalog-item' public/index.html || true) | wc -l)" -eq 0
 test "$(grep -o 'data-catalog-item' public/catalog-data/index.html | wc -l)" -gt 100
 grep -q 'YuruLinkへようこそ' public/index.html
+echo "YURULINK_HTML_BYTES:"; wc -c public/index.html public/catalog-data/index.html
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
@@ -79,7 +80,7 @@ test -s public/about/smoke-ci/index.html
 grep -q '統合形式の公開カタログを準備中' public/index.html
 echo "::endgroup::"
 grep -q "catalog-list-view" assets/css/input.css
-grep -q "catalog-item-date" layouts/index.html
+grep -q "catalog-item-date" layouts/catalog-data/list.html
 # main固有のDiscord通知資産をstagingへ保持した場合の静的安全検証。
 echo "::group::Discord notification route validation"
 node --check ops/notifications/notify-discord.js
