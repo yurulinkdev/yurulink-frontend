@@ -92,3 +92,64 @@ test('検索画面は独立ページ。遅延カタログ取得まで案内・�
   expect(stats.indexCount).toBeGreaterThan(3000);
   expect(stats.liveDomCount).toBe(20);
 });
+
+// 初回訪問ガイドはiPhoneの画面最下部に固定せず、メニューボタンの直下へ。
+test('モバイル初回ガイドは左上メニュー直下に配置・クリックで閉じる', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.addInitScript(() => localStorage.removeItem('yurulink-first-visit-hint-v1'));
+  await page.goto('/help/', {waitUntil:'load'});
+  const hint = page.locator('#onboarding-hint');
+  await expect(hint).toBeVisible();
+  const geometry = await page.evaluate(() => {
+    const hint = document.getElementById('onboarding-hint');
+    const header = document.querySelector('#main-content > header');
+    const menu = document.getElementById('open-categories');
+    const h = hint.getBoundingClientRect();
+    const b = header.getBoundingClientRect();
+    const m = menu.getBoundingClientRect();
+    return {
+      inHeader: header.contains(hint),
+      position: getComputedStyle(hint).position,
+      menuBottom: m.bottom,
+      headerBottom: b.bottom,
+      hintTop: h.top,
+      hintBottom: h.bottom,
+      viewportHeight: innerHeight
+    };
+  });
+  expect(geometry.inHeader).toBe(true);
+  expect(geometry.position).toBe('absolute');
+  expect(geometry.hintTop).toBeGreaterThanOrEqual(geometry.menuBottom);
+  expect(geometry.hintTop).toBeGreaterThanOrEqual(geometry.headerBottom);
+  expect(geometry.hintTop - geometry.headerBottom).toBeLessThan(24);
+  expect(geometry.hintBottom).toBeLessThan(geometry.viewportHeight * 0.7);
+  await page.locator('#open-categories').click();
+  await expect(hint).toHaveCount(0);
+  await page.reload();
+  await expect(page.locator('#onboarding-hint')).toHaveCount(0);
+});
+
+test('デスクトップ初回ガイドはサイドバーの分類ラベルの直下', async ({page}) => {
+  await page.setViewportSize({width:1280,height:900});
+  await page.addInitScript(() => localStorage.removeItem('yurulink-first-visit-hint-v1'));
+  await page.goto('/', {waitUntil:'load'});
+  const hint = page.locator('#onboarding-hint');
+  await expect(hint).toBeVisible();
+  const placement = await page.evaluate(() => {
+    const hint = document.getElementById('onboarding-hint');
+    const anchor = document.getElementById('categories-intro-anchor');
+    return {
+      nextSibling: anchor.nextElementSibling === hint,
+      inSidebar: !!hint.closest('#category-drawer'),
+      position: getComputedStyle(hint).position,
+      anchorBottom: anchor.getBoundingClientRect().bottom,
+      hintTop: hint.getBoundingClientRect().top
+    };
+  });
+  expect(placement.inSidebar).toBe(true);
+  expect(placement.nextSibling).toBe(true);
+  expect(placement.position).not.toBe('fixed');
+  expect(placement.hintTop).toBeGreaterThanOrEqual(placement.anchorBottom);
+  await hint.getByRole('button',{name:'案内を閉じる'}).click();
+  await expect(hint).toHaveCount(0);
+});
