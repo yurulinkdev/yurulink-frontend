@@ -4,6 +4,13 @@ import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 test('リンク投稿ページを埋め込み、既存フォームへの外部導線も残す', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/submit/');
   await expect(page.getByRole('heading', { name: 'リンクを投稿する', exact: true })).toBeVisible();
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
+  if (production) {
+    await expect(page.locator('#submission-form-frame')).toHaveCount(0);
+    await expect(page.locator('#submission-external-link')).toHaveCount(0);
+    await expect(page.getByText('このページ内でのフォーム表示は現在利用できません')).toBeVisible();
+    return;
+  }
   const form = page.locator('#submission-form-frame');
   await expect(form).toHaveAttribute('title', 'YuruLink リンク投稿 Googleフォーム');
   await expect(form).toHaveAttribute('src',
@@ -19,7 +26,14 @@ test('スマホのナビゲーションから投稿ページへ遷移できる',
   await page.setViewportSize({ width: 390, height: 844 });
   await gotoAndWaitForCatalog(page,'/catalog/');
   await page.locator('#open-categories').click();
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
   const link = page.locator('#contribution-link');
+  if (production) {
+    await expect(link).toHaveCount(0);
+    await gotoAndWaitForCatalog(page,'/submit/');
+    await expect(page.locator('#submission-form-frame')).toHaveCount(0);
+    return;
+  }
   await expect(link).toHaveAttribute('href', '/submit/');
   await link.click();
   await expect(page).toHaveURL(/\/submit\/$/);
