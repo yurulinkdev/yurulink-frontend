@@ -90,7 +90,7 @@
           {{ end }}
           <div id="category-definitions" hidden>
             {{ range $catalog.programs }}
-              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}" data-category-type="program" data-official-channel="{{ if isset . "order" }}true{{ else }}false{{ end }}" data-officiality="{{ if .officiality_verified }}{{ if in (slice "official" "authorized" "unofficial") (.officiality | default .official_status | default "") }}{{ .officiality | default .official_status }}{{ else }}unknown{{ end }}{{ else }}unknown{{ end }}"></span>
+              <span data-category-definition="{{ .id }}" data-label="{{ .name }}" data-order="{{ index $categoryOrder .id }}" data-category-type="program" data-official-channel="{{ if isset . "order" }}true{{ else }}false{{ end }}" data-channel-group="{{ .channel_group | default "other" }}" data-officiality="{{ if .officiality_verified }}{{ if in (slice "official" "authorized" "unofficial") (.officiality | default .official_status | default "") }}{{ .officiality | default .official_status }}{{ else }}unknown{{ end }}{{ else }}unknown{{ end }}"></span>
             {{ end }}
             {{ range $catalog.collections }}
               <span data-category-definition="{{ .id }}" data-label="{{ index $programs .id }}" data-order="{{ index $categoryOrder .id }}" data-category-type="collection" data-collection-kind="{{ .kind }}" data-channel-name="{{ .channel_name | default "" }}" data-channel-id="{{ .channel_id | default "" }}"></span>
