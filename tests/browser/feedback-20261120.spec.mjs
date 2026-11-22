@@ -9,11 +9,11 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   // 共通Hugoナビはdetailsによる階層構造。非展開のリンクはDOMにあっても非表示。
   const categoryNav = page.locator('#category-buttons');
   const siteSocial = categoryNav.locator('details[data-nav-group="site-social"]');
-  const unknown = siteSocial.locator('details[data-nav-group="source:unknown"]');
-  await expect(unknown.locator('a[data-category="browse:web-other"]')).toHaveCount(1);
+  const web = siteSocial.locator('details[data-nav-group="web-sites"]');
+  await expect(web.locator('a[data-category="browse:web-community"]')).toHaveCount(1);
   await siteSocial.locator(':scope > summary').click();
-  await unknown.locator(':scope > summary').click();
-  await expect(unknown.locator('a[data-category="browse:web-other"]')).toBeVisible();
+  await web.locator(':scope > summary').click();
+  await expect(web.locator('a[data-category="browse:web-community"]')).toBeVisible();
   await page.goto('/help/search-guide/');
   await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
   await page.goto('/change-log/');
@@ -48,7 +48,7 @@ test('スマホではドロワーを初回強調', async ({ page }) => {
 
 test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
   await page.goto('/?duration=under-5');
-  await expect(page.locator('#category-buttons button[data-category="browse:social-posts"]')).toHaveCount(1);
+  await expect(page.locator('#category-buttons [data-nav-group="social"]')).toHaveCount(1);
   await expect(page.locator('#duration-range')).toHaveCount(0);
   await expect.poll(() => new URL(page.url()).searchParams.has('duration')).toBe(false);
   await page.locator('#sort-order').selectOption('duration-desc');
@@ -107,7 +107,7 @@ test('サイドバーの階層はトップ・About・ヘルプで同じ', async 
   await expect(page.locator('#home-news-heading')).toHaveCount(0);
   await expect(page.locator('#category-buttons [data-server-nav-root]')).toHaveCount(1);
   const homeGroups = await categories();
-  for (const group of ['youtube-channels', 'video-role', 'site-social', 'social-content']) {
+  for (const group of ['youtube-channels', 'channel-group:official', 'channel-group:related', 'channel-group:other', 'site-social', 'web-sites', 'social']) {
     expect(homeGroups).toContain(group);
   }
   await page.goto('/about/');
@@ -117,24 +117,24 @@ test('サイドバーの階層はトップ・About・ヘルプで同じ', async 
 });
 
 test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', async ({ page }) => {
-  await page.goto('/?category=browse:web-other');
-  const home = page.locator('#category-buttons button[data-category="browse:web-other"]');
+  await page.goto('/?category=browse:web-community');
+  const home = page.locator('#category-buttons button[data-category="browse:web-community"]');
   await expect(home).toHaveAttribute('aria-current','true');
   await page.goto('/help/search-guide/');
-  const help = page.locator('#category-buttons a[data-category="browse:web-other"]');
+  const help = page.locator('#category-buttons a[data-category="browse:web-community"]');
   await expect(help).toHaveAttribute('aria-current','true');
   await expect(help).toHaveClass(/bg-panel-muted/);
-  await expect(page.locator('#category-buttons details[data-nav-group="source:unknown"]')).toHaveAttribute('open','');
+  await expect(page.locator('#category-buttons details[data-nav-group="web-sites"]')).toHaveAttribute('open','');
   await page.goto('/about/');
-  const about = page.locator('#category-buttons a[data-category="browse:web-other"]');
+  const about = page.locator('#category-buttons a[data-category="browse:web-community"]');
   await expect(about).toHaveAttribute('aria-current','true');
   await about.click();
   await expect(page).toHaveURL(/category=browse%3Aweb-other/);
   // 3,600件以上のDOMを持つCIではHugoナビの復元完了まで10秒を超えることがある。
   // 一時的な属性チェックではなく、実カテゴリと保存値の双方の復元を待つ。
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')), {timeout:30000})
-    .toBe('browse:web-other');
-  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]'))
+    .toBe('browse:web-community');
+  await expect(page.locator('#category-buttons button[data-category="browse:web-community"]'))
     .toHaveAttribute('aria-current','true', {timeout:30000});
 });
 
