@@ -45,13 +45,20 @@
 - [Cloudflare Pagesのブランチ別ビルド条件](https://developers.cloudflare.com/pages/configuration/build-configuration/)
 - [Hugoの環境別設定](https://gohugo.io/configuration/introduction/)
 
+## 統合後の確認
+
+- 取り込み用Draft PR #14は`staging`への反映によりmerged。8個のmain固有ファイルは保持し、既存のStaging画面コードは不変。
+- `staging`への反映後、既存の本番向けDraft PR #13のmergeable判定が`true`へ変化。ただしDraftのままであり、Productionへのマージ・公開の承認ではない。
+- Productionのホスト・SEO設定とデプロイ抑止は本段階では未対応。`main`へ取り込む前の必須ゲートである。
+
 ## 進捗チェック
 
 - [x] Google Drive正本 `AGENTS.md`・`Project.md` 読取
 - [x] `main` / `staging` SHAと差分監査
 - [x] 既存の`main`固有機能の保持方法を決定
 - [x] `main`無変更の統合準備ブランチを作成
-- [ ] 統合準備ブランチCI合格
-- [ ] `staging`に統合を反映し、同一SHAで再検証
+- [x] 統合準備ブランチCI合格（PR #14、SHA `bf92e5b3`のSmoke Test）
+- [x] `staging`に統合コミットをFast-forward反映（SHA `bf92e5b34296863c71c6d8de742ada71b20584ac`）
+- [ ] 反映後の同一`staging` SHAでSmoke・Preview・Browserの再検証
 - [ ] 環境別Productionビルドの設計・動作検証
 - [ ] 最終PRレビュー・本番公開承認
