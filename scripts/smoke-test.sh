@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euo pipefail
+set -euxo pipefail
 
 cleanup() {
   rm -f content/about/smoke-ci.md
@@ -31,13 +31,13 @@ grep -q "localStorage.removeItem(key)" static/js/theme-control.js
 grep -q 'page-size' public/catalog/index.html
 grep -q 'pagination' public/catalog/index.html
 # Welcome route and root must be light, standalone pages with a single main CTA.
-grep -q 'id="welcome-catalog-link"' public/index.html
-grep -q 'id="welcome-catalog-link"' public/welcome/index.html
+grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/index.html
+grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/welcome/index.html
 ! grep -q 'id="query"' public/index.html
 ! grep -q 'id="catalog"' public/index.html
 ! grep -q 'catalog-data/' public/index.html
-grep -q 'href="/catalog/"' public/index.html
-! grep -q 'id="welcome-catalog-link"' public/catalog/index.html
+grep -Eq 'href=("/catalog/"|/catalog/)([ >])' public/index.html
+! grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/catalog/index.html
 # 投稿ページはGoogle側フォームのみ埋め込み、管理用フォームURLは含めない。
 grep -q 'submission-form-frame' public/submit/index.html
 grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
