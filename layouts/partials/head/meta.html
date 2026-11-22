@@ -1,3 +1,5 @@
+{{- $pagesBranch := os.Getenv "CF_PAGES_BRANCH" -}}
+{{- $isPreviewOGP := or (and (ne $pagesBranch "") (ne $pagesBranch "main")) (and (eq $pagesBranch "") (eq hugo.Environment "staging")) -}}
 {{- $title := .Site.Title -}}
 {{- if not .IsHome -}}{{- $title = printf "%s | %s" .Title .Site.Title -}}{{- end -}}
 {{- $description := .Description | default (.Summary | plainify | truncate 155) | default (.Site.Params.description | default "ゆる学徒コンテンツの非公式リンク集") -}}
@@ -25,10 +27,18 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ "favicon-32.png" | relURL }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ "apple-touch-icon.png" | relURL }}">
 {{- $ogImage := .Site.Params.og_image | default "ogp/yurulink-light.png" -}}
+{{/* Cloudflare Pagesのビルド設定が「hugo --minify」のままでもブランチで誤配信しない。明示 --environment staging にも対応。 */}}
+{{- if $isPreviewOGP -}}
+  {{- $ogImage = "ogp/yurulink-staging.png" -}}
+{{- else if eq $pagesBranch "main" -}}
+  {{- $ogImage = "ogp/yurulink-light.png" -}}
+{{- end -}}
+{{- $ogAlt := "ゆる関連を繋ぐ。ゆる言語学ラジオ関連コンテンツへの統合リンク — YuruLink" -}}
+{{- if $isPreviewOGP -}}{{- $ogAlt = printf "%s（STAGING・検証環境）" $ogAlt -}}{{- end -}}
 <meta property="og:image" content="{{ $ogImage | absURL }}">
 <meta property="og:image:type" content="image/png">
 <meta property="og:image:width" content="1200">
 <meta property="og:image:height" content="630">
-<meta property="og:image:alt" content="ゆる関連を繋ぐ。ゆる言語学ラジオ関連コンテンツへの統合リンク — YuruLink">
+<meta property="og:image:alt" content="{{ $ogAlt }}">
 <meta name="twitter:image" content="{{ $ogImage | absURL }}">
-<meta name="twitter:image:alt" content="ゆる関連を繋ぐ。ゆる言語学ラジオ関連コンテンツへの統合リンク — YuruLink">
+<meta name="twitter:image:alt" content="{{ $ogAlt }}">

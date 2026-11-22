@@ -55,3 +55,11 @@ sequenceDiagram
 通常のコードPushに対するSmoke・Preview・ブラウザ検証を維持しています。チャットからの限定された追加検証は`ops/requests/frontend-validation.json`を入力とする同一Workflow内Jobで行います。使用可能なアクション、JSONの書式、結果と対象SHAの照合は[Staging ChatOps](staging-chatops.md)に従ってください。
 
 障害時には前回検証済みのデプロイまたはGitコミットへ復旧します。複数のCloudflare Pagesプロジェクトに同一Gitブランチを接続するとデプロイが重複するため、運用台帳では接続先・Custom Domain・環境変数を確認します。
+
+### Preview／ProductionのOGP分離（2026-11-23）
+
+- 本体の正式OGPは `static/ogp/yurulink-light.png`。StagingおよびPagesの非mainブランチPreviewだけ `static/ogp/yurulink-staging.png`（右上にSTAGING表示）を使います。
+- 設定値は `config/staging/hugo.toml` と `config/production/hugo.toml` の `params.og_image`。Hugoの `--environment staging|production` で明示切替できます。
+- Cloudflare Pagesではビルド時の `CF_PAGES_BRANCH` を `head/meta.html` が参照してカードを切り替えます。既存Cloudflareビルドコマンドに変更を加える必要はありません。ブランチ `main` は正式版、それ以外は検証版。環境変数の読取許可を `hugo.toml` の `security.funcs.getenv` に限定追加しました。
+- この改修は**OGPのみ**を自動分岐します。URL・canonical・`noindex` 等の環境分離とカスタムドメイン接続は従来の確認・承認境界を維持し、mainへ同期する際に別途点検します。
+- 画像は採用済みのHTML-to-Imageライト版にHTML/CSSで検証ラベルを合成し、Playwright Chromiumで1200×630 PNGに描画。生成AIの新規画像生成はしません。制作原本・配布物はAutomationLabとDrive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120` に同期します。

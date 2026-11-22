@@ -82,3 +82,7 @@ YuruLinkはゆる界隈の関連コンテンツを集約する**非公式の統�
 - 画像制作は**HTML-to-Image（HTML/CSS/SVG → Playwright Chromium → PNG）を必須**とし、新規の生成AIによる描画は行いません。承認済みSVGを共通マスターとし、ロゴを独立して描き直しません。
 - 編集正本：AutomationLabの[HTML-to-Imageツールキット](https://github.com/yurulinkdev/yurulink-automation-lab/tree/feat/brand-html-image-pipeline-20261119/visuals)。同期先：Google Drive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120`。配置画像とREADME・制作ソースを合わせて更新します。
 - 本変更は`staging`への反映です。`main`およびProductionの初期変更は別途承認を要します。
+
+### Staging専用のOGP
+
+Cloudflare PagesのPreview（`main`以外のブランチ）は通常のライトOGPに `STAGING` ラベルを載せた `static/ogp/yurulink-staging.png` を使用します。`main`は `static/ogp/yurulink-light.png` を使用。環境別の `config/staging/hugo.toml` / `config/production/hugo.toml` と `CF_PAGES_BRANCH` による選択を `layouts/partials/head/meta.html` で実装し、既存のCloudflareビルドコマンドに依存しない切替とします。詳細は[環境・デプロイ](docs/environments.md)を参照。

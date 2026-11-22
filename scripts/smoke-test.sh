@@ -112,3 +112,19 @@ test ! -e .github/workflows/compare-staging.yml
 echo "::endgroup::"
 
 echo "Smoke test passed."
+
+# Cloudflare Pagesは通常Hugoをproduction環境で呼び出しても、プレビューはCF_PAGES_BRANCHで確実に区別する。
+echo "::group::Branch-specific OGP"
+CF_PAGES_BRANCH=staging npm run build
+grep -Fq "ogp/yurulink-staging.png" public/index.html
+grep -Fq "ogp/yurulink-staging.png" public/about/index.html
+grep -Fq "STAGING" public/index.html
+test -s public/ogp/yurulink-staging.png
+CF_PAGES_BRANCH=main npm run build
+grep -Fq "ogp/yurulink-light.png" public/index.html
+! grep -Fq "ogp/yurulink-staging.png" public/index.html
+hugo --minify --environment staging >/dev/null
+grep -Fq "ogp/yurulink-staging.png" public/index.html
+hugo --minify --environment production >/dev/null
+grep -Fq "ogp/yurulink-light.png" public/index.html
+echo "::endgroup::"

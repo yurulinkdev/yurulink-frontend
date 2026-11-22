@@ -55,3 +55,7 @@ cloudflare_web_analytics_token = ""
 # 貼付けるコード全体は信頼できるサイト管理者だけが設定してください。
 # 空欄なら無効。複数行の場合はTOMLの複数行リテラル文字列を使用できます。
 new_relic_browser_snippet = ""
+
+# Pagesの実デプロイブランチをHugoテンプレートから安全に参照するための限定許可。
+[security.funcs]
+getenv = ["^HUGO_", "^CI$", "^CF_PAGES_BRANCH$"]
