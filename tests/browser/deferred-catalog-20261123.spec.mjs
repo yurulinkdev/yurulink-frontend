@@ -30,13 +30,13 @@ test('Welcome内部パスはルートと同じ軽量画面・Canonicalはルー�
 test('左メニュー分類はWelcomeから/catalog/へ遷移し、ロゴでWelcomeへ戻る', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
   await page.goto('/', {waitUntil:'domcontentloaded'});
-  const category = page.locator('#category-buttons a[data-category="browse:web-other"]');
-  await expect(category).toHaveAttribute('href','/catalog/?category=browse%3Aweb-other');
+  const category = page.locator('#category-buttons a[data-category="browse:web-community"]');
+  await expect(category).toHaveAttribute('href','/catalog/?category=browse%3Aweb-community');
   await page.locator('#open-categories').click();
   await page.locator('#category-buttons [data-nav-group="site-social"] > summary').click();
   await page.locator('#category-buttons [data-nav-group="web-sites"] > summary').click();
   await category.click();
-  await expect(page).toHaveURL(/\/catalog\/\?category=browse%3Aweb-other/);
+  await expect(page).toHaveURL(/\/catalog\/\?category=browse%3Aweb-community/);
   await expect(page.locator('#selected-category-title')).not.toHaveText('すべてのコンテンツ');
   await page.locator('header a[data-reset-category]').click();
   await expect(page).toHaveURL(/\/$/);

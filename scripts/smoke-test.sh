@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -euxo pipefail
+set -euo pipefail
 
 cleanup() {
   rm -f content/about/smoke-ci.md
