@@ -64,6 +64,7 @@ YouTubeの収集データは公開品質検査に基づいて掲載します。�
 - [環境・デプロイ](docs/environments.md)
 - [デザイン仕様](docs/design-system-phase2.md)
 - [表示・ナビゲーション回帰防止契約（2026-11-22）](docs/frontend-ui-regression-contract-20261122.md)
+- [カテゴリ再設計・初期表示性能の検証契約（2026-11-22）](docs/frontend-refactoring-performance-category-20261122.md)
 - [Backend](https://github.com/yurulinkdev/yurulink-backend)
 
 ## 主要なページ構成（2026-11-20）
