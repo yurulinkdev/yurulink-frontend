@@ -126,11 +126,17 @@ test('catalog metadata: category order and playlist channel labels', async ({ pa
       return map;
     }, new Map());
     const getMeta = id => metadata.get(id) || primary.get(id) || {order: Number.MAX_SAFE_INTEGER, label: id};
-    const groups = buttons.filter(x => x.dataset.category.startsWith('youtube-channel:'));
-    const actual = groups.map(x => x.dataset.category);
-    const expected = [...actual].sort((a,b) => getMeta(a).order - getMeta(b).order ||
-      getMeta(a).label.localeCompare(getMeta(b).label,'ja'));
-    if (JSON.stringify(actual) !== JSON.stringify(expected)) throw new Error('Channel category order differs from catalog order');
+    // Navigation groups channels by editorial group (official/related/other).
+    // Ordering is guaranteed inside each group, not across the entire tree.
+    for (const section of element.querySelectorAll('details[data-nav-group^="channel-group:"]')) {
+      const channelLinks = [...section.querySelectorAll('button[data-category^="youtube-channel:"]')];
+      const actual = channelLinks.map(x => x.dataset.category);
+      const expected = [...actual].sort((a,b) => getMeta(a).order - getMeta(b).order ||
+        getMeta(a).label.localeCompare(getMeta(b).label,'ja'));
+      if (JSON.stringify(actual) !== JSON.stringify(expected)) {
+        throw new Error('Channel order differs within editorial group: '+section.dataset.navGroup);
+      }
+    }
   });
 });
 
@@ -339,12 +345,17 @@ test('high view count: numeric rendering and sorting preserve the elephant video
   const elephant=page.locator('[data-catalog-item][data-title*="象は鼻が長い"][data-view-count]').filter({
     has: page.locator('a[href*="yzTqAU_kiKM"]')
   }).first();
-  await expect(elephant).toHaveAttribute('data-view-count','1843230');
-  await expect(elephant.locator('.catalog-item-views')).toContainText('1,843,230');
-  const counts=await page.locator('[data-catalog-item][data-kind="video"][data-platform="youtube"]')
-    .evaluateAll(nodes=>nodes.map(n=>n.dataset.viewCount).filter(Boolean));
-  expect(counts.every(value=>/^\d+$/.test(value))).toBe(true);
-  expect(Math.max(...counts.map(Number))).toBeGreaterThanOrEqual(1843230);
+  await expect(elephant).toHaveAttribute('data-view-count', /^\\d+$/);
+  const count = Number(await elephant.getAttribute('data-view-count'));
+  expect(count).toBeGreaterThan(1000000);
+  await expect(elephant.locator('.catalog-item-views')).toContainText(new Intl.NumberFormat('ja-JP').format(count));
+  // YouTube counters naturally change between catalog refreshes: enforce numeric
+  // integrity and correct formatting without hardcoding a historical count.
+  const counts=await page.evaluate(() => window.YuruLinkCatalogItems
+    .filter(node=>node.dataset.kind==='video' && node.dataset.platform==='youtube')
+    .map(node=>node.dataset.viewCount).filter(Boolean));
+  expect(counts.every(value=>/^\\d+$/.test(value))).toBe(true);
+  expect(Math.max(...counts.map(Number))).toBeGreaterThanOrEqual(count);
 });
 
 test('search help article and combined publication-date range', async ({page}) => {
