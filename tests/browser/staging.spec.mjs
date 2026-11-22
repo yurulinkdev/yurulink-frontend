@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 import { mkdir, writeFile } from 'node:fs/promises';
 import { join } from 'node:path';
 
@@ -10,7 +11,7 @@ async function saveEvidence(page, label) {
   await page.screenshot({ path: join(evidence, label + '.png'), fullPage: true });
 }
 async function openCatalog(page, url = '/') {
-  const response = await page.goto(url, { waitUntil: 'domcontentloaded' });
+  const response = await gotoAndWaitForCatalog(page,url, { waitUntil: 'domcontentloaded' });
   expect(response?.status()).toBe(200);
   await expect(page.locator('#catalog')).toBeVisible();
   await expect(page.locator('[data-catalog-item]:visible').first()).toBeVisible();
@@ -54,7 +55,8 @@ test('mobile: list layout and horizontal overflow', async ({ page }) => {
 test('category URLs: direct access, filtering, pagination and screenshots', async ({ page }) => {
   test.setTimeout(90000); // 実データ5カテゴリ×各ページの画像保存にはCI負荷で45秒を超えることがある。
   await openCatalog(page);
-  const categoryCounts = await page.locator('[data-catalog-item]').evaluateAll(items => {
+  const categoryCounts = await page.evaluate(() => {
+    const items = window.YuruLinkCatalogItems;
     const counts = {};
     for (const item of items) {
       const id = item.dataset.category;
@@ -93,7 +95,8 @@ test('category URLs: direct access, filtering, pagination and screenshots', asyn
 
 test('catalog metadata: category order and playlist channel labels', async ({ page }) => {
   await openCatalog(page);
-  const metadata = await page.locator('[data-catalog-item]').evaluateAll(items => {
+  const metadata = await page.evaluate(() => {
+    const items = window.YuruLinkCatalogItems;
     const categories = new Map();
     for (const item of items) {
       if (!item.dataset.category || categories.has(item.dataset.category)) continue;
@@ -115,7 +118,7 @@ test('catalog metadata: category order and playlist channel labels', async ({ pa
         label: node.dataset.label || node.dataset.categoryDefinition,
         order: Number(node.dataset.order)
       }]));
-    const primary = [...document.querySelectorAll('[data-catalog-item]')].reduce((map, item) => {
+    const primary = window.YuruLinkCatalogItems.reduce((map, item) => {
       if (item.dataset.category && !map.has(item.dataset.category)) map.set(item.dataset.category, {
         label: item.dataset.categoryLabel,
         order: Number(item.dataset.categoryOrder)
@@ -172,7 +175,7 @@ test('catalog interactions: sorting, search, and bottom pagination', async ({ pa
 
 
 test('multiple category memberships: playlist and channel both filter the same item', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <div id="category-definitions" hidden>
@@ -204,7 +207,8 @@ test('multiple category memberships: playlist and channel both filter the same i
 
 test('category pagination: category-scoped pages remain consistent', async ({ page }) => {
   await openCatalog(page, '/?size=20');
-  const groups = await page.locator('[data-catalog-item]').evaluateAll(items => {
+  const groups = await page.evaluate(() => {
+    const items = window.YuruLinkCatalogItems;
     const counts = new Map();
     for (const item of items) for (const id of (item.dataset.categoryIds || item.dataset.category || '').split(/\s+/).filter(Boolean)) {
       counts.set(id, (counts.get(id) || 0) + 1);
@@ -213,7 +217,7 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
   });
   expect(groups.length).toBeGreaterThan(0);
   const [category, count] = groups[0];
-  await page.goto('/?' + new URLSearchParams({ category, size: '20' }));
+  await gotoAndWaitForCatalog(page,'/?' + new URLSearchParams({ category, size: '20' }));
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(20);
   await page.locator('#pagination').getByRole('button', { name: '2', exact: true }).click();
   await expect(page).toHaveURL(/page=2/);
@@ -227,7 +231,7 @@ test('category pagination: category-scoped pages remain consistent', async ({ pa
 
 
 test('hierarchical sidebar: channel playlists and virtual top-level categories', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <div id="category-definitions" hidden>
@@ -286,8 +290,8 @@ test('hierarchical sidebar: channel playlists and virtual top-level categories',
 
 test('live catalog: view-count sort matches actual YouTube video statistics', async ({ page }) => {
   await openCatalog(page, '/?sort=views-desc');
-  const counts = await page.locator('[data-catalog-item]').evaluateAll(items =>
-    items
+  const counts = await page.evaluate(() =>
+    window.YuruLinkCatalogItems
       .filter(item => item.dataset.kind === 'video' &&
                       item.dataset.platform === 'youtube' &&
                       /^\d+$/.test(item.dataset.viewCount || ''))
@@ -307,7 +311,7 @@ test('live catalog: view-count sort matches actual YouTube video statistics', as
 });
 
 test('view-count sorting: descending, ascending, missing-last and URL state', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <select id="sort-order"><option value="newest">新しい順</option><option value="views-desc">再生数：多い順</option><option value="views-asc">再生数：少ない順</option></select>
@@ -368,14 +372,14 @@ test('invalid calendar dates in shared URL are ignored, valid leap day is retain
   await expect(page.locator('#date-from')).toHaveValue('');
   await expect(page.locator('#date-to')).toHaveValue('');
   await expect(page).not.toHaveURL(/(?:from|to)=2026/);
-  await page.goto('/?from=2024-02-29&to=2024-02-29');
+  await gotoAndWaitForCatalog(page,'/?from=2024-02-29&to=2024-02-29');
   await expect(page.locator('#date-from')).toHaveValue('2024-02-29');
   await expect(page.locator('#date-to')).toHaveValue('2024-02-29');
   await expect(page).toHaveURL(/from=2024-02-29/);
 });
 
 test('search guide describes all URL filters and explicitly notes missing participant data', async ({page}) => {
-  await page.goto('/help/search-guide/');
+  await gotoAndWaitForCatalog(page,'/help/search-guide/');
   await expect(page.getByRole('heading', {name:'YuruLink の検索・絞り込みガイド'})).toBeVisible();
   const text=await page.locator('article').innerText();
   for (const key of ['date_field','from','to','people','AND条件','OR条件']) {
@@ -384,7 +388,7 @@ test('search guide describes all URL filters and explicitly notes missing partic
 });
 
 test('person tags require explicit item relations and combine with dates', async ({page}) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.setContent(
     '<input id="query"><span id="selected-category"></span><span id="count"></span>' +
     '<input id="date-from" type="date"><input id="date-to" type="date">' +
@@ -419,7 +423,7 @@ test('playlist directory: links, hierarchy and source channel suppression', asyn
   await expect(cards.first().locator('a[href^="https://www.youtube.com/playlist?list="]').first()).toBeVisible();
 
   const playlist = await cards.first().getAttribute('data-playlist-id');
-  await page.goto('/?' + new URLSearchParams({category: 'youtube-playlist:' + playlist}));
+  await gotoAndWaitForCatalog(page,'/?' + new URLSearchParams({category: 'youtube-playlist:' + playlist}));
   await expect(page.locator('#playlist-title-link')).toBeVisible();
   await expect(page.locator('#playlist-title-link')).toHaveAttribute('href',
     'https://www.youtube.com/playlist?list=' + playlist);
@@ -566,7 +570,7 @@ test('sidebar keeps program categories without global type duplicates or virtual
   await expect(sidebar.locator('summary', {hasText:'公式性未確認'})).toHaveCount(0);
 
   // 旧URLの直リンクはメニュー項目を削除しても動作させる。
-  await page.goto('/?category=browse%3Alive');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Alive');
   const formats = await page.locator('[data-catalog-item]:visible').evaluateAll(items =>
     items.map(x => x.dataset.videoFormat));
   expect(formats.length).toBeGreaterThan(0);
@@ -575,35 +579,42 @@ test('sidebar keeps program categories without global type duplicates or virtual
 
 
 test('site/SNS provenance is reviewer-verified: test imports stay in unverified group', async ({page}) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   const sidebar=page.locator('#category-buttons');
   await expect(sidebar.locator('summary', {hasText:'サイト・SNS'})).toBeVisible();
   // 旧Book4の全communityは検証用のため、明示的な確定印なしに非公式へ分類しない。
-  const community=await page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"]').count();
-  expect(community).toBeGreaterThan(0);
-  const notReviewed=await page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"][data-classification-verified="false"]').count();
-  expect(notReviewed).toBe(community);
+  const community = await page.evaluate(() => {
+    const entries = window.YuruLinkCatalogItems.filter(x => x.dataset.kind === 'website' && x.dataset.provenance === 'community');
+    return { count: entries.length, unreviewed: entries.every(x => x.dataset.classificationVerified === 'false') };
+  });
+  expect(community.count).toBeGreaterThan(0);
+  expect(community.unreviewed).toBe(true);
   // 旧URLは引き続き解釈するが、メニューは最新の公式・公認/非公式2択のみ。
-  await page.goto('/?category=browse%3Aweb-other');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Aweb-other');
   expect(await page.locator('[data-catalog-item]:visible').count()).toBeGreaterThan(0);
   await expect(page.locator('#category-buttons button[data-category="browse:web-other"]')).toHaveCount(0);
   await expect(page.locator('#category-buttons button[data-category="browse:web-community"]')).toHaveCount(1);
 });
 
 test('video cards show the actual related program and preserve channel/playlist identity', async ({page}) => {
-  await page.goto('/');
-  const videoCards=page.locator('[data-catalog-item][data-kind="video"]');
-  expect(await videoCards.count()).toBeGreaterThan(3000);
+  await gotoAndWaitForCatalog(page,'/');
+  const stats = await page.evaluate(() => {
+    const videos = window.YuruLinkCatalogItems.filter(x => x.dataset.kind === 'video');
+    return {
+      total: videos.length,
+      labeled: videos.filter(x => /ゆる/.test(x.querySelector('.catalog-item-meta')?.textContent || '')).length,
+      matched: videos.filter(x => x.dataset.programLabels).length
+    };
+  });
+  expect(stats.total).toBeGreaterThan(3000);
   // チャンネル投稿とプレイリスト所属から取得した番組名のない項目を誤って公式表示しない。
-  const labeled=videoCards.locator('.catalog-item-meta').filter({hasText:/ゆる/});
-  expect(await labeled.count()).toBeGreaterThan(100);
-  const matched=await videoCards.evaluateAll(nodes=>nodes.filter(n=>n.dataset.programLabels).length);
-  expect(matched).toBeGreaterThan(100);
+  expect(stats.labeled).toBeGreaterThan(100);
+  expect(stats.matched).toBeGreaterThan(100);
 });
 
 
 test('branding: approved logo, favicon and OGP candidate are served from staging', async ({page, request}) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await expect(page.locator('#category-drawer img[src*="yurulink-symbol-master.svg"]')).toHaveCount(1);
   await expect(page.locator('#category-drawer svg[aria-hidden="true"] path[d^="M12 5.5"]')).toHaveCount(0);
   const svgIcon=page.locator('head link[rel="icon"][type="image/svg+xml"]');
@@ -626,7 +637,7 @@ test('branding: approved logo, favicon and OGP candidate are served from staging
 
 test('mobile: approved logo and arrow-left drawer control keep typography consistent', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   const headerLogo=page.locator('header img[src*="yurulink-symbol-master.svg"]');
   await expect(headerLogo).toBeVisible();
   const natural=await headerLogo.evaluate(async img => {
@@ -652,18 +663,21 @@ test('mobile: approved logo and arrow-left drawer control keep typography consis
 });
 
 test('official/community classification is not inferred from unreviewed legacy provenance', async ({page}) => {
-  await page.goto('/');
-  const recorded=page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"]');
-  expect(await recorded.count()).toBeGreaterThan(0);
-  expect(await recorded.evaluateAll(nodes=>nodes.every(node=>node.dataset.classificationVerified==='false'))).toBe(true);
-  await page.goto('/?category=browse%3Aweb-community');
+  await gotoAndWaitForCatalog(page,'/');
+  const recorded = await page.evaluate(() => {
+    const nodes = window.YuruLinkCatalogItems.filter(x => x.dataset.kind === 'website' && x.dataset.provenance === 'community');
+    return {count:nodes.length, allUnverified:nodes.every(x=>x.dataset.classificationVerified==='false')};
+  });
+  expect(recorded.count).toBeGreaterThan(0);
+  expect(recorded.allUnverified).toBe(true);
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Aweb-community');
   await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(0);
-  await page.goto('/?category=browse%3Aweb-other');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Aweb-other');
   expect(await page.locator('[data-catalog-item]:visible').count()).toBeGreaterThan(0);
 });
 
 test('taxonomy labels and parent IDs are shared with Google Forms categories', async ({page}) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   const web=page.locator('[data-taxonomy-id="official_site"]');
   const social=page.locator('[data-taxonomy-id="official_social_profile"]');
   await expect(web).toHaveAttribute('data-parent-id','web');

@@ -1,7 +1,8 @@
 import { test, expect } from '@playwright/test';
+import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 
 test('リンク投稿ページを埋め込み、既存フォームへの外部導線も残す', async ({ page }) => {
-  await page.goto('/submit/');
+  await gotoAndWaitForCatalog(page,'/submit/');
   await expect(page.getByRole('heading', { name: 'リンクを投稿する', exact: true })).toBeVisible();
   const form = page.locator('#submission-form-frame');
   await expect(form).toHaveAttribute('title', 'YuruLink リンク投稿 Googleフォーム');
@@ -16,7 +17,7 @@ test('リンク投稿ページを埋め込み、既存フォームへの外部�
 
 test('スマホのナビゲーションから投稿ページへ遷移できる', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.locator('#open-categories').click();
   const link = page.locator('#contribution-link');
   await expect(link).toHaveAttribute('href', '/submit/');

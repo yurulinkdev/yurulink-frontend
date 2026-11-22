@@ -1,8 +1,9 @@
 import { test, expect } from '@playwright/test';
+import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 
 test('共通カテゴリは「すべて」＋トップレベル2分類で、名称に推測の公式性表示を付けない', async ({ page }) => {
   for (const url of ['/', '/submit/']) {
-    await page.goto(url);
+    await gotoAndWaitForCatalog(page,url);
     const nav = page.locator('#category-buttons [data-server-nav-root]');
     const top = nav.locator(':scope > details > summary');
     await expect(top).toHaveCount(2);
@@ -22,18 +23,19 @@ test('共通カテゴリは「すべて」＋トップレベル2分類で、名�
 });
 
 test('分類選択後の画面タイトルもtaxonomyナビと同じ表記にする', async ({ page }) => {
-  await page.goto('/?category=browse%3Aweb-official');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Aweb-official');
   await expect(page.locator('#selected-category-title')).toHaveText('公式・公認');
-  await page.goto('/?category=browse%3Asocial-other');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Asocial-other');
   await expect(page.locator('#selected-category-title')).toHaveText('その他');
-  await page.goto('/?category=browse%3Ayoutube-group%3Arelated');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Ayoutube-group%3Arelated');
   await expect(page.locator('#selected-category-title')).toHaveText('コラボ・公認・関連');
 });
 
 test('初期データ件数が大きくてもDOM整形は画面表示分に限定される', async ({ page }) => {
-  await page.goto('/');
-  const total = await page.locator('#catalog [data-catalog-item]').count();
+  await gotoAndWaitForCatalog(page,'/');
+  const total = await page.evaluate(() => window.YuruLinkCatalogItems.length);
   expect(total).toBeGreaterThan(3000);
+  expect(await page.locator('#catalog [data-catalog-item]').count()).toBeLessThanOrEqual(20);
   await expect(page.locator('#catalog')).toHaveClass(/catalog-ready/);
   const formatted = page.locator('#catalog [data-ui-formatted="1"]');
   const visible = page.locator('#catalog [data-catalog-item]:visible');
@@ -70,7 +72,7 @@ test('Book1のチャンネル配置カテゴリは公式性の確定フラグに
     other:['C','unknown']
   };
   for (const [group,titles] of Object.entries(expectations)) {
-    await page.goto('/?category=' + encodeURIComponent('browse:youtube-group:'+group));
+    await gotoAndWaitForCatalog(page,'/?category=' + encodeURIComponent('browse:youtube-group:'+group));
     await page.setContent(fixture);
     await page.addScriptTag({url:'/js/site.js'});
     await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(titles.length);
@@ -81,7 +83,7 @@ test('Book1のチャンネル配置カテゴリは公式性の確定フラグに
 
 
 test('初期表示のナビ・HTML・paint時間の計測値をCIログへ記録する', async ({ page }) => {
-  await page.goto('/', { waitUntil: 'load' });
+  await gotoAndWaitForCatalog(page,'/', { waitUntil: 'load' });
   await expect(page.locator('#catalog')).toHaveClass(/catalog-ready/);
   const metrics = await page.evaluate(() => {
     const nav = performance.getEntriesByType('navigation')[0];
@@ -93,19 +95,21 @@ test('初期表示のナビ・HTML・paint時間の計測値をCIログへ記録
       load_event_end_ms: Number((nav?.loadEventEnd || 0).toFixed(1)),
       first_contentful_paint_ms: fcp ? Number(fcp.startTime.toFixed(1)) : null,
       catalog_item_dom_count: document.querySelectorAll('#catalog [data-catalog-item]').length,
+      catalog_index_count: window.YuruLinkCatalogItems.length,
       nav_node_count: document.querySelectorAll('#category-buttons *').length,
       initially_visible_count: document.querySelectorAll('#catalog [data-catalog-item]:not([hidden])').length,
     };
   });
   console.log('YURULINK_STAGING_PERF_BASELINE=' + JSON.stringify(metrics));
-  expect(metrics.catalog_item_dom_count).toBeGreaterThan(3000);
+  expect(metrics.catalog_index_count).toBeGreaterThan(3000);
+  expect(metrics.catalog_item_dom_count).toBeLessThanOrEqual(20);
   expect(metrics.nav_node_count).toBeGreaterThan(0);
   expect(metrics.initially_visible_count).toBe(20);
 });
 
 
 test('SNSその他は非公式・未確認のプロフィールを取りこぼさない', async ({ page }) => {
-  await page.goto('/?category=browse%3Asocial-other');
+  await gotoAndWaitForCatalog(page,'/?category=browse%3Asocial-other');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <div id="category-buttons"></div>

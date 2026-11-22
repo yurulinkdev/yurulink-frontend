@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 
 // Frontend UI の確定仕様。日付や個別のYouTube動画IDに依存せず、
 // Staging に実際に配信されたHugo/JS/CSSをブラウザで検証する。
 test('カード・リスト画像は16:9全幅で描画し、画像を伸縮変形せず黒帯をトリミング', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   const card = page.locator('#catalog [data-catalog-item][data-kind="video"]:visible').first();
   const media = card.locator('.catalog-media');
   const image = media.locator('img[data-thumbnail-image]');
@@ -39,10 +40,10 @@ test('カード・リスト画像は16:9全幅で描画し、画像を伸縮変�
 
 test('ロゴリンクからのトップ遷移は選択カテゴリだけ解除し、表示形式等は保持', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
-  await page.goto('/?category=browse:web-other');
+  await gotoAndWaitForCatalog(page,'/?category=browse:web-other');
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')))
     .toBe('browse:web-other');
-  await page.goto('/submit/');
+  await gotoAndWaitForCatalog(page,'/submit/');
   const headerLogo = page.locator('header a[data-reset-category]');
   await expect(headerLogo).toBeVisible();
   // モバイルヘッダーは共通partial内のYuruLink一か所だけ。
@@ -55,7 +56,7 @@ test('ロゴリンクからのトップ遷移は選択カテゴリだけ解除�
 });
 
 test('すべてのコンテンツ選択はlocalStorageからカテゴリキーを削除', async ({ page }) => {
-  await page.goto('/?category=browse:web-other');
+  await gotoAndWaitForCatalog(page,'/?category=browse:web-other');
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')))
     .toBe('browse:web-other');
   await page.locator('#category-buttons button[data-category=""]').click();
@@ -66,29 +67,29 @@ test('すべてのコンテンツ選択はlocalStorageからカテゴリキー�
 
 test('PCのサイドバーロゴも保存カテゴリを解除する', async ({ page }) => {
   await page.setViewportSize({width:1280,height:800});
-  await page.goto('/?category=browse:web-other');
-  await page.goto('/help/');
+  await gotoAndWaitForCatalog(page,'/?category=browse:web-other');
+  await gotoAndWaitForCatalog(page,'/help/');
   await page.locator('#category-drawer a[aria-label="YuruLink トップページ"]').click();
   await expect(page).toHaveURL(/\/$/);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1'))).toBeNull();
 });
 
 test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page }) => {
-  const response = await page.goto('/change-log/');
+  const response = await gotoAndWaitForCatalog(page,'/change-log/');
   expect(response?.status()).toBe(200);
   await expect(page.getByRole('heading',{name:'更新履歴',exact:true})).toBeVisible();
   await expect(page.locator('footer a[href="/change-log/"]')).toHaveCount(1);
   await expect(page.locator('#category-drawer nav[aria-label="サイト内ページ"] a[href="/change-log/"]')).toHaveCount(1);
   await expect(page.locator('#category-drawer section[aria-label="最近の更新履歴"] li')).toHaveCount(0);
   for (const old of ['/history/','/news/changelog/']) {
-    const res = await page.goto(old);
+    const res = await gotoAndWaitForCatalog(page,old);
     expect(res?.status(),old).toBe(404);
   }
 });
 
 test('スマホの左端右スワイプはtouchmove時に開き、縦スワイプでは開かず、左スワイプで閉じる', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
-  await page.goto('/change-log/');
+  await gotoAndWaitForCatalog(page,'/change-log/');
   const trigger = page.locator('#open-categories');
   const drawer = page.locator('#category-drawer');
   const swipe = (from, to, target) => page.evaluate(({from,to,target}) => {

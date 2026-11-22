@@ -1,9 +1,10 @@
 import { test, expect } from '@playwright/test';
+import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 
 test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履歴', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await expect(page.locator('#home-news-heading')).toHaveCount(0);
-  await page.goto('/about/');
+  await gotoAndWaitForCatalog(page,'/about/');
   await expect(page.getByRole('heading', { name: 'このサイトについて', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: '記事・お知らせ', exact: true })).toBeVisible();
   // 共通Hugoナビはdetailsによる階層構造。非展開のリンクはDOMにあっても非表示。
@@ -14,24 +15,24 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   await siteSocial.locator(':scope > summary').click();
   await web.locator(':scope > summary').click();
   await expect(web.locator('a[data-category="browse:web-community"]')).toBeVisible();
-  await page.goto('/help/search-guide/');
+  await gotoAndWaitForCatalog(page,'/help/search-guide/');
   await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
-  await page.goto('/change-log/');
+  await gotoAndWaitForCatalog(page,'/change-log/');
   await expect(page.getByRole('heading', { name: '更新履歴', exact: true })).toBeVisible();
   // 旧URL・存在しないURLがトップページへ200でフォールバックしないことを検証。
-  const removed = await page.goto('/news/welcome/');
+  const removed = await gotoAndWaitForCatalog(page,'/news/welcome/');
   expect(removed?.status()).toBe(404);
   await expect(page.getByRole('heading', { name: 'ページが見つかりません', exact: true })).toBeVisible();
-  const oldLog = await page.goto('/history/');
+  const oldLog = await gotoAndWaitForCatalog(page,'/history/');
   expect(oldLog?.status()).toBe(404);
-  const oldNews = await page.goto('/news/changelog/');
+  const oldNews = await gotoAndWaitForCatalog(page,'/news/changelog/');
   expect(oldNews?.status()).toBe(404);
-  const unknownPage = await page.goto('/not-found-check-20261121/');
+  const unknownPage = await gotoAndWaitForCatalog(page,'/not-found-check-20261121/');
   expect(unknownPage?.status()).toBe(404);
 });
 
 test('初回だけカテゴリを強調', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await expect(page.locator('#onboarding-hint')).toBeVisible();
   await expect(page.locator('#categories-intro-anchor')).toHaveClass(/onboarding-highlight/);
   await page.locator('#onboarding-hint button').click();
@@ -41,13 +42,13 @@ test('初回だけカテゴリを強調', async ({ page }) => {
 
 test('スマホではドロワーを初回強調', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await expect(page.locator('#onboarding-hint')).toBeVisible();
   await expect(page.locator('#open-categories')).toHaveClass(/onboarding-highlight/);
 });
 
 test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
-  await page.goto('/?duration=under-5');
+  await gotoAndWaitForCatalog(page,'/?duration=under-5');
   await expect(page.locator('#category-buttons [data-nav-group="social"]')).toHaveCount(1);
   await expect(page.locator('#duration-range')).toHaveCount(0);
   await expect.poll(() => new URL(page.url()).searchParams.has('duration')).toBe(false);
@@ -58,14 +59,14 @@ test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
 });
 
 test('Stagingは公開するが検索エンジンへは登録しない', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
-  await page.goto('/about/');
+  await gotoAndWaitForCatalog(page,'/about/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 });
 
 test('GA4設定済みだがStagingホストでは測定しない・公式Xを表示', async ({ page }) => {
-  await page.goto('/about/');
+  await gotoAndWaitForCatalog(page,'/about/');
   await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
   await expect(page.locator('#analytics-consent')).toBeHidden();
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
@@ -79,7 +80,7 @@ test('GA4設定済みだがStagingホストでは測定しない・公式Xを表
 });
 
 test('5分未満はショート・300秒は動画（カテゴリと種類の両方に適用）', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <div id="content-type-filter"><input type="checkbox" name="content-type" value="video">
@@ -103,29 +104,29 @@ test('5分未満はショート・300秒は動画（カテゴリと種類の両�
 test('サイドバーの階層はトップ・About・ヘルプで同じ', async ({ page }) => {
   const categories = async () => page.locator('#category-buttons [data-nav-group]').evaluateAll(nodes =>
     nodes.map(node => node.dataset.navGroup));
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await expect(page.locator('#home-news-heading')).toHaveCount(0);
   await expect(page.locator('#category-buttons [data-server-nav-root]')).toHaveCount(1);
   const homeGroups = await categories();
   for (const group of ['youtube-channels', 'channel-group:official', 'channel-group:related', 'channel-group:other', 'site-social', 'web-sites', 'social']) {
     expect(homeGroups).toContain(group);
   }
-  await page.goto('/about/');
+  await gotoAndWaitForCatalog(page,'/about/');
   expect(await categories()).toEqual(homeGroups);
-  await page.goto('/help/search-guide/');
+  await gotoAndWaitForCatalog(page,'/help/search-guide/');
   expect(await categories()).toEqual(homeGroups);
 });
 
 test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', async ({ page }) => {
-  await page.goto('/?category=browse:web-community');
+  await gotoAndWaitForCatalog(page,'/?category=browse:web-community');
   const home = page.locator('#category-buttons button[data-category="browse:web-community"]');
   await expect(home).toHaveAttribute('aria-current','true');
-  await page.goto('/help/search-guide/');
+  await gotoAndWaitForCatalog(page,'/help/search-guide/');
   const help = page.locator('#category-buttons a[data-category="browse:web-community"]');
   await expect(help).toHaveAttribute('aria-current','true');
   await expect(help).toHaveClass(/bg-panel-muted/);
   await expect(page.locator('#category-buttons details[data-nav-group="web-sites"]')).toHaveAttribute('open','');
-  await page.goto('/about/');
+  await gotoAndWaitForCatalog(page,'/about/');
   const about = page.locator('#category-buttons a[data-category="browse:web-community"]');
   await expect(about).toHaveAttribute('aria-current','true');
   await about.click();
@@ -139,23 +140,23 @@ test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', 
 });
 
 test('GA4 Production専用ホスト制限はページの設定に存在', async ({ page }) => {
-  await page.goto('/help/');
+  await gotoAndWaitForCatalog(page,'/help/');
   await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
 });
 
 
 test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評価順', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   const form = page.locator('#contribution-link');
   await expect(form).toBeVisible();
   await expect(form).toContainText('リンクを投稿する');
   await expect(form).toHaveAttribute('href','/submit/');
-  await page.goto('/submit/');
+  await gotoAndWaitForCatalog(page,'/submit/');
   await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
   await expect(page.locator('aside a[href="https://x.com/YuruLinkDev"] img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
   // ここからは投稿ページではなくカタログの並び替え・動画メタ情報を検証する。
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   const video = page.locator('li[data-catalog-item][data-kind="video"]').first();
   await expect(video.locator('.catalog-video-format')).toContainText(/動画|ショート|ライブ配信/);
   await page.locator('#sort-order').selectOption('likes-desc');
@@ -173,7 +174,7 @@ test('SNSのブランドアイコンと通知ベクターはローカル静的�
 });
 
 test('高評価順は未取得を0高評価とせず末尾に置く', async ({ page }) => {
-  await page.goto('/');
+  await gotoAndWaitForCatalog(page,'/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <select id="sort-order"><option value="newest">新着</option><option value="likes-desc">高評価順</option></select>
