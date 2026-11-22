@@ -17,7 +17,7 @@ test('リンク投稿ページを埋め込み、既存フォームへの外部�
 
 test('スマホのナビゲーションから投稿ページへ遷移できる', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await page.locator('#open-categories').click();
   const link = page.locator('#contribution-link');
   await expect(link).toHaveAttribute('href', '/submit/');

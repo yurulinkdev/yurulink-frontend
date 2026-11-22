@@ -1,0 +1,12 @@
+{{/* 独立した軽量ランディング。全件検索・カタログデータを読み込まない。 */}}
+<section class="mx-auto flex min-h-[65vh] max-w-4xl flex-col px-4 py-10 sm:px-7" aria-labelledby="welcome-heading">
+  <div class="rounded-xl border border-line bg-panel px-6 py-8 sm:px-9 sm:py-10">
+    <p class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">ゆるい発見を、リンクでつなぐ。</p>
+    <h1 id="welcome-heading" class="text-2xl font-bold text-ink sm:text-3xl">YuruLinkへようこそ</h1>
+    <p class="mt-5 max-w-2xl text-base leading-8 text-muted-ink">YuruLink（ゆるリンク）は、ゆる言語学ラジオなどに関連する動画・プレイリスト・Webサイト・SNSをまとめて探せる、非公式のリンク集です。</p>
+    <p class="mt-3 max-w-2xl text-sm leading-7 text-muted-ink">見たい番組やカテゴリーは、パソコンでは左側のメニュー、スマートフォンでは左上のメニューボタンから選べます。</p>
+  </div>
+  <div class="mt-auto pt-10 text-center">
+    <a id="welcome-catalog-link" class="inline-flex min-h-12 items-center justify-center rounded-xl bg-accent px-8 py-3 font-semibold text-white hover:opacity-90 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent" href="{{ "catalog/" | relURL }}" data-reset-category>すべてのコンテンツ</a>
+  </div>
+</section>

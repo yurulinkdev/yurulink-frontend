@@ -17,7 +17,7 @@ trap cleanup EXIT
 
 echo "::group::Default build"
 npm run build
-for path in public/index.html public/about/index.html public/change-log/index.html public/help/index.html public/submit/index.html; do
+for path in public/index.html public/welcome/index.html public/catalog/index.html public/about/index.html public/change-log/index.html public/help/index.html public/submit/index.html; do
   test -s "$path" || { echo "::error::Missing $path"; exit 1; }
 done
 grep -Eq 'id=("main-content"|main-content)([ >])' public/index.html || { echo '::error::Missing main-content'; head -c 800 public/index.html; exit 1; }
@@ -28,8 +28,16 @@ test ! -e public/history/index.html
 test ! -e public/news/changelog/index.html
 grep -q 'prefers-color-scheme: dark' assets/css/tokens.css
 grep -q "localStorage.removeItem(key)" static/js/theme-control.js
-grep -q 'page-size' public/index.html
-grep -q 'pagination' public/index.html
+grep -q 'page-size' public/catalog/index.html
+grep -q 'pagination' public/catalog/index.html
+# Welcome route and root must be light, standalone pages with a single main CTA.
+grep -q 'id="welcome-catalog-link"' public/index.html
+grep -q 'id="welcome-catalog-link"' public/welcome/index.html
+! grep -q 'id="query"' public/index.html
+! grep -q 'id="catalog"' public/index.html
+! grep -q 'catalog-data/' public/index.html
+grep -q 'href="/catalog/"' public/index.html
+! grep -q 'id="welcome-catalog-link"' public/catalog/index.html
 # 投稿ページはGoogle側フォームのみ埋め込み、管理用フォームURLは含めない。
 grep -q 'submission-form-frame' public/submit/index.html
 grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
@@ -41,11 +49,12 @@ grep -q 'drawer.inert' static/js/theme-control.js
 node --check static/js/site.js
 # First paint must never serialize thousands of cards into index.html.
 test -s public/catalog-data/index.html
-grep -q 'id="catalog-loading"' public/index.html || grep -q 'id=catalog-loading' public/index.html
-test "$( (grep -o 'data-catalog-item' public/index.html || true) | wc -l)" -eq 0
+grep -q 'id="catalog-loading"' public/catalog/index.html || grep -q 'id=catalog-loading' public/catalog/index.html
+test "$( (grep -o 'data-catalog-item' public/catalog/index.html || true) | wc -l)" -eq 0
 test "$(grep -o 'data-catalog-item' public/catalog-data/index.html | wc -l)" -gt 100
 grep -q 'YuruLinkへようこそ' public/index.html
-echo "YURULINK_HTML_BYTES:"; wc -c public/index.html public/catalog-data/index.html
+! grep -q 'YuruLinkへようこそ' public/catalog/index.html
+echo "YURULINK_HTML_BYTES:"; wc -c public/index.html public/welcome/index.html public/catalog/index.html public/catalog-data/index.html
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
@@ -77,7 +86,8 @@ test -s public/index.html
 test -s public/about/index.html
 test -s public/change-log/index.html
 test -s public/about/smoke-ci/index.html
-grep -q '統合形式の公開カタログを準備中' public/index.html
+grep -q '統合形式の公開カタログを準備中' public/catalog/index.html
+! grep -q 'id="catalog"' public/index.html
 echo "::endgroup::"
 grep -q "catalog-list-view" assets/css/input.css
 grep -q "catalog-item-date" layouts/catalog-data/list.html

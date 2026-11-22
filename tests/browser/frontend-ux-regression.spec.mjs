@@ -4,7 +4,7 @@ import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 // Frontend UI の確定仕様。日付や個別のYouTube動画IDに依存せず、
 // Staging に実際に配信されたHugo/JS/CSSをブラウザで検証する。
 test('カード・リスト画像は16:9全幅で描画し、画像を伸縮変形せず黒帯をトリミング', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   const card = page.locator('#catalog [data-catalog-item][data-kind="video"]:visible').first();
   const media = card.locator('.catalog-media');
   const image = media.locator('img[data-thumbnail-image]');
@@ -40,7 +40,7 @@ test('カード・リスト画像は16:9全幅で描画し、画像を伸縮変�
 
 test('ロゴリンクからのトップ遷移は選択カテゴリだけ解除し、表示形式等は保持', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
-  await gotoAndWaitForCatalog(page,'/?category=browse:web-other');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse:web-other');
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')))
     .toBe('browse:web-other');
   await gotoAndWaitForCatalog(page,'/submit/');
@@ -52,11 +52,12 @@ test('ロゴリンクからのトップ遷移は選択カテゴリだけ解除�
   await headerLogo.click();
   await expect(page).toHaveURL(/\/$/);
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1'))).toBeNull();
-  await expect(page.locator('#selected-category-title')).toHaveText('すべてのコンテンツ');
+  await expect(page.getByRole('heading',{name:'YuruLinkへようこそ'})).toBeVisible();
+  await expect(page.locator('#catalog')).toHaveCount(0);
 });
 
 test('すべてのコンテンツ選択はlocalStorageからカテゴリキーを削除', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=browse:web-other');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse:web-other');
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')))
     .toBe('browse:web-other');
   await page.locator('#category-buttons button[data-category=""]').click();
@@ -67,7 +68,7 @@ test('すべてのコンテンツ選択はlocalStorageからカテゴリキー�
 
 test('PCのサイドバーロゴも保存カテゴリを解除する', async ({ page }) => {
   await page.setViewportSize({width:1280,height:800});
-  await gotoAndWaitForCatalog(page,'/?category=browse:web-other');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse:web-other');
   await gotoAndWaitForCatalog(page,'/help/');
   await page.locator('#category-drawer a[aria-label="YuruLink トップページ"]').click();
   await expect(page).toHaveURL(/\/$/);

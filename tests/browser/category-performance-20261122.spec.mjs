@@ -23,16 +23,16 @@ test('共通カテゴリは「すべて」＋トップレベル2分類で、名�
 });
 
 test('分類選択後の画面タイトルもtaxonomyナビと同じ表記にする', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=browse%3Aweb-official');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse%3Aweb-official');
   await expect(page.locator('#selected-category-title')).toHaveText('公式・公認');
-  await gotoAndWaitForCatalog(page,'/?category=browse%3Asocial-other');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse%3Asocial-other');
   await expect(page.locator('#selected-category-title')).toHaveText('その他');
-  await gotoAndWaitForCatalog(page,'/?category=browse%3Ayoutube-group%3Arelated');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse%3Ayoutube-group%3Arelated');
   await expect(page.locator('#selected-category-title')).toHaveText('コラボ・公認・関連');
 });
 
 test('初期データ件数が大きくてもDOM整形は画面表示分に限定される', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   const total = await page.evaluate(() => window.YuruLinkCatalogItems.length);
   expect(total).toBeGreaterThan(3000);
   expect(await page.locator('#catalog [data-catalog-item]').count()).toBeLessThanOrEqual(20);
@@ -72,7 +72,7 @@ test('Book1のチャンネル配置カテゴリは公式性の確定フラグに
     other:['C','unknown']
   };
   for (const [group,titles] of Object.entries(expectations)) {
-    await gotoAndWaitForCatalog(page,'/?category=' + encodeURIComponent('browse:youtube-group:'+group));
+    await gotoAndWaitForCatalog(page,'/catalog/?category=' + encodeURIComponent('browse:youtube-group:'+group));
     await page.setContent(fixture);
     await page.addScriptTag({url:'/js/site.js'});
     await expect(page.locator('[data-catalog-item]:visible')).toHaveCount(titles.length);
@@ -83,7 +83,7 @@ test('Book1のチャンネル配置カテゴリは公式性の確定フラグに
 
 
 test('初期表示のナビ・HTML・paint時間の計測値をCIログへ記録する', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/', { waitUntil: 'load' });
+  await gotoAndWaitForCatalog(page,'/catalog/', { waitUntil: 'load' });
   await expect(page.locator('#catalog')).toHaveClass(/catalog-ready/);
   const metrics = await page.evaluate(() => {
     const nav = performance.getEntriesByType('navigation')[0];
@@ -109,7 +109,7 @@ test('初期表示のナビ・HTML・paint時間の計測値をCIログへ記録
 
 
 test('SNSその他は非公式・未確認のプロフィールを取りこぼさない', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=browse%3Asocial-other');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse%3Asocial-other');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <div id="category-buttons"></div>

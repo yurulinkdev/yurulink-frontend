@@ -6,11 +6,13 @@
 {{- if or .Site.Params.noindex .Params.noindex }}
 <meta name="robots" content="noindex, nofollow">
 {{- end }}
-<link rel="canonical" href="{{ .Permalink }}">
+{{- $canonical := .Permalink -}}
+{{- if eq .Section "welcome" }}{{ $canonical = .Site.Home.Permalink }}{{ end }}
+<link rel="canonical" href="{{ $canonical }}">
 <meta property="og:type" content="{{ if .IsPage }}article{{ else }}website{{ end }}">
 <meta property="og:title" content="{{ $title }}">
 <meta property="og:description" content="{{ $description }}">
-<meta property="og:url" content="{{ .Permalink }}">
+<meta property="og:url" content="{{ $canonical }}">
 <meta name="twitter:card" content="summary_large_image">
 
 {{/* アイコンとOGPは採用シンボルに統一。OGP本文はHugo設定で切替可能。 */}}

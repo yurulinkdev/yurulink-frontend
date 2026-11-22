@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 
 test('No4: Google Formは指定の公開回答URLを案内し、編集URLを露出しない', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   const cta=page.locator('aside #contribution-link');
   await expect(cta).toBeVisible();
   await expect(cta).toHaveAttribute('href','/submit/');
@@ -14,7 +14,7 @@ test('No4: Google Formは指定の公開回答URLを案内し、編集URLを露�
 });
 
 test('No4: 同じショート判定をカードラベルと種類フィルタで使用し、日時はJST', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=');
   await page.setContent([
     '<input id="query"><span id="selected-category"></span><span id="count"></span>',
     '<div id="content-type-filter"><input type="checkbox" name="content-type" value="video">',
@@ -41,7 +41,7 @@ test('No4: 同じショート判定をカードラベルと種類フィルタで
 });
 
 test('No4: すべてのコンテンツにはサイトとSNSも入り、種類を連動して絞る', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=');
   await page.setContent([
     '<input id="query"><span id="selected-category"></span><span id="count"></span>',
     '<div id="content-type-filter"><input type="checkbox" name="content-type" value="site"><input type="checkbox" name="content-type" value="social"></div>',
@@ -65,7 +65,7 @@ test('No4: すべてのコンテンツにはサイトとSNSも入り、種類を
 });
 
 test('No4: プレイリストはグリッドカード、リストでは横長サムネイルで全体表示', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=browse:playlists');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse:playlists');
   await page.locator('button[data-catalog-view="grid"]').click();
   const playlist=page.locator('li[data-playlist-card]:visible').first();
   await expect(playlist).toBeVisible();
@@ -80,7 +80,7 @@ test('No4: プレイリストはグリッドカード、リストでは横長サ
 });
 
 test('No4: リストは分類と日時を同じ行に置き、再生数と高評価数を次行へ', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=');
   await page.locator('button[data-catalog-view="list"]').click();
   const card=page.locator('li[data-catalog-item][data-kind="video"]:visible').first();
   await expect(card.locator('.catalog-meta-line')).toHaveCount(1);
@@ -100,7 +100,7 @@ test('No4: リストは分類と日時を同じ行に置き、再生数と高評
 });
 
 test('No4: 公式性未検証のYouTubeチャンネルを公式扱いしない', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   // 公式性認定バッジではなく、Book1のナビ分類を表示する。
   await expect(page.locator('nav#category-buttons [data-nav-group="channel-group:official"]')).toHaveCount(1);
   await expect(page.locator('nav#category-buttons [data-nav-group="channel-group:related"]')).toHaveCount(1);
@@ -110,7 +110,7 @@ test('No4: 公式性未検証のYouTubeチャンネルを公式扱いしない',
 });
 
 test('No4: サイトのSNSアイコンには実アカウント名を付ける', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   const x=page.locator('aside a[href="https://x.com/YuruLinkDev"]');
   await expect(x.locator('img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
   await expect(x).toContainText('@YuruLinkDev');

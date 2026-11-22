@@ -2,7 +2,7 @@ import { test, expect } from '@playwright/test';
 import { gotoAndWaitForCatalog } from './catalog-test-helpers.mjs';
 
 test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履歴', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await expect(page.locator('#home-news-heading')).toHaveCount(0);
   await gotoAndWaitForCatalog(page,'/about/');
   await expect(page.getByRole('heading', { name: 'このサイトについて', exact: true })).toBeVisible();
@@ -32,7 +32,7 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
 });
 
 test('初回だけカテゴリを強調', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await expect(page.locator('#onboarding-hint')).toBeVisible();
   await expect(page.locator('#categories-intro-anchor')).toHaveClass(/onboarding-highlight/);
   await page.locator('#onboarding-hint button').click();
@@ -42,13 +42,13 @@ test('初回だけカテゴリを強調', async ({ page }) => {
 
 test('スマホではドロワーを初回強調', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await expect(page.locator('#onboarding-hint')).toBeVisible();
   await expect(page.locator('#open-categories')).toHaveClass(/onboarding-highlight/);
 });
 
 test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?duration=under-5');
+  await gotoAndWaitForCatalog(page,'/catalog/?duration=under-5');
   await expect(page.locator('#category-buttons [data-nav-group="social"]')).toHaveCount(1);
   await expect(page.locator('#duration-range')).toHaveCount(0);
   await expect.poll(() => new URL(page.url()).searchParams.has('duration')).toBe(false);
@@ -59,7 +59,7 @@ test('SNS投稿分類と再生時間フィルタ廃止', async ({ page }) => {
 });
 
 test('Stagingは公開するが検索エンジンへは登録しない', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
   await gotoAndWaitForCatalog(page,'/about/');
   await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
@@ -80,7 +80,7 @@ test('GA4設定済みだがStagingホストでは測定しない・公式Xを表
 });
 
 test('5分未満はショート・300秒は動画（カテゴリと種類の両方に適用）', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <div id="content-type-filter"><input type="checkbox" name="content-type" value="video">
@@ -104,7 +104,7 @@ test('5分未満はショート・300秒は動画（カテゴリと種類の両�
 test('サイドバーの階層はトップ・About・ヘルプで同じ', async ({ page }) => {
   const categories = async () => page.locator('#category-buttons [data-nav-group]').evaluateAll(nodes =>
     nodes.map(node => node.dataset.navGroup));
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await expect(page.locator('#home-news-heading')).toHaveCount(0);
   await expect(page.locator('#category-buttons [data-server-nav-root]')).toHaveCount(1);
   const homeGroups = await categories();
@@ -118,7 +118,7 @@ test('サイドバーの階層はトップ・About・ヘルプで同じ', async 
 });
 
 test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/?category=browse:web-community');
+  await gotoAndWaitForCatalog(page,'/catalog/?category=browse:web-community');
   const home = page.locator('#category-buttons button[data-category="browse:web-community"]');
   await expect(home).toHaveAttribute('aria-current','true');
   await gotoAndWaitForCatalog(page,'/help/search-guide/');
@@ -147,7 +147,7 @@ test('GA4 Production専用ホスト制限はページの設定に存在', async 
 
 
 test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評価順', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   const form = page.locator('#contribution-link');
   await expect(form).toBeVisible();
   await expect(form).toContainText('リンクを投稿する');
@@ -156,7 +156,7 @@ test('投稿CTA・SNSベクターアイコン・動画種別ラベル・高評�
   await expect(page.locator('#submission-external-link')).toHaveAttribute('href','https://forms.gle/hgYcATGs2oHEbf9v9');
   await expect(page.locator('aside a[href="https://x.com/YuruLinkDev"] img')).toHaveAttribute('src',/icons\/social\/x\.svg/);
   // ここからは投稿ページではなくカタログの並び替え・動画メタ情報を検証する。
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   const video = page.locator('li[data-catalog-item][data-kind="video"]').first();
   await expect(video.locator('.catalog-video-format')).toContainText(/動画|ショート|ライブ配信/);
   await page.locator('#sort-order').selectOption('likes-desc');
@@ -174,7 +174,7 @@ test('SNSのブランドアイコンと通知ベクターはローカル静的�
 });
 
 test('高評価順は未取得を0高評価とせず末尾に置く', async ({ page }) => {
-  await gotoAndWaitForCatalog(page,'/');
+  await gotoAndWaitForCatalog(page,'/catalog/');
   await page.setContent(`
     <input id="query"><span id="selected-category"></span><span id="count"></span>
     <select id="sort-order"><option value="newest">新着</option><option value="likes-desc">高評価順</option></select>

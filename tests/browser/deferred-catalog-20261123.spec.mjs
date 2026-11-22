@@ -1,28 +1,79 @@
 import { test, expect } from '@playwright/test';
 
-test('トップ案内が重いカタログ取得前に表示され、可視カードだけを描画', async ({page}) => {
+test('ルートは独立したWelcomeのみ。検索一覧・重いデータを取得せず、唯一の案内CTAで一覧へ', async ({page}) => {
+  let catalogRequests = 0;
+  page.on('request', req => { if (req.url().includes('/catalog-data/')) catalogRequests += 1; });
+  const response = await page.goto('/', { waitUntil: 'load' });
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', {name: 'YuruLinkへようこそ'})).toBeVisible();
+  await expect(page.locator('#query')).toHaveCount(0);
+  await expect(page.locator('#catalog')).toHaveCount(0);
+  await expect(page.locator('#main-content > section a')).toHaveCount(1);
+  await expect(page.locator('#welcome-catalog-link')).toHaveAttribute('href','/catalog/');
+  expect(catalogRequests).toBe(0);
+  await page.locator('#welcome-catalog-link').click();
+  await expect(page).toHaveURL(/\/catalog\/$/);
+  await expect(page.locator('#catalog.catalog-ready')).toBeVisible({timeout:30000});
+  await expect(page.locator('#catalog [data-catalog-item]:visible')).toHaveCount(20);
+});
+
+test('Welcome内部パスはルートと同じ軽量画面・Canonicalはルート', async ({page}) => {
+  const response = await page.goto('/welcome/', { waitUntil: 'load' });
+  expect(response?.status()).toBe(200);
+  await expect(page.getByRole('heading', {name: 'YuruLinkへようこそ'})).toBeVisible();
+  await expect(page.locator('#catalog')).toHaveCount(0);
+  await expect(page.locator('#welcome-catalog-link')).toHaveAttribute('href','/catalog/');
+  await expect(page.locator('link[rel=canonical]')).toHaveAttribute('href', /\/$/);
+  await expect(page.locator('meta[name=robots]')).toHaveAttribute('content',/noindex/);
+});
+
+test('左メニュー分類はWelcomeから/catalog/へ遷移し、ロゴでWelcomeへ戻る', async ({page}) => {
+  await page.setViewportSize({width:390,height:844});
+  await page.goto('/', {waitUntil:'domcontentloaded'});
+  const category = page.locator('#category-buttons a[data-category="browse:web-other"]');
+  await expect(category).toHaveAttribute('href','/catalog/?category=browse%3Aweb-other');
+  await page.locator('#open-categories').click();
+  await page.locator('#category-buttons [data-nav-group="site-social"] > summary').click();
+  await page.locator('#category-buttons [data-nav-group="web-sites"] > summary').click();
+  await category.click();
+  await expect(page).toHaveURL(/\/catalog\/\?category=browse%3Aweb-other/);
+  await expect(page.locator('#selected-category-title')).not.toHaveText('すべてのコンテンツ');
+  await page.locator('header a[data-reset-category]').click();
+  await expect(page).toHaveURL(/\/$/);
+  await expect(page.getByRole('heading',{name:'YuruLinkへようこそ'})).toBeVisible();
+});
+
+test('旧ルート検索URLは/catalog/へ転送して検索条件を維持', async ({page}) => {
+  await page.goto('/?category=browse%3Aweb-other&sort=title-asc', {waitUntil:'domcontentloaded'});
+  await expect(page).toHaveURL(/\/catalog\/\?category=browse%3Aweb-other&sort=title-asc/);
+  await expect(page.locator('#catalog.catalog-ready')).toBeVisible({timeout:30000});
+  await expect(page.locator('#sort-order')).toHaveValue('title-asc');
+});
+
+test('検索画面は独立ページ。遅延カタログ取得まで案内・検索UIを先に表示しDOMは20件のみ', async ({page}) => {
   let allowResponse;
-  const release = new Promise(resolve => {allowResponse=resolve;});
+  const release = new Promise(resolve => { allowResponse = resolve; });
   await page.route('**/catalog-data/', async route => {
     await release;
     await route.continue();
   });
   try {
-    const response = await page.goto('/', {waitUntil:'domcontentloaded'});
+    const response = await page.goto('/catalog/', {waitUntil:'domcontentloaded'});
     expect(response?.status()).toBe(200);
-    await expect(page.getByRole('heading',{name:'YuruLinkへようこそ'})).toBeVisible();
+    await expect(page.locator('#query')).toBeVisible();
     await expect(page.locator('#catalog-loading')).toBeVisible();
-    expect(await page.locator('#catalog [data-catalog-item]').count()).toBe(0);
+    await expect(page.locator('#catalog [data-catalog-item]')).toHaveCount(0);
+    await expect(page.getByRole('heading',{name:'YuruLinkへようこそ'})).toHaveCount(0);
   } finally {
     allowResponse();
   }
   await expect(page.locator('#catalog')).toHaveClass(/catalog-ready/, {timeout:30000});
   await expect(page.locator('#catalog [data-catalog-item]:visible')).toHaveCount(20);
   await expect(page.locator('#catalog-loading')).toBeHidden();
-  const stats=await page.evaluate(()=>({
-    indexCount:window.YuruLinkCatalogItems.length,
-    liveDomCount:document.querySelectorAll('#catalog [data-catalog-item]').length,
-    fcp:performance.getEntriesByType('paint').find(x=>x.name==='first-contentful-paint')?.startTime ?? null
+  const stats = await page.evaluate(() => ({
+    indexCount: window.YuruLinkCatalogItems.length,
+    liveDomCount: document.querySelectorAll('#catalog [data-catalog-item]').length,
+    fcp: performance.getEntriesByType('paint').find(x => x.name === 'first-contentful-paint')?.startTime ?? null
   }));
   console.log('YURULINK_DEFERRED_CATALOG=' + JSON.stringify(stats));
   expect(stats.indexCount).toBeGreaterThan(3000);
