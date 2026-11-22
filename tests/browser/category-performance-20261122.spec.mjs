@@ -102,3 +102,20 @@ test('初期表示のナビ・HTML・paint時間の計測値をCIログへ記録
   expect(metrics.nav_node_count).toBeGreaterThan(0);
   expect(metrics.initially_visible_count).toBe(20);
 });
+
+
+test('SNSその他は非公式・未確認のプロフィールを取りこぼさない', async ({ page }) => {
+  await page.goto('/?category=browse%3Asocial-other');
+  await page.setContent(`
+    <input id="query"><span id="selected-category"></span><span id="count"></span>
+    <div id="category-buttons"></div>
+    <ul id="catalog">
+      <li data-catalog-item data-kind="social_profile" data-platform="x" data-category="community_social_profile" data-classification-verified="true" data-provenance="community" data-title="関係者以外" data-search="関係者以外"></li>
+      <li data-catalog-item data-kind="social_profile" data-platform="x" data-category="social_profile" data-classification-verified="false" data-provenance="unknown" data-title="未確認" data-search="未確認"></li>
+      <li data-catalog-item data-kind="social_profile" data-platform="x" data-category="official_social_profile" data-classification-verified="true" data-provenance="official" data-title="公式" data-search="公式"></li>
+    </ul><nav id="pagination-top"></nav><nav id="pagination"></nav><p id="no-results" hidden></p>
+  `);
+  await page.addScriptTag({url:'/js/site.js'});
+  const titles = await page.locator('[data-catalog-item]:visible').evaluateAll(items => items.map(x => x.dataset.title));
+  expect(titles).toEqual(['関係者以外','未確認']);
+});
