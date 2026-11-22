@@ -1,19 +1,25 @@
-{{/* 全ページ共通のサイドバーツリー。分類は公開カタログ＋taxonomy定義からビルドする。
-     JSによる非ホーム専用の略式メニューは使用しない。 */}}
+{{/* 共通カテゴリ: 初期描画はHugoの静的HTML。大規模カタログでもJSを待たず操作可能。 */}}
 {{ $root := . }}
 {{ $catalog := .Site.Data.public.catalog }}
 {{ $channels := slice }}
 {{ $playlists := slice }}
-{{ $channelNameCounts := dict }}
+{{ $channelIds := dict }}
+{{ $channelNames := dict }}
+{{ $nameCounts := dict }}
 {{ with $catalog }}
   {{ range $index, $p := .programs }}
-    {{ if and (hasPrefix ($p.id | default "") "youtube-channel:") (not (hasPrefix ($p.name | default "") "YouTube channel UC")) (isset $p "order") }}
-      {{ $name := lower $p.name }}
-      {{ $channelNameCounts = merge $channelNameCounts (dict $name (add (index $channelNameCounts $name | default 0) 1)) }}
-      {{ $status := $p.officiality | default ($p.official_status | default "") }}
-      {{ $statusVerified := $p.officiality_verified | default false }}
-      {{ if not (and $statusVerified (in (slice "official" "authorized" "unofficial") $status)) }}{{ $status = "unknown" }}{{ end }}
-      {{ $channels = append (dict "id" $p.id "name" $p.name "status" $status "order" (int ($p.order | default (add $index 1000)))) $channels }}
+    {{ $id := $p.id | default "" }}
+    {{ $name := $p.name | default "" }}
+    {{ if and (hasPrefix $id "youtube-channel:") (not (hasPrefix $name "YouTube channel UC")) (isset $p "order") }}
+      {{/* Book1で指定された配置グループは検証済み公式性とは別。未設定はその他へ。 */}}
+      {{ $group := $p.channel_group | default "other" }}
+      {{ if not (in (slice "official" "related" "other") $group) }}{{ $group = "other" }}{{ end }}
+      {{ $channels = append (dict "id" $id "name" $name "group" $group "order" (int ($p.order | default (add $index 1000)))) $channels }}
+      {{ $rawId := strings.TrimPrefix "youtube-channel:" $id }}
+      {{ $channelIds = merge $channelIds (dict $rawId $id) }}
+      {{ $key := lower (strings.TrimSpace $name) }}
+      {{ $nameCounts = merge $nameCounts (dict $key (add (index $nameCounts $key | default 0) 1)) }}
+      {{ $channelNames = merge $channelNames (dict $key $id) }}
     {{ end }}
   {{ end }}
   {{ range $index, $p := .collections }}
@@ -24,148 +30,96 @@
 {{ end }}
 {{ $channels = sort $channels "order" "asc" }}
 {{ $playlists = sort $playlists "order" "asc" }}
-{{ $playlistParents := dict }}
+{{/* 旧実装の O(チャンネル×プレイリスト) のネスト走査を廃止。
+     所有IDが一意なら優先し、名前一致は同名チャンネルが重複しない場合だけ採用。 */}}
+{{ $playlistsByChannel := dict }}
+{{ $ungrouped := slice }}
 {{ range $playlist := $playlists }}
-  {{ $parent := "" }}
-  {{ range $channel := $channels }}
-    {{ $explicitID := strings.TrimPrefix "youtube-channel:" $channel.id }}
-    {{ if and $playlist.channelId (eq $playlist.channelId $explicitID) }}
-      {{ $parent = $channel.id }}
-    {{ else if and (not $playlist.channelId) $playlist.channelName (eq (lower $playlist.channelName) (lower $channel.name)) (eq (index $channelNameCounts (lower $channel.name)) 1) }}
-      {{ $parent = $channel.id }}
+  {{ $parent := index $channelIds $playlist.channelId | default "" }}
+  {{ if not $parent }}
+    {{ $key := lower (strings.TrimSpace $playlist.channelName) }}
+    {{ if eq (index $nameCounts $key | default 0) 1 }}
+      {{ $parent = index $channelNames $key | default "" }}
     {{ end }}
   {{ end }}
-  {{ if $parent }}{{ $playlistParents = merge $playlistParents (dict $playlist.id $parent) }}{{ end }}
+  {{ if $parent }}
+    {{ $current := index $playlistsByChannel $parent | default (slice) }}
+    {{ $playlistsByChannel = merge $playlistsByChannel (dict $parent (append $playlist $current)) }}
+  {{ else }}
+    {{ $ungrouped = append $playlist $ungrouped }}
+  {{ end }}
 {{ end }}
 
 <div data-server-nav-root>
   {{ partial "site/nav-item.html" (dict "context" $root "label" "すべてのコンテンツ" "category" "") }}
-  {{ if $channels }}
   <details class="mt-2" data-nav-group="youtube-channels" open>
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">YouTubeチャンネル</summary>
-    <div class="ml-3 border-l border-line pl-2">
-      <details class="mt-1" data-nav-group="channel-status">
-        <summary class="cursor-pointer rounded-lg px-3 py-2 text-xs font-semibold hover:bg-panel-muted">公式性から探す</summary>
-        <div class="ml-3 border-l border-line pl-2">
-          {{ range (slice (dict "id" "official" "label" "公式") (dict "id" "authorized" "label" "公認") (dict "id" "unofficial" "label" "非公式") (dict "id" "unknown" "label" "未確認")) }}
-            {{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" (printf "browse:channel-status:%s" .id)) }}
-          {{ end }}
-        </div>
-      </details>
-      {{ range $channel := $channels }}
-        {{ $playlistsForChannel := slice }}
-        {{ range $playlist := $playlists }}
-          {{ if eq (index $playlistParents $playlist.id | default "") $channel.id }}
-            {{ $playlistsForChannel = append $playlist $playlistsForChannel }}
-          {{ end }}
-        {{ end }}
-        <details class="ml-1 mt-2" data-nav-group="channel:{{ $channel.id }}">
-          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $channel.name }} <span class="ml-1 text-xs font-normal text-muted-ink">({{ if eq $channel.status "official" }}公式{{ else if eq $channel.status "authorized" }}公認{{ else if eq $channel.status "unofficial" }}非公式{{ else }}未確認{{ end }})</span></summary>
-          <div class="ml-3 border-l border-line pl-2">
-            {{ partial "site/nav-item.html" (dict "context" $root "label" "このチャンネルのすべて" "category" $channel.id) }}
-            {{ partial "site/nav-item.html" (dict "context" $root "label" "動画" "category" (printf "browse:video:%s" $channel.id)) }}
-            <details class="mt-2" data-nav-group="playlists:{{ $channel.id }}">
-              <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">プレイリスト</summary>
-              <div class="ml-3 border-l border-line pl-2">
-                {{ partial "site/nav-item.html" (dict "context" $root "label" "プレイリスト一覧" "category" (printf "browse:playlists:%s" $channel.id)) }}
-                {{ range $playlist := $playlistsForChannel }}
-                  {{ $label := $playlist.name }}
-                  {{ if $playlist.channelName }}{{ $label = printf "%s[%s]" $label $playlist.channelName }}{{ end }}
-                  {{ partial "site/nav-item.html" (dict "context" $root "label" $label "category" $playlist.id) }}
-                {{ end }}
-              </div>
-            </details>
-            {{ partial "site/nav-item.html" (dict "context" $root "label" "ショート" "category" (printf "browse:short:%s" $channel.id)) }}
-            {{ partial "site/nav-item.html" (dict "context" $root "label" "ライブ" "category" (printf "browse:live:%s" $channel.id)) }}
-          </div>
-        </details>
-      {{ end }}
-    </div>
-  </details>
-  {{ end }}
-  {{ $otherPlaylists := slice }}
-  {{ range $playlist := $playlists }}
-    {{ if not (index $playlistParents $playlist.id) }}
-      {{ $otherPlaylists = append $playlist $otherPlaylists }}
-    {{ end }}
-  {{ end }}
-  {{ if $otherPlaylists }}
-  <details class="mt-2" data-nav-group="other-playlists">
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">その他のプレイリスト</summary>
-    <div class="ml-3 border-l border-line pl-2">
-      {{ range $playlist := $otherPlaylists }}
-        {{ $label := $playlist.name }}
-        {{ if $playlist.channelName }}{{ $label = printf "%s[%s]" $label $playlist.channelName }}{{ end }}
-        {{ partial "site/nav-item.html" (dict "context" $root "label" $label "category" $playlist.id) }}
-      {{ end }}
-    </div>
-  </details>
-  {{ end }}
-  {{/* 動画の出自による分類は自動認定せず、0件でも正規のメニュー構造を維持する。 */}}
-  <details class="mt-2" data-nav-group="video-role">
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">動画の位置づけ</summary>
+    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">YouTube動画</summary>
     <div class="ml-3 border-l border-line pl-2">
       {{ range (slice
-        (dict "id" "browse:video-official" "label" "公式動画（確認済み）")
-        (dict "id" "browse:video-channel" "label" "収集対象チャンネルの投稿")
-        (dict "id" "browse:video-community" "label" "有志制作の動画")
-        (dict "id" "browse:video-open-mic" "label" "オープンマイク動画")
-        (dict "id" "browse:video-guest" "label" "ゲスト出演動画")
-        (dict "id" "browse:video-related" "label" "その他の関連動画（未確認）")
-        (dict "id" "browse:single" "label" "チャンネル・プレイリスト未所属の動画")
+        (dict "id" "official" "label" "公式チャンネル")
+        (dict "id" "related" "label" "コラボ・公認・関連")
+        (dict "id" "other" "label" "その他")
       ) }}
-        {{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" .id) }}
+        {{ $group := . }}
+        <details class="mt-1" data-nav-group="channel-group:{{ $group.id }}">
+          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $group.label }}</summary>
+          <div class="ml-3 border-l border-line pl-2">
+            {{ partial "site/nav-item.html" (dict "context" $root "label" "この分類のすべて" "category" (printf "browse:youtube-group:%s" $group.id)) }}
+            {{ range $channel := $channels }}
+              {{ if eq $channel.group $group.id }}
+                <details class="mt-1" data-nav-group="channel:{{ $channel.id }}">
+                  {{/* チャンネル名に公式性判定ラベルを追加しない。 */}}
+                  <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">{{ $channel.name }}</summary>
+                  <div class="ml-3 border-l border-line pl-2">
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" "このチャンネルのすべて" "category" $channel.id) }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" "動画" "category" (printf "browse:video:%s" $channel.id)) }}
+                    <details class="mt-1" data-nav-group="playlists:{{ $channel.id }}">
+                      <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">プレイリスト</summary>
+                      <div class="ml-3 border-l border-line pl-2">
+                        {{ partial "site/nav-item.html" (dict "context" $root "label" "プレイリスト一覧" "category" (printf "browse:playlists:%s" $channel.id)) }}
+                        {{ range (index $playlistsByChannel $channel.id | default (slice)) }}
+                          {{ partial "site/nav-item.html" (dict "context" $root "label" .name "category" .id) }}
+                        {{ end }}
+                      </div>
+                    </details>
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" "ショート" "category" (printf "browse:short:%s" $channel.id)) }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" "ライブ" "category" (printf "browse:live:%s" $channel.id)) }}
+                  </div>
+                </details>
+              {{ end }}
+            {{ end }}
+            {{ if and (eq $group.id "other") $ungrouped }}
+              <details class="mt-1" data-nav-group="other-playlists">
+                <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">その他のプレイリスト</summary>
+                <div class="ml-3 border-l border-line pl-2">
+                  {{ range $ungrouped }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" .name "category" .id) }}
+                  {{ end }}
+                </div>
+              </details>
+            {{ end }}
+          </div>
+        </details>
       {{ end }}
     </div>
   </details>
   <details class="mt-2" data-nav-group="site-social">
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">サイト・SNS</summary>
+    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">その他サイト・SNS</summary>
     <div class="ml-3 border-l border-line pl-2">
-      {{ range (slice
-        (dict "id" "official" "label" "公式関連" "webId" "browse:web-official" "webLabel" "公式関連サイト" "socialId" "browse:social-official" "socialLabel" "公式SNSアカウント")
-        (dict "id" "community" "label" "有志・非公式" "webId" "browse:web-community" "webLabel" "有志・非公式サイト" "socialId" "browse:social-community" "socialLabel" "有志・非公式SNS")
-        (dict "id" "unknown" "label" "公式性未確認" "webId" "browse:web-other" "webLabel" "公式性未確認サイト" "socialId" "browse:social-other" "socialLabel" "公式性未確認SNS")
-      ) }}
-        <details class="mt-2" data-nav-group="source:{{ .id }}">
-          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ .label }}</summary>
-          <div class="ml-3 border-l border-line pl-2">
-            {{ partial "site/nav-item.html" (dict "context" $root "label" .webLabel "category" .webId) }}
-            {{ partial "site/nav-item.html" (dict "context" $root "label" .socialLabel "category" .socialId) }}
-          </div>
-        </details>
-      {{ end }}
-      <details class="mt-2" data-nav-group="social-content">
-        <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">SNSコンテンツ・note</summary>
+      <details class="mt-1" data-nav-group="web-sites">
+        <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">Webサイト</summary>
         <div class="ml-3 border-l border-line pl-2">
-          {{ range (slice
-            (dict "id" "browse:social-profiles" "label" "SNSプロフィール")
-            (dict "id" "browse:social-posts" "label" "SNSの投稿・リール")
-            (dict "id" "browse:note-articles" "label" "noteの記事")
-            (dict "id" "browse:note-series" "label" "noteのシリーズ")
-          ) }}
-            {{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" .id) }}
-          {{ end }}
+          {{ partial "site/nav-item.html" (dict "context" $root "label" "公式・公認" "category" "browse:web-official") }}
+          {{ partial "site/nav-item.html" (dict "context" $root "label" "非公式" "category" "browse:web-community") }}
+        </div>
+      </details>
+      <details class="mt-1" data-nav-group="social">
+        <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">SNS</summary>
+        <div class="ml-3 border-l border-line pl-2">
+          {{ partial "site/nav-item.html" (dict "context" $root "label" "公式/関係者" "category" "browse:social-official") }}
+          {{ partial "site/nav-item.html" (dict "context" $root "label" "その他" "category" "browse:social-other") }}
         </div>
       </details>
     </div>
   </details>
-  {{/* その他の分類は共通taxonomyの非YouTube・非SNS葉から生成する。 */}}
-  {{ $otherCategories := slice }}
-  {{ with $root.Site.Data.taxonomy }}
-    {{ range .categories }}
-      {{ if or (eq .id "reading") (eq .id "event") (eq .id "audio") }}
-        {{ range .children }}
-          {{ $otherCategories = append (dict "id" .id "label" .label) $otherCategories }}
-        {{ end }}
-      {{ end }}
-    {{ end }}
-  {{ end }}
-  {{ if $otherCategories }}
-  <details class="mt-2" data-nav-group="other-categories">
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">その他のカテゴリー</summary>
-    <div class="ml-3 border-l border-line pl-2">
-      {{ range $otherCategories }}{{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" .id) }}{{ end }}
-    </div>
-  </details>
-  {{ end }}
 </div>
