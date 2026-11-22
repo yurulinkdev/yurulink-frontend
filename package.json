@@ -2,7 +2,7 @@
   "name": "yurulink-frontend",
   "private": true,
   "scripts": {
-    "css:build": "tailwindcss -i ./assets/css/input.css -o ./static/css/site.css --minify",
+    "css:build": "node scripts/prepare-site-build.mjs && tailwindcss -i ./assets/css/input.css -o ./static/css/site.css --minify",
     "css:watch": "tailwindcss -i ./assets/css/input.css -o ./static/css/site.css --watch",
     "build": "npm run css:build && hugo --minify"
   },
