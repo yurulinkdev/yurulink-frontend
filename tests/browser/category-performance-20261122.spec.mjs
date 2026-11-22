@@ -69,3 +69,27 @@ test('Book1のチャンネル配置カテゴリは公式性の確定フラグに
       .toEqual(titles);
   }
 });
+
+
+test('初期表示のナビ・HTML・paint時間の計測値をCIログへ記録する', async ({ page }) => {
+  await page.goto('/', { waitUntil: 'load' });
+  await expect(page.locator('#catalog')).toHaveClass(/catalog-ready/);
+  const metrics = await page.evaluate(() => {
+    const nav = performance.getEntriesByType('navigation')[0];
+    const paint = performance.getEntriesByType('paint');
+    const fcp = paint.find(item => item.name === 'first-contentful-paint');
+    return {
+      nav_responseEnd_ms: Number((nav?.responseEnd || 0).toFixed(1)),
+      dom_content_loaded_ms: Number((nav?.domContentLoadedEventEnd || 0).toFixed(1)),
+      load_event_end_ms: Number((nav?.loadEventEnd || 0).toFixed(1)),
+      first_contentful_paint_ms: fcp ? Number(fcp.startTime.toFixed(1)) : null,
+      catalog_item_dom_count: document.querySelectorAll('#catalog [data-catalog-item]').length,
+      nav_node_count: document.querySelectorAll('#category-buttons *').length,
+      initially_visible_count: document.querySelectorAll('#catalog [data-catalog-item]:not([hidden])').length,
+    };
+  });
+  console.log('YURULINK_STAGING_PERF_BASELINE=' + JSON.stringify(metrics));
+  expect(metrics.catalog_item_dom_count).toBeGreaterThan(3000);
+  expect(metrics.nav_node_count).toBeGreaterThan(0);
+  expect(metrics.initially_visible_count).toBe(20);
+});
