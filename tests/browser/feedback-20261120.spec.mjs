@@ -129,7 +129,7 @@ test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', 
   const about = page.locator('#category-buttons a[data-category="browse:web-community"]');
   await expect(about).toHaveAttribute('aria-current','true');
   await about.click();
-  await expect(page).toHaveURL(/category=browse%3Aweb-other/);
+  await expect(page).toHaveURL(/category=browse%3Aweb-community/);
   // 3,600件以上のDOMを持つCIではHugoナビの復元完了まで10秒を超えることがある。
   // 一時的な属性チェックではなく、実カテゴリと保存値の双方の復元を待つ。
   await expect.poll(() => page.evaluate(() => localStorage.getItem('yurulink-selected-category-v1')), {timeout:30000})
