@@ -25,7 +25,7 @@
   {{ else }}
     <p class="rounded-xl border border-line bg-panel p-4 text-muted-ink">このページ内でのフォーム表示は現在利用できません。</p>
   {{ end }}
-  {{ if $externalOK }}
+  {{ if and ($submission.enabled | default false) $externalOK }}
     <p class="mt-4">
       <a id="submission-external-link" href="{{ $externalURL.String | safeURL }}" target="_blank" rel="noopener noreferrer"
         class="inline-flex min-h-11 items-center rounded-lg border border-accent px-4 py-2 font-semibold text-accent hover:bg-panel-muted">

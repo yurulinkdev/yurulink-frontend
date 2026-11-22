@@ -632,7 +632,12 @@ test('branding: approved logo, favicon and OGP candidate are served from staging
   await expect(svgIcon).toHaveAttribute('href', /yurulink-symbol-master\.svg/);
   await expect(page.locator('head link[rel="apple-touch-icon"]')).toHaveAttribute('href', /apple-touch-icon\.png/);
   const og=page.locator('head meta[property="og:image"]');
-  await expect(og).toHaveAttribute('content', /\/ogp\/yurulink-light\.png$/);
+  const host = new URL(page.url()).hostname;
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(host);
+  const local = ['127.0.0.1','localhost'].includes(host);
+  await expect(og).toHaveAttribute('content', production || local
+    ? /\/ogp\/yurulink-light\.png$/
+    : /\/ogp\/yurulink-staging\.png$/);
   await expect(page.locator('head meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
   const source = await request.get('/brand/yurulink-symbol-master.svg');
   const svg = await source.text();
