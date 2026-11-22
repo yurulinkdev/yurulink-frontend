@@ -20,6 +20,15 @@ body { background: var(--page); color: var(--text); }
 :focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
 /* 本文行間は組版トークンで一括管理。 */
 /* 一覧は同じカードDOMを共有し、grid/listでレイアウトだけ切替える。 */
+/* 初期ページの巨大DOMから画面外カードのレイアウト／描画を後回しにする。
+   JSの絞り込みで非表示になる要素は[hidden]を優先し、可視分のみ描画する。 */
+#catalog > [data-catalog-item] {
+  content-visibility: auto;
+  contain-intrinsic-size: auto 320px;
+}
+#catalog.catalog-list-view > [data-catalog-item] {
+  contain-intrinsic-size: auto 100px;
+}
 .catalog-card { display: flex; flex-direction: column; min-width: 0; }
 .catalog-card .catalog-media {
   display: flex;
