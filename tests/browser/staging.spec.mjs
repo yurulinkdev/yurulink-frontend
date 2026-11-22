@@ -506,12 +506,17 @@ test('real metadata: 5分未満を含むショートとライブの表示分類'
   await expect(page.locator('#category-drawer')).not.toContainText('公開承認されたリンクのみを掲載します');
 });
 
-test('channel playlist heading opens the link directory', async ({ page }) => {
+test('channel playlist directory link opens the playlist listing', async ({ page }) => {
   await openCatalog(page);
-  const channel = page.locator('#category-buttons details[data-nav-group^="channel:"] > summary').first();
-  await channel.click();
-  const summary = page.locator('#category-buttons details details details > summary', {hasText:'プレイリスト'}).first();
-  await summary.click();
+  const nav = page.locator('#category-buttons');
+  const channel = nav.locator('details[data-nav-group^="channel:"]').first();
+  const group = channel.locator('xpath=ancestor::details[starts-with(@data-nav-group,"channel-group:")]').first();
+  await group.locator(':scope > summary').click();
+  await channel.locator(':scope > summary').click();
+  const playlists = channel.locator('details[data-nav-group^="playlists:"]');
+  await playlists.locator(':scope > summary').click();
+  // 新しいHugoナビでは親見出しは開閉のみ、実際の絞り込みはリスト入口。
+  await playlists.locator('button[data-category^="browse:playlists:"]').click();
   await expect(page).toHaveURL(/category=browse%3Aplaylists%3A/);
   const cards = page.locator('[data-playlist-card]:visible');
   expect(await cards.count()).toBeGreaterThan(0);
@@ -555,7 +560,10 @@ test('sidebar keeps program categories without global type duplicates or virtual
   await expect(sidebar.locator('button[data-category="social_profile"]')).toHaveCount(0);
   await expect(sidebar.locator('button[data-category="video"]')).toHaveCount(0);
   await expect(sidebar.locator('summary', {hasText:'サイト・SNS'})).toHaveCount(1);
-  await expect(sidebar.locator('summary', {hasText:'公式性未確認'})).toHaveCount(1);
+  await expect(sidebar.locator('summary', {hasText:'Webサイト'})).toHaveCount(1);
+  await expect(sidebar.locator('button[data-category="browse:web-official"]')).toHaveCount(1);
+  await expect(sidebar.locator('button[data-category="browse:web-community"]')).toHaveCount(1);
+  await expect(sidebar.locator('summary', {hasText:'公式性未確認'})).toHaveCount(0);
 
   // 旧URLの直リンクはメニュー項目を削除しても動作させる。
   await page.goto('/?category=browse%3Alive');
@@ -575,9 +583,11 @@ test('site/SNS provenance is reviewer-verified: test imports stay in unverified 
   expect(community).toBeGreaterThan(0);
   const notReviewed=await page.locator('[data-catalog-item][data-kind="website"][data-provenance="community"][data-classification-verified="false"]').count();
   expect(notReviewed).toBe(community);
+  // 旧URLは引き続き解釈するが、メニューは最新の公式・公認/非公式2択のみ。
   await page.goto('/?category=browse%3Aweb-other');
   expect(await page.locator('[data-catalog-item]:visible').count()).toBeGreaterThan(0);
-  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]')).toHaveCount(1);
+  await expect(page.locator('#category-buttons button[data-category="browse:web-other"]')).toHaveCount(0);
+  await expect(page.locator('#category-buttons button[data-category="browse:web-community"]')).toHaveCount(1);
 });
 
 test('video cards show the actual related program and preserve channel/playlist identity', async ({page}) => {
