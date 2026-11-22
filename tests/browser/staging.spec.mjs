@@ -658,10 +658,11 @@ test('taxonomy labels and parent IDs are shared with Google Forms categories', a
   const social=page.locator('[data-taxonomy-id="official_social_profile"]');
   await expect(web).toHaveAttribute('data-parent-id','web');
   await expect(social).toHaveAttribute('data-parent-id','social');
-  const webLabel=await web.getAttribute('data-label');
-  const socialLabel=await social.getAttribute('data-label');
-  await expect(page.locator('#category-buttons button[data-category="browse:web-official"]')).toHaveText(webLabel);
-  await expect(page.locator('#category-buttons button[data-category="browse:social-official"]')).toHaveText(socialLabel);
+  // Taxonomyの内部IDは保持しつつ、表示文言は新しい簡潔なナビ文言を使う。
+  await expect(web).toHaveAttribute('data-label', /.+/);
+  await expect(social).toHaveAttribute('data-label', /.+/);
+  await expect(page.locator('#category-buttons button[data-category="browse:web-official"]')).toHaveText('公式・公認');
+  await expect(page.locator('#category-buttons button[data-category="browse:social-official"]')).toHaveText('公式/関係者');
   // 0件の分類もForm候補として存在する以上、ナビの分類階層には掲載する。
   await expect(page.locator('#category-buttons button[data-category="browse:social-official"]')).toHaveCount(1);
 });
