@@ -43,11 +43,24 @@ test('左メニュー分類はWelcomeから/catalog/へ遷移し、ロゴでWelc
   await expect(page.getByRole('heading',{name:'YuruLinkへようこそ'})).toBeVisible();
 });
 
-test('旧ルート検索URLは/catalog/へ転送して検索条件を維持', async ({page}) => {
-  await page.goto('/?category=browse%3Aweb-other&sort=title-asc', {waitUntil:'domcontentloaded'});
-  await expect(page).toHaveURL(/\/catalog\/\?category=browse%3Aweb-other&sort=title-asc/);
-  await expect(page.locator('#catalog.catalog-ready')).toBeVisible({timeout:30000});
-  await expect(page.locator('#sort-order')).toHaveValue('title-asc');
+test('クエリ付きルートもWelcomeのまま。遅延転送・検索HTMLの取得を禁止', async ({page}) => {
+  const requests = [];
+  page.on('request', request => {
+    if (/\/catalog-data\//.test(request.url())) requests.push(request.url());
+  });
+  const url = '/?category=browse%3Aweb-community&sort=likes-asc';
+  const response = await page.goto(url, {waitUntil:'load'});
+  expect(response?.status()).toBe(200);
+  await expect(page).toHaveURL(/\/\?category=browse%3Aweb-community&sort=likes-asc$/);
+  await expect(page.getByRole('heading',{name:'YuruLinkへようこそ'})).toBeVisible();
+  await expect(page.locator('#catalog')).toHaveCount(0);
+  await expect(page.locator('#query')).toHaveCount(0);
+  await expect(page.locator('script[src*="site.js"]')).toHaveCount(0);
+  await expect(page.locator('script[src*="legacy-catalog-redirect.js"]')).toHaveCount(0);
+  await page.waitForTimeout(1600);
+  await expect(page).toHaveURL(/\/\?category=browse%3Aweb-community&sort=likes-asc$/);
+  expect(requests).toEqual([]);
+  expect(await page.evaluate(() => typeof window.YuruLinkCatalogItems)).toBe('undefined');
 });
 
 test('検索画面は独立ページ。遅延カタログ取得まで案内・検索UIを先に表示しDOMは20件のみ', async ({page}) => {

@@ -36,6 +36,10 @@ grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/welcome
 ! grep -q 'id="query"' public/index.html
 ! grep -q 'id="catalog"' public/index.html
 ! grep -q 'catalog-data/' public/index.html
+# Root must remain Welcome even for old query-based catalog bookmarks.
+! grep -q 'legacy-catalog-redirect' public/index.html
+! grep -q 'js/site.js' public/index.html
+test ! -e static/js/legacy-catalog-redirect.js
 grep -Eq 'href=("/catalog/"|/catalog/)([ >])' public/index.html
 ! grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/catalog/index.html
 # 投稿ページはGoogle側フォームのみ埋め込み、管理用フォームURLは含めない。

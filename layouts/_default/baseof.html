@@ -15,7 +15,6 @@
     <script src="{{ "js/ga4-consent.js" | relURL }}" defer></script>
   {{ end }}
   {{ if eq .Section "catalog" }}<script src="{{ "js/site.js" | relURL }}" defer></script>{{ end }}
-  {{ if .IsHome }}<script src="{{ "js/legacy-catalog-redirect.js" | relURL }}" defer></script>{{ end }}
 </head>
 <body class="min-h-screen bg-page text-ink">
   <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-panel focus:p-3">本文へ移動</a>
