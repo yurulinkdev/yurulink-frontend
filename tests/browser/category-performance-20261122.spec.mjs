@@ -21,6 +21,15 @@ test('共通カテゴリは「すべて」＋トップレベル2分類で、名�
   }
 });
 
+test('分類選択後の画面タイトルもtaxonomyナビと同じ表記にする', async ({ page }) => {
+  await page.goto('/?category=browse%3Aweb-official');
+  await expect(page.locator('#selected-category-title')).toHaveText('公式・公認');
+  await page.goto('/?category=browse%3Asocial-other');
+  await expect(page.locator('#selected-category-title')).toHaveText('その他');
+  await page.goto('/?category=browse%3Ayoutube-group%3Arelated');
+  await expect(page.locator('#selected-category-title')).toHaveText('コラボ・公認・関連');
+});
+
 test('初期データ件数が大きくてもDOM整形は画面表示分に限定される', async ({ page }) => {
   await page.goto('/');
   const total = await page.locator('#catalog [data-catalog-item]').count();
