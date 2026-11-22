@@ -33,3 +33,5 @@ jobs:
         run: npm install --no-audit --no-fund
       - name: Build and smoke test
         run: bash scripts/smoke-test.sh
+      - name: Verify Cloudflare Preview and Production builds
+        run: node scripts/verify-site-environments.mjs
