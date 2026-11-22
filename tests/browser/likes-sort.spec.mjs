@@ -40,3 +40,38 @@ test('likes sorting uses populated video counts and sends unknowns to the end', 
   await expect(page).toHaveURL(/sort=likes-asc/);
   expect(errors).toEqual([]);
 });
+
+
+test('real published likes sort on /catalog/ uses every loaded video and preserves zero', async ({page}) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  await page.goto('/catalog/?category=');
+  await page.locator('#catalog.catalog-ready').waitFor({state:'attached',timeout:30000});
+  const snapshot = await page.evaluate(() => {
+    const records = window.YuruLinkCatalogItems || [];
+    const likes = records.filter(node =>
+      node.dataset.kind === 'video' && node.dataset.platform === 'youtube' &&
+      /^\\d+$/.test(node.dataset.likeCount || ''))
+      .map(node => Number(node.dataset.likeCount))
+      .filter(n => Number.isSafeInteger(n));
+    return {total:records.length, matched:likes.length, max:Math.max(...likes)};
+  });
+  expect(snapshot.total).toBeGreaterThan(4000);
+  expect(snapshot.matched).toBeGreaterThan(4000);
+
+  await page.locator('#sort-order').selectOption('likes-desc');
+  await expect(page.locator('#catalog [data-catalog-item]')).toHaveCount(20);
+  const desc = await page.locator('#catalog [data-catalog-item]').evaluateAll(nodes =>
+    nodes.map(node => Number(node.dataset.likeCount)));
+  expect(desc[0]).toBe(snapshot.max);
+  expect(desc).toEqual([...desc].sort((a,b)=>b-a));
+  await expect(page).toHaveURL(/sort=likes-desc/);
+
+  await page.locator('#sort-order').selectOption('likes-asc');
+  await expect(page.locator('#catalog [data-catalog-item]')).toHaveCount(20);
+  const asc = await page.locator('#catalog [data-catalog-item]').evaluateAll(nodes =>
+    nodes.map(node => Number(node.dataset.likeCount)));
+  expect(asc).toEqual([...asc].sort((a,b)=>a-b));
+  await expect(page).toHaveURL(/sort=likes-asc/);
+  expect(errors).toEqual([]);
+});
