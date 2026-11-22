@@ -43,8 +43,13 @@ test ! -e static/js/legacy-catalog-redirect.js
 grep -Eq 'href=("/catalog/"|/catalog/)([ >])' public/index.html
 ! grep -Eq 'id=("welcome-catalog-link"|welcome-catalog-link)([ >])' public/catalog/index.html
 # 投稿ページはGoogle側フォームのみ埋め込み、管理用フォームURLは含めない。
-grep -q 'submission-form-frame' public/submit/index.html
-grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
+if [[ "${CF_PAGES_BRANCH:-${GITHUB_REF_NAME:-staging}}" == "main" ]]; then
+  ! grep -q 'submission-form-frame' public/submit/index.html
+  ! grep -q 'submission-external-link' public/submit/index.html
+else
+  grep -q 'submission-form-frame' public/submit/index.html
+  grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
+fi
 ! grep -q 'forms/d/1W7ZMlY4pcQk1zWOL3s47StzndF5OxZG-PzRFS63-mSU/edit' public/submit/index.html
 # ドロワーのキーボード操作と非表示時のフォーカス抑止を静的検査
 grep -q "event.key === 'Escape'" static/js/theme-control.js
