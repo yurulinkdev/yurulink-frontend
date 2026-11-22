@@ -3,7 +3,7 @@
 更新：2026-11-21。対象ブランチ：`staging`。本ドキュメントは**Staging用**で、`main`／Production、DNS、Backend Green/Blue の切替を行わない。
 
 ## 目的と責務
-- `staging` を常用の開発経路として維持し、ChatGPTのGitHub連携から**特定JSONのPushだけ**で検証処理を起動する。
+- `staging` を常用の開発経路として維持し、GitHub APIに接続したクライアントから**特定JSONのPushだけ**で検証処理を起動する。
 - Backend `develop`の `backend-validation-request.yml` と同じ **Push→JSON許可リスト検証→同じWorkflow内のJobで実行** を採用。
 - 既存の自動Smoke／Cloudflare Preview SHA検証／Playwright Browser検証はコードPushとPRに対して維持。手動`workflow_dispatch`も削除しない。
 - 起動用Workflowが別のWorkflowを`gh workflow run`などでDispatchする方式は採用しない。
@@ -41,9 +41,9 @@
 | `browser_staging_readonly` | 指定SHAのPreview URLを取得し、そのSHAのPlaywrightテストをChromiumで実行 | Artifactsのみ |
 | `full_staging_readonly` | Smoke→Preview確認→Browserの順で検証 | Artifactsのみ |
 
-`target_sha`は、ChatGPTが対象ブランチの現行SHAを実際に読み取って記入する。リクエストJSONのPushでブランチのHEADが変わっても、**対象の検証コードとCloudflareデプロイSHAがずれない**ようにする。
+`target_sha`には、対象ブランチの現行SHAをGitHub APIで取得して記入する。リクエストJSONのPushでブランチのHEADが変わっても、**対象の検証コードとCloudflareデプロイSHAがずれない**ようにする。
 
-## チャットからの作業手順
+## リクエストJSONによる検証手順
 1. 必ずGitHubで`staging`の現在SHA・Workflow・JSONを読み直す。
 2. `target_sha`に検証したいコードCommitの40文字SHAを設定し、`action`を4つの列挙から選ぶ。
 3. `request_id`を変更し、`staging`上のJSONだけCommit／Pushする。不要なWorkflow変更や任意Shellコマンドの埋め込みをしない。
@@ -78,6 +78,3 @@
 - SecretはCloudflareを読むStepだけに渡す。GitHub Tokenは`contents: read`。
 - 高権限なProxmox Self-hosted Runnerを、PublicなFrontendリポジトリの検証Workflowへ直接接続しない。内部操作はPrivateな運用Repoに独立した許可リスト・承認ゲートを設ける。
 - `workflow_dispatch`の旧Workflowは、手動／調査用途として残す。別Workflowへの直接起動が復活したと誤認しない。
-
-## Skill
-共通知識はYuruLink Automation Labの `.agents/skills/github-actions-chatops/SKILL.md` に記録。具体的なFront/Backの実装状況は各ブランチの実ファイルで再確認すること。

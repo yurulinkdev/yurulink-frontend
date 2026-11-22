@@ -45,4 +45,4 @@ YouTube動画
 - `scripts/smoke-test.sh`：Hugo、非カタログ、404、主要ページを検証。
 - `tests/browser/category-performance-20261122.spec.mjs`：ナビの2大分類、ラベル、可視カードのみの書換え、Book1グループによるフィルタ。
 - `tests/browser/staging.spec.mjs`、`feedback-20261120.spec.mjs`、`feedback-20261121.spec.mjs`、`frontend-ux-regression.spec.mjs`：過去の機能の退行防止。
-- 同一SHAのFrontend Smoke、Cloudflare Preview SHA、Playwright Chromiumを全て成功確認し、結果をDrive正本/WBSへ反映する。ブラウザのビジュアル確認・モバイル実機確認をCI合格と取り違えない。
+- 同一SHAのFrontend Smoke、Cloudflare Preview SHA、Playwright Chromiumを全て成功確認し、結果を検証記録に残す。ブラウザのビジュアル確認・モバイル実機確認をCI合格と取り違えない。
