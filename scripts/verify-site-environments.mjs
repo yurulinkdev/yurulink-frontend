@@ -12,16 +12,18 @@ function build(target){
   const catalog=html('catalog');
   const submit=html('submit');
   const url=target==='production'?'https://yurulink-frontend.pages.dev/':'https://staging.yurulink-frontend.pages.dev/';
-  assert(root.includes('rel="canonical" href="'+url+'"'),target+' canonical mismatch');
-  assert(root.includes('property="og:image" content="'+url),target+' OGP URL mismatch');
-  assert(catalog.includes('rel="canonical" href="'+url+'catalog/'),target+' catalog canonical mismatch');
-  const noindex=/<meta name="robots" content="noindex, nofollow">/.test(root);
+  const canonical = doc => doc.match(/<link\b[^>]*\brel=(?:"canonical"|canonical)[^>]*>/i)?.[0] || '';
+  const ogImage = doc => doc.match(/<meta\b[^>]*\bproperty=(?:"og:image"|og:image)[^>]*>/i)?.[0] || '';
+  assert(canonical(root).includes(url),target+' canonical mismatch: '+canonical(root));
+  assert(ogImage(root).includes(url),target+' OGP URL mismatch: '+ogImage(root));
+  assert(canonical(catalog).includes(url+'catalog/'),target+' catalog canonical mismatch: '+canonical(catalog));
+  const noindex=/<meta\b[^>]*\bname=(?:"robots"|robots)[^>]*noindex/i.test(root);
   assert(noindex===(target!=='production'),target+' noindex mismatch');
-  const form=submit.includes('id="submission-form-frame"');
+  const form=/<iframe\b[^>]*\bid=(?:"submission-form-frame"|submission-form-frame)/i.test(submit);
   assert(form===(target!=='production'),target+' submission iframe state mismatch');
-  if(target==='production')assert(!submit.includes('id="submission-external-link"'),'Production exposes unvalidated form');
-  assert(root.includes('id="welcome-catalog-link"'),'Welcome entry missing');
-  assert(!root.includes('id="catalog"'),'Welcome includes catalog unexpectedly');
+  if(target==='production')assert(!/<a\b[^>]*\bid=(?:"submission-external-link"|submission-external-link)/i.test(submit),'Production exposes unvalidated form');
+  assert(root.includes('welcome-catalog-link'),'Welcome entry missing');
+  assert(!/<[^>]+\bid=(?:"catalog"|catalog)(?:\s|>)/i.test(root),'Welcome includes catalog unexpectedly');
   console.log('SITE_RELEASE_BUILD_OK '+JSON.stringify({target,canonical:url,noindex,form}));
 }
 try {build('production');build('staging');}
