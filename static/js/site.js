@@ -5,9 +5,10 @@
   // First paint only contains the small landing shell. Fetch the full, generated
   // catalog as an inert template so thousands of cards never join the live DOM.
   // This preserves the original Hugo markup and all classification semantics.
-  let cardTemplate;
-  let items;
-  try {
+  const cardTemplate = document.createElement('template');
+  // Older Playwright fixtures still supply an inline, tiny catalog.
+  let items = [...catalog.querySelectorAll('[data-catalog-item]')];
+  if (!items.length) try {
     const response = await fetch('/catalog-data/', {credentials:'same-origin'});
     if (!response.ok) throw new Error('Catalog HTTP ' + response.status);
     const html = await response.text();
@@ -16,7 +17,6 @@
     const start = opening.index + opening[0].length;
     const end = html.indexOf('</ul>', start);
     if (end < start) throw new Error('Catalog closing tag not found');
-    cardTemplate = document.createElement('template');
     cardTemplate.innerHTML = html.slice(start, end);
     items = [...cardTemplate.content.querySelectorAll('[data-catalog-item]')];
     if (!items.length) throw new Error('Catalog is empty');
@@ -25,6 +25,9 @@
     if (loading) loading.firstChild.textContent = 'リンク一覧を読み込めませんでした。通信状態を確認して再読み込みするか、';
     return;
   }
+  // Diagnostics and E2E assertions inspect the complete detached public catalog.
+  // The live document still holds only the current page's cards.
+  window.YuruLinkCatalogItems = items;
   const search = document.getElementById('query');
   const selected = document.getElementById('selected-category');
   const count = document.getElementById('count');

@@ -38,6 +38,13 @@ grep -q 'forms.gle/hgYcATGs2oHEbf9v9' public/submit/index.html
 grep -q "event.key === 'Escape'" static/js/theme-control.js
 grep -q "event.key !== 'Tab'" static/js/theme-control.js
 grep -q 'drawer.inert' static/js/theme-control.js
+node --check static/js/site.js
+# First paint must never serialize thousands of cards into index.html.
+test -s public/catalog-data/index.html
+grep -q 'id="catalog-loading"' public/index.html || grep -q 'id=catalog-loading' public/index.html
+test "$( (grep -o 'data-catalog-item' public/index.html || true) | wc -l)" -eq 0
+test "$(grep -o 'data-catalog-item' public/catalog-data/index.html | wc -l)" -gt 100
+grep -q 'YuruLinkへようこそ' public/index.html
 echo "::endgroup::"
 
 echo "::group::Markdown single-page smoke"
@@ -89,10 +96,4 @@ test ! -e .github/workflows/compare-staging.yml
 ! grep -Fq 'yurulink-frontend-staging' .github/workflows/cloudflare-inventory-request.yml
 echo "::endgroup::"
 
-# First paint must never serialize thousands of cards into index.html.
-test -s public/catalog-data/index.html
-grep -q 'id="catalog-loading"' public/index.html || grep -q 'id=catalog-loading' public/index.html
-test "$( (grep -o 'data-catalog-item' public/index.html || true) | wc -l)" -eq 0
-test "$(grep -o 'data-catalog-item' public/catalog-data/index.html | wc -l)" -gt 100
-grep -q 'YuruLinkへようこそ' public/index.html
 echo "Smoke test passed."
