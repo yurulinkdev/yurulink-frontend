@@ -252,6 +252,9 @@
   for (const node of buttons?.querySelectorAll('[data-category]') || []) {
     const id = node.dataset.category || '';
     const label = node.textContent.trim();
+    // Book1のグループ見出しに付随する汎用ボタン「この分類のすべて」は
+    // 選択ページの見出しではなく、親groupの確定カテゴリ名を優先する。
+    if (id.startsWith('browse:youtube-group:')) continue;
     if (id.startsWith('browse:') && label) virtualLabels.set(id, label);
   }
   // 手動確認済みIDとBook1収集対象の区別を保つ。登録チャンネル＝公式とは断定しない。
