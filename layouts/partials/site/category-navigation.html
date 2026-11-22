@@ -1,6 +1,7 @@
 {{/* 共通カテゴリ: 初期描画はHugoの静的HTML。大規模カタログでもJSを待たず操作可能。 */}}
 {{ $root := . }}
 {{ $catalog := .Site.Data.public.catalog }}
+{{ $nav := .Site.Data.taxonomy.navigation }}
 {{ $channels := slice }}
 {{ $playlists := slice }}
 {{ $channelIds := dict }}
@@ -53,13 +54,9 @@
 <div data-server-nav-root>
   {{ partial "site/nav-item.html" (dict "context" $root "label" "すべてのコンテンツ" "category" "") }}
   <details class="mt-2" data-nav-group="youtube-channels" open>
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">YouTube動画</summary>
+    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $nav.youtube.label }}</summary>
     <div class="ml-3 border-l border-line pl-2">
-      {{ range (slice
-        (dict "id" "official" "label" "公式チャンネル")
-        (dict "id" "related" "label" "コラボ・公認・関連")
-        (dict "id" "other" "label" "その他")
-      ) }}
+      {{ range $nav.youtube.groups }}
         {{ $group := . }}
         <details class="mt-1" data-nav-group="channel-group:{{ $group.id }}">
           <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $group.label }}</summary>
@@ -104,22 +101,18 @@
     </div>
   </details>
   <details class="mt-2" data-nav-group="site-social">
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">その他サイト・SNS</summary>
+    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $nav.other.label }}</summary>
     <div class="ml-3 border-l border-line pl-2">
-      <details class="mt-1" data-nav-group="web-sites">
-        <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">Webサイト</summary>
-        <div class="ml-3 border-l border-line pl-2">
-          {{ partial "site/nav-item.html" (dict "context" $root "label" "公式・公認" "category" "browse:web-official") }}
-          {{ partial "site/nav-item.html" (dict "context" $root "label" "非公式" "category" "browse:web-community") }}
-        </div>
-      </details>
-      <details class="mt-1" data-nav-group="social">
-        <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">SNS</summary>
-        <div class="ml-3 border-l border-line pl-2">
-          {{ partial "site/nav-item.html" (dict "context" $root "label" "公式/関係者" "category" "browse:social-official") }}
-          {{ partial "site/nav-item.html" (dict "context" $root "label" "その他" "category" "browse:social-other") }}
-        </div>
-      </details>
+      {{ range $section := $nav.other.groups }}
+        <details class="mt-1" data-nav-group="{{ $section.id }}{{ if eq $section.id "web" }}-sites{{ end }}">
+          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $section.label }}</summary>
+          <div class="ml-3 border-l border-line pl-2">
+            {{ range $section.children }}
+              {{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" .id) }}
+            {{ end }}
+          </div>
+        </details>
+      {{ end }}
     </div>
   </details>
 </div>
