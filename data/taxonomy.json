@@ -268,5 +268,45 @@
       "related": "コラボ・関係者・公認",
       "other": "その他"
     }
+  },
+  "submission_category": {
+    "mode": "two-dropdown",
+    "parent": {
+      "title": "親カテゴリ",
+      "required": true,
+      "options": [
+        {
+          "id": "youtube",
+          "label": "YouTube動画"
+        },
+        {
+          "id": "web",
+          "label": "Webサイト"
+        },
+        {
+          "id": "social",
+          "label": "SNS"
+        }
+      ]
+    },
+    "child": {
+      "title": "子カテゴリ",
+      "required": true,
+      "options": [
+        {
+          "id": "official",
+          "label": "公式"
+        },
+        {
+          "id": "related",
+          "label": "関連"
+        },
+        {
+          "id": "unofficial",
+          "label": "非公式"
+        }
+      ]
+    },
+    "review_rule": "suggestion_only_not_verified_officiality"
   }
 }
