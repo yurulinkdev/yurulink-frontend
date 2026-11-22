@@ -96,7 +96,12 @@ test('検索画面は独立ページ。遅延カタログ取得まで案内・�
 // 初回訪問ガイドはiPhoneの画面最下部に固定せず、メニューボタンの直下へ。
 test('モバイル初回ガイドは左上メニュー直下に配置・クリックで閉じる', async ({page}) => {
   await page.setViewportSize({width:390,height:844});
-  await page.addInitScript(() => localStorage.removeItem('yurulink-first-visit-hint-v1'));
+  await page.addInitScript(() => {
+    // This init script also runs on reload; clear only the first navigation.
+    if (sessionStorage.getItem('e2e-onboarding-first-navigation')) return;
+    localStorage.removeItem('yurulink-first-visit-hint-v1');
+    sessionStorage.setItem('e2e-onboarding-first-navigation', '1');
+  });
   await page.goto('/help/', {waitUntil:'load'});
   const hint = page.locator('#onboarding-hint');
   await expect(hint).toBeVisible();
