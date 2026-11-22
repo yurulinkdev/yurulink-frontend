@@ -55,7 +55,23 @@ test('actual generated catalog exposes like counts and sorts correctly', async (
     return {count: likes.length, max: Math.max(...likes)};
   });
   expect(summary.count).toBeGreaterThan(0);
+  const inspect = async label => {
+    const details = await page.evaluate(() => ({
+      count: document.querySelector('#count')?.textContent,
+      live: document.querySelectorAll('#catalog [data-catalog-item]').length,
+      all: window.YuruLinkCatalogItems?.length,
+      query: document.querySelector('#query')?.value,
+      category: window.YuruLinkCategoryState?.get(),
+      selectedTypes: [...document.querySelectorAll('#content-type-filter input:checked')].map(n => n.value),
+      sort: document.querySelector('#sort-order')?.value,
+      location: location.href,
+      ready: document.querySelector('#catalog')?.className
+    }));
+    console.log('ACTUAL_LIKES_SORT_' + label + ' ' + JSON.stringify(details));
+  };
+  await inspect('BEFORE');
   await page.locator('#sort-order').selectOption('likes-desc');
+  await inspect('AFTER');
   const descending = await page.locator('#catalog [data-catalog-item]').evaluateAll(nodes =>
     nodes.map(node => Number(node.dataset.likeCount)));
   expect(descending.length).toBeGreaterThan(1);
