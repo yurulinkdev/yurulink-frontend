@@ -100,11 +100,12 @@ test('No4: リストは分類と日時を同じ行に置き、再生数と高評
 
 test('No4: 公式性未検証のYouTubeチャンネルを公式扱いしない', async ({ page }) => {
   await page.goto('/');
-  await expect(page.locator('nav#category-buttons [data-nav-group="channel-status"]')).toHaveCount(1);
+  // 公式性認定バッジではなく、Book1のナビ分類を表示する。
+  await expect(page.locator('nav#category-buttons [data-nav-group="channel-group:official"]')).toHaveCount(1);
+  await expect(page.locator('nav#category-buttons [data-nav-group="channel-group:related"]')).toHaveCount(1);
+  await expect(page.locator('nav#category-buttons [data-nav-group="channel-group:other"]')).toHaveCount(1);
   await expect(page.locator('[data-category-definition][data-category-type="program"][data-officiality="unknown"]').first()).toHaveCount(1);
-  await page.locator('nav#category-buttons [data-nav-group="channel-status"] > summary').click();
-  await expect(page.locator('button[data-category="browse:channel-status:authorized"]')).toHaveCount(1);
-  await expect(page.locator('button[data-category="browse:channel-status:unofficial"]')).toHaveCount(1);
+  await expect(page.locator('nav#category-buttons [data-nav-group^="channel:"] > summary').first()).not.toContainText(/（公式|（非公式|（未確認/);
 });
 
 test('No4: サイトのSNSアイコンには実アカウント名を付ける', async ({ page }) => {
