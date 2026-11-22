@@ -40,3 +40,47 @@ test('likes sorting uses populated video counts and sends unknowns to the end', 
   await expect(page).toHaveURL(/sort=likes-asc/);
   expect(errors).toEqual([]);
 });
+
+
+test('deployed catalog data sorts available YouTube likes in both directions', async ({page}) => {
+  const errors = [];
+  page.on('pageerror', error => errors.push(error.message));
+  // Standalone welcome moved the interactive catalog from / to /catalog/.
+  // /catalog-data/ remains the inert, HTML-only data source for this page.
+  await page.goto('/catalog/?category=');
+  await expect(page.locator('#catalog')).toHaveClass(/catalog-ready/);
+  const summary = await page.evaluate(() => {
+    const all = window.YuruLinkCatalogItems || [];
+    const available = all.filter(node =>
+      node.dataset.kind === 'video' &&
+      node.dataset.platform === 'youtube' &&
+      /^[0-9]+$/.test(node.dataset.likeCount || ''))
+      .map(node => Number(node.dataset.likeCount))
+      .filter(value => Number.isSafeInteger(value));
+    return {
+      count: available.length,
+      max: Math.max(...available),
+      min: Math.min(...available)
+    };
+  });
+  expect(summary.count).toBeGreaterThan(100);
+  expect(summary.max).toBeGreaterThan(0);
+
+  const displayedLikes = () => page.locator('#catalog [data-catalog-item]').evaluateAll(nodes =>
+    nodes.map(node => node.dataset.likeCount).map(raw =>
+      /^[0-9]+$/.test(raw || '') ? Number(raw) : null));
+  await page.locator('#sort-order').selectOption('likes-desc');
+  let visible = await displayedLikes();
+  expect(visible.length).toBeGreaterThan(1);
+  expect(visible.every(Number.isSafeInteger)).toBe(true);
+  expect(visible[0]).toBe(summary.max);
+  expect(visible).toEqual([...visible].sort((a, b) => b - a));
+
+  await page.locator('#sort-order').selectOption('likes-asc');
+  visible = await displayedLikes();
+  expect(visible.every(Number.isSafeInteger)).toBe(true);
+  expect(visible[0]).toBe(summary.min);
+  expect(visible).toEqual([...visible].sort((a, b) => a - b));
+  await expect(page).toHaveURL(/sort=likes-asc/);
+  expect(errors).toEqual([]);
+});
