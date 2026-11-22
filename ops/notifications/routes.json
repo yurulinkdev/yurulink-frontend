@@ -1,0 +1,42 @@
+{
+  "schema_version": 1,
+  "webhook_secret": "DISCORD_WEBHOOK_URL",
+  "events": {
+    "forms.submission.received": {
+      "order": 10,
+      "enabled": false,
+      "thread_id": null,
+      "description": "Google Form回答送信の検知（即時通知、未接続）"
+    },
+    "forms.submission.imported": {
+      "order": 20,
+      "enabled": false,
+      "thread_id": null,
+      "description": "Backendによるフォーム回答取込結果の確定（未接続）"
+    },
+    "catalog.content.published": {
+      "order": 30,
+      "enabled": false,
+      "thread_id": null,
+      "description": "新規ページ・コンテンツの公開完了（未接続）"
+    },
+    "deploy.staging.completed": {
+      "order": 40,
+      "enabled": false,
+      "thread_id": null,
+      "description": "Stagingデプロイ終了（未接続）"
+    },
+    "deploy.production.completed": {
+      "order": 50,
+      "enabled": false,
+      "thread_id": null,
+      "description": "本番デプロイ終了（未接続）"
+    },
+    "ops.cloudflare.inventory.completed": {
+      "order": 90,
+      "enabled": true,
+      "thread_id": null,
+      "description": "Cloudflare Pages棚卸し終了（Actions接続済み）"
+    }
+  }
+}

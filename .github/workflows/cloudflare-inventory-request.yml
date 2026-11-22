@@ -1,0 +1,156 @@
+name: Cloudflare inventory request (read only)
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ops/requests/cloudflare-inventory.json
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: cloudflare-inventory-request
+  cancel-in-progress: false
+
+jobs:
+  inventory:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+      CLOUDFLARE_ACCOUNT_ID: ${{ vars.CLOUDFLARE_ACCOUNT_ID }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate inventory request
+        shell: bash
+        run: |
+          set -euo pipefail
+          file=ops/requests/cloudflare-inventory.json
+          jq -e '
+            type == "object" and
+            (keys | sort) == ["action","request_id","schema_version"] and
+            .schema_version == 1 and
+            .action == "inventory_pages_readonly" and
+            (.request_id | type == "string" and test("^[a-zA-Z0-9_-]{1,64}$"))
+          ' "$file" >/dev/null
+          echo "Validated read-only inventory request"
+      - name: Check Cloudflare configuration
+        shell: bash
+        run: |
+          test -n "$CLOUDFLARE_API_TOKEN" || { echo "::error::Missing CLOUDFLARE_API_TOKEN"; exit 1; }
+          test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing variable CLOUDFLARE_ACCOUNT_ID"; exit 1; }
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install Wrangler
+        run: npm install --no-save --no-audit --no-fund wrangler@4
+      - name: List Pages projects with Wrangler
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p inventory
+          npx wrangler pages project list | tee inventory/projects-summary.txt
+      - name: Diagnose Pages REST endpoints (read only)
+        id: rest_inventory
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          ok=0
+          for endpoint in \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID" \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects" \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend" \
+            "accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/yurulink-frontend-staging"; do
+            case "$endpoint" in
+              */pages/projects) name="projects-list";;
+              */pages/projects/yurulink-frontend) name="production-project";;
+              */pages/projects/yurulink-frontend-staging) name="legacy-staging-project";;
+              *) name="account";;
+            esac
+            status=$(curl --silent --show-error --retry 2 -o inventory/api-response.json -w '%{http_code}' \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/$endpoint")
+            if [ "$status" != 200 ] || ! jq -e '.success == true' inventory/api-response.json >/dev/null; then
+              codes=$(jq -r '[.errors[]? | .code] | map(tostring) | join(",")' inventory/api-response.json 2>/dev/null || true)
+              echo "::warning::$name: HTTP $status, error codes: $codes"
+              continue
+            fi
+            echo "$name: HTTP 200"
+            if [ "$name" = "projects-list" ]; then
+              jq '[.result[] | {
+                name, subdomain, production_branch,
+                source_type: .source.type,
+                source_repo: .source.config.repo_name,
+                source_branch: .source.config.production_branch,
+                build_command: .build_config.build_command,
+                destination_dir: .build_config.destination_dir,
+                domains
+              }]' inventory/api-response.json > inventory/projects-details.json
+              ok=1
+            elif [ "$name" = "production-project" ] || [ "$name" = "legacy-staging-project" ]; then
+              jq '{name: .result.name, subdomain: .result.subdomain,
+                production_branch: .result.production_branch,
+                source_type: .result.source.type,
+                source_repo: .result.source.config.repo_name,
+                source_branch: .result.source.config.production_branch,
+                build_command: .result.build_config.build_command,
+                destination_dir: .result.build_config.destination_dir,
+                domains: .result.domains}' inventory/api-response.json > "inventory/$name.json"
+              ok=1
+            fi
+          done
+          rm -f inventory/api-response.json
+          if [ "$ok" -ne 1 ]; then
+            echo "::warning::No detailed Pages configuration retrieved"
+            exit 1
+          fi
+      - name: Inspect deployment branches (read only)
+        continue-on-error: true
+        shell: bash
+        run: |
+          set -euo pipefail
+          for project in yurulink-frontend yurulink-frontend-staging; do
+            status=$(curl --silent --show-error -o inventory/deployments-response.json -w '%{http_code}' \
+              -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+              "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects/$project/deployments?per_page=20")
+            if [ "$status" != 200 ]; then
+              echo "::warning::Deployment inventory for $project: HTTP $status"
+              continue
+            fi
+            jq '[.result[] | {
+              id, environment, url, created_on,
+              branch: .deployment_trigger.metadata.branch,
+              commit_hash: .deployment_trigger.metadata.commit_hash,
+              latest_stage: (.stages[-1].status // null)
+            }]' inventory/deployments-response.json > "inventory/$project-deployments.json"
+            echo "$project: deployment inventory retrieved"
+          done
+          rm -f inventory/deployments-response.json
+      - name: Upload inventory
+        uses: actions/upload-artifact@v4
+        with:
+          name: cloudflare-pages-inventory-request
+          path: |
+            inventory/projects-summary.txt
+            inventory/projects-details.json
+            inventory/production-project.json
+            inventory/legacy-staging-project.json
+            inventory/yurulink-frontend-deployments.json
+            inventory/yurulink-frontend-staging-deployments.json
+          retention-days: 7
+          if-no-files-found: error
+      - name: Validate Discord event routes
+        run: node ops/notifications/validate-routes.js
+      - name: Notify Discord (optional)
+        if: always()
+        continue-on-error: true
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          YURULINK_EVENT_CODE: ops.cloudflare.inventory.completed
+          YURULINK_EVENT_STATUS: ${{ job.status }}
+        run: node ops/notifications/notify-discord.js
