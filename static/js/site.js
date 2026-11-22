@@ -408,8 +408,10 @@
       (record.categoryId === 'official_social_profile' || provenanceOf(record) === 'official');
     if (selectedCategory === 'browse:social-community') return record.kind === 'social_profile' &&
       (record.categoryId === 'community_social_profile' || provenanceOf(record) === 'community');
+    // 新ナビ「SNS > その他」は公式/関係者以外をまとめる。旧「有志・非公式」
+    // サブカテゴリ廃止後も、communityまたは未分類プロフィールが消えないようにする。
     if (selectedCategory === 'browse:social-other') return record.kind === 'social_profile' &&
-      !matchesCategory(record,'browse:social-official') && !matchesCategory(record,'browse:social-community');
+      !matchesCategory(record,'browse:social-official');
     if (selectedCategory === 'browse:video-official') return formatOf(record) === 'video' && videoRole(record) === 'official';
     if (selectedCategory === 'browse:video-channel') return formatOf(record) === 'video' && videoRole(record) === 'channel';
     if (selectedCategory === 'browse:video-community') return formatOf(record) === 'video' && videoRole(record) === 'community';
