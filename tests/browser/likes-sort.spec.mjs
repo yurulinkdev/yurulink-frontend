@@ -40,3 +40,32 @@ test('likes sorting uses populated video counts and sends unknowns to the end', 
   await expect(page).toHaveURL(/sort=likes-asc/);
   expect(errors).toEqual([]);
 });
+
+
+test('actual generated catalog exposes like counts and sorts correctly', async ({page}) => {
+  await page.goto('/catalog-data/');
+  await page.locator('#catalog.catalog-ready').waitFor({state:'attached',timeout:30000});
+  const summary = await page.evaluate(() => {
+    const all = window.YuruLinkCatalogItems || [];
+    const likes = all.filter(node => node.dataset.kind === 'video'
+      && node.dataset.platform === 'youtube'
+      && /^\\d+$/.test(node.dataset.likeCount || ''))
+      .map(node => Number(node.dataset.likeCount))
+      .filter(value => Number.isSafeInteger(value));
+    return {count: likes.length, max: Math.max(...likes)};
+  });
+  expect(summary.count).toBeGreaterThan(0);
+  await page.locator('#sort-order').selectOption('likes-desc');
+  const descending = await page.locator('#catalog [data-catalog-item]').evaluateAll(nodes =>
+    nodes.map(node => Number(node.dataset.likeCount)));
+  expect(descending.length).toBeGreaterThan(1);
+  expect(descending[0]).toBe(summary.max);
+  expect(descending.every(Number.isSafeInteger)).toBe(true);
+  expect(descending).toEqual([...descending].sort((a,b) => b - a));
+
+  await page.locator('#sort-order').selectOption('likes-asc');
+  const ascending = await page.locator('#catalog [data-catalog-item]').evaluateAll(nodes =>
+    nodes.map(node => Number(node.dataset.likeCount)));
+  expect(ascending.every(Number.isSafeInteger)).toBe(true);
+  expect(ascending).toEqual([...ascending].sort((a,b) => a - b));
+});
