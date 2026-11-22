@@ -11,7 +11,8 @@
       "community",
       "unknown"
     ],
-    "provenance_rule": "reviewer_verified_only"
+    "provenance_rule": "reviewer_verified_only",
+    "submitted_categories": "zero_or_more_suggestions"
   },
   "categories": [
     {
@@ -210,5 +211,62 @@
       "label": "ゆる学徒カフェ",
       "kind": "place"
     }
-  ]
+  ],
+  "navigation": {
+    "youtube": {
+      "label": "YouTube動画",
+      "groups": [
+        {
+          "id": "official",
+          "label": "公式チャンネル"
+        },
+        {
+          "id": "related",
+          "label": "コラボ・公認・関連"
+        },
+        {
+          "id": "other",
+          "label": "その他"
+        }
+      ]
+    },
+    "other": {
+      "label": "その他サイト・SNS",
+      "groups": [
+        {
+          "id": "web",
+          "label": "Webサイト",
+          "children": [
+            {
+              "id": "browse:web-official",
+              "label": "公式・公認"
+            },
+            {
+              "id": "browse:web-community",
+              "label": "非公式"
+            }
+          ]
+        },
+        {
+          "id": "social",
+          "label": "SNS",
+          "children": [
+            {
+              "id": "browse:social-official",
+              "label": "公式/関係者"
+            },
+            {
+              "id": "browse:social-other",
+              "label": "その他"
+            }
+          ]
+        }
+      ]
+    },
+    "book1_channel_group_labels": {
+      "official": "公式チャンネル",
+      "related": "コラボ・関係者・公認",
+      "other": "その他"
+    }
+  }
 }
