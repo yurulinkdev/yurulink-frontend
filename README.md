@@ -74,6 +74,8 @@ Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用�
 - [UI・操作の回帰契約](docs/frontend-ui-regression-contract-20261122.md)
 - [デザインシステム](docs/design-system-phase2.md)
 - [環境・デプロイ](docs/environments.md)
+- [MainとStagingの差分監査・同期判定（2026-11-23）](docs/staging-main-diff-audit-20261123.md)
+- [StagingからMainへのPR昇格・承認手順（ChatGPT非依存）](docs/staging-main-promotion-runbook.md)
 - [Staging ChatOpsの検証手順](docs/staging-chatops.md)
 - [Google Forms埋め込み](docs/submission-embed-staging.md)
 - [計測サービスの設定](docs/observability-evaluation.md)
