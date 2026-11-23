@@ -1,0 +1,75 @@
+name: Verify Cloudflare DNS Write using reversible TXT record
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - ops/requests/cloudflare-dns-write-probe.json
+
+permissions:
+  contents: read
+
+concurrency:
+  group: yurulink-dns-reversible-probe
+  cancel-in-progress: false
+
+jobs:
+  dns_write_check:
+    runs-on: ubuntu-latest
+    timeout-minutes: 8
+    env:
+      CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+      - name: Validate exact isolated DNS write test request
+        shell: bash
+        run: |
+          set -euo pipefail
+          jq -e '
+            type == "object" and
+            (keys | sort) == ["action","request_id","schema_version","zone"] and
+            .schema_version == 1 and
+            .action == "dns_txt_create_verify_delete" and
+            .zone == "yurulink.com" and
+            (.request_id | type == "string" and test("^[a-zA-Z0-9_-]{1,64}$"))
+          ' ops/requests/cloudflare-dns-write-probe.json >/dev/null
+          test -n "$CLOUDFLARE_API_TOKEN"
+          echo "Isolated test confirmed; existing DNS records will not be modified"
+      - name: Create, read, delete and re-read disposable TXT record
+        shell: bash
+        run: |
+          set -euo pipefail
+          API=https://api.cloudflare.com/client/v4
+          H="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          ZONES=$(curl -fsS -H "$H" "$API/zones?name=yurulink.com&per_page=5")
+          ZONE=$(printf '%s' "$ZONES" | jq -er '.result[] | select(.name == "yurulink.com") | .id' | head -1)
+          [[ "$ZONE" =~ ^[0-9a-f]{32}$ ]]
+          NAME="_yl-gh-dns-probe-$GITHUB_RUN_ID.yurulink.com"
+          CONTENT="yurulink-dns-verified-$GITHUB_RUN_ID"
+          ENDPOINT="$API/zones/$ZONE/dns_records"
+          EXISTING=$(curl -fsS -G -H "$H" --data-urlencode "name=$NAME" --data-urlencode "type=TXT" "$ENDPOINT")
+          echo "$EXISTING" | jq -e '.success == true and (.result | length == 0)' >/dev/null
+          ID=""
+          cleanup() {
+            if [[ -n "$ID" ]]; then
+              echo "Cleaning up temporary TXT record after interruption"
+              curl --silent --show-error --fail --retry 3 -X DELETE -H "$H" "$ENDPOINT/$ID" >/dev/null || true
+            fi
+          }
+          trap cleanup EXIT
+          BODY=$(jq -nc --arg name "$NAME" --arg content "$CONTENT" '{type:"TXT",name:$name,content:$content,ttl:120}')
+          RESULT=$(curl -fsS --retry 2 -X POST -H "$H" -H 'Content-Type: application/json' --data "$BODY" "$ENDPOINT")
+          ID=$(printf '%s' "$RESULT" | jq -er '.result.id')
+          printf '%s' "$RESULT" | jq -e --arg name "$NAME" '.success == true and .result.type == "TXT" and .result.name == $name' >/dev/null
+          FETCHED=$(curl -fsS -H "$H" "$ENDPOINT/$ID")
+          printf '%s' "$FETCHED" | jq -e --arg content "$CONTENT" --arg name "$NAME" '.success == true and .result.content == $content and .result.name == $name' >/dev/null
+          DELETED=$(curl -fsS --retry 2 -X DELETE -H "$H" "$ENDPOINT/$ID")
+          printf '%s' "$DELETED" | jq -e '.success == true' >/dev/null
+          ID=""
+          echo "DNS Write verification: create and read and delete succeeded"
+          sleep 1
+          AFTER=$(curl -fsS -G -H "$H" --data-urlencode "name=$NAME" --data-urlencode "type=TXT" "$ENDPOINT")
+          printf '%s' "$AFTER" | jq -e '.success == true and (.result | length == 0)' >/dev/null
+          echo "DNS Write verification: cleanup readback succeeded; zero test records left"
