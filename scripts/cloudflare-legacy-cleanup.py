@@ -78,7 +78,7 @@ def project(name):
 
 def deployment_page():
     result = call("GET", "/accounts/" + ACCOUNT + "/pages/projects/" + LEGACY +
-                  "/deployments", query={"page": 1, "per_page": 100})
+                  "/deployments", query={"page": 1, "per_page": 25})
     return result.get("result") or [], result.get("result_info") or {}
 
 
@@ -87,8 +87,8 @@ def delete_deployment(deployment_id):
         raise ValueError("Unexpected deployment ID format; refusing delete")
     path = "/accounts/" + ACCOUNT + "/pages/projects/" + LEGACY + "/deployments/" + deployment_id
     try:
-        call("DELETE", path, query={"force": "true"}, allow_missing=True)
-        return "deleted"
+        result = call("DELETE", path, query={"force": "true"}, allow_missing=True)
+        return "missing" if result is None else "deleted"
     except ApiError as exc:
         if "active production deployment" in str(exc).lower():
             return "protected"
@@ -133,7 +133,7 @@ def main():
     print("Legacy deployment count before cleanup:", total)
     protected = set(active_ids)
     deleted = 0
-    for round_no in range(1, 35):
+    for round_no in range(1, 101):
         entries, info = deployment_page()
         total = info.get("total_count", len(entries))
         if total <= 80:
