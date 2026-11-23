@@ -199,7 +199,7 @@ def main():
             rows = read_dns(zone, host, dns_token)
             report["dns"][host] = dns_summary(rows)
             if host in names:
-                report["pages"][host] = {"status": names[host].get("status"), "validation_data": bool(names[host].get("validation_data"))}
+                report["pages"][host] = {"status": names[host].get("status"), "validation_status": (names[host].get("validation_data") or {}).get("status"), "verification_status": (names[host].get("verification_data") or {}).get("status"), "validation_error": (names[host].get("validation_data") or {}).get("error_message"), "verification_error": (names[host].get("verification_data") or {}).get("error_message")}
             else:
                 report["pages"][host] = {"status": "not_attached"}
             safe_record_check(host, rows)
