@@ -7,6 +7,7 @@ No arbitrary hostnames, record types, or user-provided API paths are accepted.
 import base64
 import datetime
 import json
+from html.parser import HTMLParser
 import os
 import re
 import sys
@@ -80,6 +81,23 @@ def safe_record_check(host, rows):
 
 
 
+class HeadMetadata(HTMLParser):
+    def __init__(self):
+        super().__init__()
+        self.canonical = None
+        self.robots = None
+        self.og_image = None
+
+    def handle_starttag(self, tag, attrs):
+        d = dict(attrs)
+        if tag == "link" and d.get("rel") == "canonical":
+            self.canonical = d.get("href")
+        if tag == "meta" and d.get("name") == "robots":
+            self.robots = d.get("content")
+        if tag == "meta" and d.get("property") == "og:image":
+            self.og_image = d.get("content")
+
+
 def probe_host(host):
     """Public HTTPS verification; no authentication, no external redirects trusted."""
     result = {"hostname": host}
@@ -91,13 +109,18 @@ def probe_host(host):
         with urllib.request.urlopen(req, timeout=20) as resp:
             body = resp.read(500_000).decode("utf-8", errors="replace")
             final_url = resp.geturl()
+            metadata = HeadMetadata()
+            metadata.feed(body)
             result.update({
                 "http_status": resp.status,
                 "final_hostname": urllib.parse.urlsplit(final_url).hostname,
                 "title_present": "YuruLink" in body,
-                "canonical_custom_host": ('rel="canonical" href="https://' + host + '/') in body,
-                "noindex": 'name="robots" content="noindex' in body,
-                "expected_ogp": ("yurulink-staging.png" if host.startswith("staging.") else "yurulink-light.png") in body,
+                "canonical_url": metadata.canonical,
+                "canonical_custom_host": urllib.parse.urlsplit(metadata.canonical or "").hostname == host,
+                "robots_content": metadata.robots,
+                "noindex": "noindex" in (metadata.robots or "").lower(),
+                "og_image": metadata.og_image,
+                "expected_ogp": ("yurulink-staging.png" if host.startswith("staging.") else "yurulink-light.png") in (metadata.og_image or ""),
             })
     except urllib.error.HTTPError as ex:
         result["http_status"] = ex.code
