@@ -50,7 +50,7 @@ sequenceDiagram
 
 `staging`から`main`へのマージはコード変更だけでなくPages Productionの自動デプロイを伴い得る操作です。事前承認なしに実施しません。BackendのBlue／Green有効世代、初回データ公開、DNS切替も独立した承認対象です。
 
-**定期データ更新の例外**：Backendが検証済み`catalog.json`を`data/public/catalog.json`へ配信する既存ジョブは、Frontend `staging`および`main`への自動更新を許可します。JSONのみの変更に伴うProductionの自動ビルドは通常の掲載内容更新として扱い、アプリケーションコードの本番昇格と区別します。JSON配信ジョブにコード・設定変更を混在させません。
+**定期データ更新の例外**：Backendが検証済み`catalog.json`を`data/public/catalog.json`へ配信する既存ジョブは、Frontendの`staging`と`main`双方への自動更新を許可します。JSON更新だけで起動するProductionの自動ビルドは通常の掲載内容更新として扱い、コードや設定の本番昇格とは区別します。JSON配信にコード変更を混在させません。
 
 ## 検証の起動方法
 
