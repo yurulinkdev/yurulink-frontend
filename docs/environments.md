@@ -50,6 +50,8 @@ sequenceDiagram
 
 `staging`から`main`へのマージはコード変更だけでなくPages Productionの自動デプロイを伴い得る操作です。事前承認なしに実施しません。BackendのBlue／Green有効世代、初回データ公開、DNS切替も独立した承認対象です。
 
+**定期データ更新の例外**：Backendが検証済み`catalog.json`を`data/public/catalog.json`へ配信する既存ジョブは、Frontend `staging`および`main`への自動更新を許可します。JSONのみの変更に伴うProductionの自動ビルドは通常の掲載内容更新として扱い、アプリケーションコードの本番昇格と区別します。JSON配信ジョブにコード・設定変更を混在させません。
+
 ## 検証の起動方法
 
 通常のコードPushに対するSmoke・Preview・ブラウザ検証を維持しています。チャットからの限定された追加検証は`ops/requests/frontend-validation.json`を入力とする同一Workflow内Jobで行います。使用可能なアクション、JSONの書式、結果と対象SHAの照合は[Staging ChatOps](staging-chatops.md)に従ってください。

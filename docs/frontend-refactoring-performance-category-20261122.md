@@ -1,12 +1,10 @@
-# Frontendの性能・カテゴリ構造契約（2026-11-22）
+# Frontendのカテゴリ構造・初期表示性能
 
-## 対象／公開境界
-- 適用先は `yurulink-frontend` の `staging` のみ。Backendは `develop`、Shared Book1で表示分類を編集する。
-- 本番切替、Frontend/Backend `main` マージ、Cloudflare DNS更新、Blue/Greenアクティブ切替は、Staging検証結果を提示してから個別承認を得る。
-- 本文は当日ユーザー指示による新しい確定ナビ仕様。既存の2026-11-20/21の階層・公式性表示と矛盾する点は本書を優先する。
+YuruLinkのFrontendは、トップページの案内とリンク検索を別ページに分ける。カテゴリの表示構造はBackendの分類定義を基準とし、一覧画面では表示する件数に応じてDOMを更新する。
 
-## 表示カテゴリ（表示文言の正本）
-カテゴリー選択なしの「すべてのコンテンツ」を最上部、独立した項目として配置する。トップレベルは厳密に次の2つ。
+対象は`yurulink-frontend`の`staging`。Productionへの公開、`main`へのマージ、DNS変更、BackendのBlue／Green切替は別の承認対象とする。
+
+## カテゴリの表示構造
 
 ```text
 すべてのコンテンツ
@@ -23,26 +21,30 @@ YouTube動画
    └─ その他
 ```
 
-- 表示ラベル・UIの分類IDの正本はBackend `config/taxonomy.v1.json` の `navigation`、Frontend `data/taxonomy.json` は同一内容のコピー。Hugoの `category-navigation.html` が `navigation` を参照する。コピー間の整合をCIで検査すること。
-- YouTubeの3分類はShared Book1 `channel_groups` を人が選択する**表示上の配置先**で、`channel_group=official|related|other` として公開 `catalog.programs[]` に投影される。収集対象チャンネルであっても、未選択なら `other` に仮配置する。
-- 上記の「公式チャンネル」という名称、Book1の選択結果、動画の所属経路は、権利者・番組・公認性を独立に検証したという証明にならない。公開の `officiality_verified` を自動的に真にしない。
-- ナビ中の個々のチャンネル名やリンク名に `（公式）`、`（未確認）`、`（非公式）` といった公式性判定のサフィックスを追加しない。ただしユーザー指定の**固定カテゴリ名そのもの**にある「公式」「公認」等は仕様として維持。
-- チャンネルの内側の動画／プレイリスト／ショート／ライブ、プレイリスト所属先は保持。登録外の動画を誤って公式チャンネルに昇格しない。
-- 保存したカテゴリのURLとLocalStorage復元、「すべてのコンテンツ」またはブランドロゴでの解除、種類フィルタ、検索、ソート、カード／リスト表示、月別更新履歴、スマホのドロワー操作は引き続き回帰必須。
+- 上記の階層は、Backendの`config/taxonomy.v1.json`にある`navigation`を基準とし、Frontendの`data/taxonomy.json`と整合させる。
+- YouTubeチャンネルの表示分類はShared Book1の`channel_groups`から取得する。`channel_group=official|related|other`はナビゲーションの配置先であり、個別の公式性確認結果とは別に扱う。
+- チャンネルには動画・プレイリスト・ショート・ライブの導線を置き、必要に応じて所属プレイリストを階層表示する。
+- カテゴリを選ぶと`/catalog/`に移動し、検索・種類フィルタと組み合わせて表示する。ロゴで`/`に戻った場合、または「すべてのコンテンツ」を選んだ場合はカテゴリ選択を解除する。
+- カードやメニューの名前に、確認していない「公式」「公認」などの判定を追加しない。固定されたカテゴリ名はそのまま使用する。
 
-## 診断で確認した初期表示のコストと改善
-| 箇所 | 以前の動作 | 改修した動作 | 課題 |
-|---|---|---|---|
-| HugoカテゴリHTML | チャンネル×PLをネスト探索、ページごとに構築 | ID／正規化名の対応マップによる1パス構築、`partialCached`をホーム／下層ごとに利用 | チャンネル名とPLの一意性 |
-| DOMの動画メタ整形 | 公開カタログ約3,600件へ4つ以上の同期ループ | 初期20件、表示設定で最大100件のみを遅延整形・再整形回避 | 未表示要素は整形前のテキストが残る（正しい動作） |
-| カード画像 `sizes` | ビュー切替時に3,600件以上の画像要素を走査 | 可視ページの画像要素だけ更新 | PC168px／スマホ128pxのリスト幅に同期 |
-| CSSカード | リストの `:has(> .catalog-media)` 判定 | `:first-child` でメディア不在を処理。画面外要素は `content-visibility:auto` | Browser実測で描画・高さジャンプを確認 |
-| GitHub Smoke | 同ブランチで連続push時も実行を重ねる | 最新push優先のconcurrency、過去runキャンセル | Preview SHA一致・Browser E2Eの独立ゲートは維持 |
+## ページ別の読み込み
 
-**重要：** Hugoはなお3,600件以上のカードHTMLを初期応答に含める。以上はHugoテンプレート・JavaScript処理・画面外描画の軽量化であり、転送量／DOMパース数を根本的には減らしていない。将来の最優先改善候補は「静的検索索引とJSON／HTML分割・可視ページだけのカード生成」。その場合は日本語検索、URL共有、カテゴリ絞り込み、遷移、アクセシビリティ、no-JS基本表示をE2Eで検証してから段階移行し、まずCore Web VitalsとLCP/INP/CLSの実測基準を採る。
+| ページ | 主な内容 | カタログの読み込み |
+| --- | --- | --- |
+| `/` | 「ようこそ」の案内 | 全件カードHTMLは読み込まない |
+| `/welcome/` | 同じ案内を表示する補助ページ | 全件カードHTMLは読み込まない |
+| `/catalog/` | 検索、カテゴリ・種類フィルタ、ソート、ページ送り | `/catalog-data/`から一覧HTMLを非同期取得 |
+| `/catalog-data/` | Hugoが生成する全件リンク一覧。JavaScript無効時の参照にも利用 | 一覧HTMLを直接表示 |
 
-## 回帰／同一SHA検証
-- `scripts/smoke-test.sh`：Hugo、非カタログ、404、主要ページを検証。
-- `tests/browser/category-performance-20261122.spec.mjs`：ナビの2大分類、ラベル、可視カードのみの書換え、Book1グループによるフィルタ。
-- `tests/browser/staging.spec.mjs`、`feedback-20261120.spec.mjs`、`feedback-20261121.spec.mjs`、`frontend-ux-regression.spec.mjs`：過去の機能の退行防止。
-- 同一SHAのFrontend Smoke、Cloudflare Preview SHA、Playwright Chromiumを全て成功確認し、結果を検証記録に残す。ブラウザのビジュアル確認・モバイル実機確認をCI合格と取り違えない。
+`static/js/site.js`は取得した一覧HTMLを`template`内に保持し、通常の表示領域へ追加するカードを1ページ分に限定する。標準は20件で、表示件数の切替により50件または100件となる。画像の`sizes`調整や動画メタデータの表示処理も、表示対象カードに適用する。
+
+2026-11-22時点の診断記録には「初期応答に数千件のカードHTMLを含む」とあるが、現行構成では`/catalog/`の初期応答と`/catalog-data/`の取得が分離されている。**転送量・初期表示時間の実測値は、この構成ごとに取得する。** 検索索引の分割やJSONによる軽量化は、追加の改善候補である。
+
+## 動作・性能の確認
+
+- `scripts/smoke-test.sh`でHugo生成、主要ページ、404などを確認する。
+- `tests/browser/category-performance-20261122.spec.mjs`でカテゴリ構造、表示ラベル、表示件数、フィルタを検証する。
+- `tests/browser/staging.spec.mjs`、`feedback-20261120.spec.mjs`、`feedback-20261121.spec.mjs`、`frontend-ux-regression.spec.mjs`で既存の検索・遷移・操作を確認する。
+- 同じコミットSHAでSmoke、Cloudflare PreviewのデプロイSHA、Playwright Chromiumの結果を照合する。実機の体感速度はCIとは別に評価する。
+
+関連：[初期表示とURLの境界](frontend-initial-render-performance-20261123.md)／[UI回帰仕様](frontend-ui-regression-contract-20261122.md)。

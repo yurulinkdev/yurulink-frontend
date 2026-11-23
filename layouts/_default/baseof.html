@@ -9,14 +9,15 @@
   <link rel="stylesheet" href="{{ "css/site.css" | relURL }}">
   <script src="{{ "js/theme-control.js" | relURL }}" defer></script>
   <script src="{{ "js/category-state.js" | relURL }}" defer></script>
-  <script src="{{ "js/onboarding.js" | relURL }}" defer></script>
+  {{ if partial "site/catalog-available.html" . }}<script src="{{ "js/onboarding.js" | relURL }}" defer></script>{{ end }}
   {{ $ga := .Site.Params.analytics.ga4_measurement_id | default "" }}
   {{ if gt (len (findRE "^G-[A-Z0-9]+$" $ga)) 0 }}
     <script src="{{ "js/ga4-consent.js" | relURL }}" defer></script>
   {{ end }}
-  {{ if eq .Section "catalog" }}<script src="{{ "js/site.js" | relURL }}" defer></script>{{ end }}
+  {{ if and (eq .Section "catalog") (partial "site/catalog-available.html" .) }}<script src="{{ "js/site.js" | relURL }}" defer></script>{{ end }}
 </head>
 <body class="min-h-screen bg-page text-ink">
+  {{ partial "site/ui-translations.html" . }}
   <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-panel focus:p-3">本文へ移動</a>
   <div class="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
     {{ partial "site/sidebar.html" . }}

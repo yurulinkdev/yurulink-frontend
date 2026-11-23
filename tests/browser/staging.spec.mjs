@@ -389,12 +389,12 @@ test('invalid calendar dates in shared URL are ignored, valid leap day is retain
   await expect(page).toHaveURL(/from=2024-02-29/);
 });
 
-test('search guide describes all URL filters and explicitly notes missing participant data', async ({page}) => {
+test('search guide explains filters and notes missing participant data in user-facing terms', async ({page}) => {
   await gotoAndWaitForCatalog(page,'/help/search-guide/');
-  await expect(page.getByRole('heading', {name:'YuruLink の検索・絞り込みガイド'})).toBeVisible();
+  await expect(page.getByRole('heading', {name:'検索・絞り込みガイド', exact:true})).toBeVisible();
   const text=await page.locator('article').innerText();
-  for (const key of ['date_field','from','to','people','AND条件','OR条件']) {
-    expect(text).toContain(key);
+  for (const phrase of ['公開日', '更新日', '出演者タグ', 'AND', 'OR', '出演者の確定データは現在準備中です']) {
+    expect(text).toContain(phrase);
   }
 });
 

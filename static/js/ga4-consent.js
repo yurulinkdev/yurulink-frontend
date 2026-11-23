@@ -1,5 +1,7 @@
 /* GA4計測は利用者の同意後のみ開始。測定IDは公開設定値であり秘密情報ではない。 */
 (() => {
+  const ui = (() => { try { return JSON.parse(document.getElementById('yl-ui-messages')?.textContent || '{}'); } catch { return {}; } })();
+  const tr = (name, fallback) => ui[name] || fallback;
   const section = document.getElementById('analytics-consent');
   if (!section) return;
   const id = section.dataset.ga4Id || '';
@@ -32,8 +34,8 @@
     section.hidden = false;
     const chosen = state === 'allow' || state === 'deny';
     message.textContent = chosen
-      ? ('Google Analyticsの計測設定：' + (state === 'allow' ? '同意済み' : '同意しない'))
-      : 'サイト改善のためGoogle Analyticsを利用します。ご同意のときだけ計測します。';
+      ? (tr('analyticsStatusPrefix','Google Analyticsの計測設定：') + (state === 'allow' ? tr('analyticsStatusAllowed','同意済み') : tr('analyticsStatusDenied','同意しない')))
+      : tr('analyticsDefaultNotice','サイト改善のためGoogle Analyticsを利用します。ご同意のときだけ計測します。');
     allow.hidden = chosen; deny.hidden = chosen; change.hidden = !chosen;
   };
   const save = value => {

@@ -1,54 +1,54 @@
 <header class="relative z-20 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur sm:px-7 lg:sticky lg:top-0">
   <div class="flex flex-wrap items-center gap-3">
-    <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">メニューを開く</span></button>
-    <a class="inline-flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight text-accent lg:hidden" href="{{ "" | relURL }}" data-reset-category aria-label="YuruLink トップページ">
-      <img src="{{ .Site.Params.brand_logo | default "brand/yurulink-symbol-approved-transparent.png" | relURL }}" alt="" width="36" height="36" class="h-9 w-9 shrink-0 object-contain" decoding="async">
-      <span class="brand-wordmark">YuruLink</span>
+    <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">{{ i18n "menuOpen" }}</span></button>
+    <a class="inline-flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight text-accent lg:hidden" href="{{ "" | relURL }}" data-reset-category aria-label="{{ i18n "siteHome" .Site.Title }}">
+      <img src="{{ .Site.Params.brand_logo | relURL }}" alt="" width="36" height="36" class="h-9 w-9 shrink-0 object-contain" decoding="async">
+      <span class="brand-wordmark">{{ .Site.Title }}</span>
     </a>
-    {{ if eq .Section "catalog" }}
+    {{ if and (eq .Section "catalog") (partial "site/catalog-available.html" .) }}
       <div class="relative order-3 w-full min-w-0 lg:order-none lg:flex-1">
         <div class="flex items-center gap-2">
           <div class="relative min-w-0 flex-1">
-            <label class="sr-only" for="query">コンテンツを検索</label>
-            <input id="query" type="search" placeholder="タイトル・説明・番組名で検索" class="w-full rounded-xl border border-line bg-page py-2.5 pl-4 pr-12 text-ink placeholder:text-muted-ink" autocomplete="off">
-            <a id="search-help-link" href="{{ "help/search-guide/" | relURL }}" class="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-ink hover:bg-panel-muted hover:text-accent" aria-label="検索の使い方を開く" title="検索の使い方">
+            <label class="sr-only" for="query">{{ i18n "searchLabel" }}</label>
+            <input id="query" type="search" placeholder="{{ i18n "searchPlaceholder" }}" class="w-full rounded-xl border border-line bg-page py-2.5 pl-4 pr-12 text-ink placeholder:text-muted-ink" autocomplete="off">
+            <a id="search-help-link" href="{{ "help/search-guide/" | relURL }}" class="absolute right-1 top-1/2 inline-flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-lg text-muted-ink hover:bg-panel-muted hover:text-accent" aria-label="{{ i18n "searchHelpOpen" }}" title="{{ i18n "searchHelp" }}">
               {{/* Heroicons outline question-mark-circle */}}
               <svg aria-hidden="true" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-6 w-6"><circle cx="12" cy="12" r="9.75"/><path stroke-linecap="round" stroke-linejoin="round" d="M9.879 7.519a3 3 0 1 1 4.242 4.242c-.765.765-2.121 1.378-2.121 2.489V15m0 3h.008v.008H12V18Z"/></svg>
             </a>
           </div>
           <details id="search-advanced" class="group relative shrink-0">
-            <summary class="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-line bg-page text-ink hover:bg-panel-muted focus-visible:outline" aria-label="日付・出演者の詳細検索" title="日付・出演者の詳細検索">
+            <summary class="inline-flex h-11 w-11 cursor-pointer list-none items-center justify-center rounded-xl border border-line bg-page text-ink hover:bg-panel-muted focus-visible:outline" aria-label="{{ i18n "advancedSearch" }}" title="{{ i18n "advancedSearch" }}">
               {{/* Heroicons outline funnel */}}
               <svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" class="h-5 w-5"><path stroke-linecap="round" stroke-linejoin="round" d="M3 4.5h18v2.25l-7.5 8.25v5.25l-3 1.5v-6.75L3 6.75V4.5Z"/></svg>
             </summary>
             <div class="absolute right-0 top-full z-50 mt-2 w-[min(88vw,22rem)] space-y-4 rounded-xl border border-line bg-panel p-4 shadow-xl" role="group" aria-label="詳細検索条件">
               <fieldset class="space-y-2">
-                <legend class="text-sm font-semibold">日付による絞り込み</legend>
-                <label class="block text-xs text-muted-ink" for="date-field">対象の日付</label>
+                <legend class="text-sm font-semibold">{{ i18n "dateFilter" }}</legend>
+                <label class="block text-xs text-muted-ink" for="date-field">{{ i18n "dateField" }}</label>
                 <select id="date-field" class="w-full rounded-lg border border-line bg-page px-3 py-2 text-sm">
-                  <option value="published">公開日</option>
-                  <option value="updated">更新日（更新日時があるコンテンツのみ）</option>
+                  <option value="published">{{ i18n "publishedDate" }}</option>
+                  <option value="updated">{{ i18n "updatedDateKnown" }}</option>
                 </select>
                 <div class="grid grid-cols-2 gap-2">
-                  <label class="block text-xs text-muted-ink" for="date-from">開始日
+                  <label class="block text-xs text-muted-ink" for="date-from">{{ i18n "startDate" }}
                     <input id="date-from" type="date" class="mt-1 block w-full min-w-0 rounded-lg border border-line bg-page p-2 text-sm">
                   </label>
-                  <label class="block text-xs text-muted-ink" for="date-to">終了日
+                  <label class="block text-xs text-muted-ink" for="date-to">{{ i18n "endDate" }}
                     <input id="date-to" type="date" class="mt-1 block w-full min-w-0 rounded-lg border border-line bg-page p-2 text-sm">
                   </label>
                 </div>
               </fieldset>
               <fieldset>
-                <legend class="text-sm font-semibold">出演者タグ</legend>
+                <legend class="text-sm font-semibold">{{ i18n "participantTag" }}</legend>
                 <div id="person-filter-options" class="mt-2 max-h-44 space-y-2 overflow-y-auto text-sm" aria-live="polite"></div>
-                <p class="mt-1 text-xs text-muted-ink">確認済みの出演情報のみ対象です。番組の所属だけでは付与しません。</p>
+                <p class="mt-1 text-xs text-muted-ink">{{ i18n "participantVerified" }}</p>
               </fieldset>
-              <button id="reset-advanced-search" type="button" class="rounded-lg border border-line px-3 py-2 text-sm hover:bg-panel-muted">詳細条件を解除</button>
+              <button id="reset-advanced-search" type="button" class="rounded-lg border border-line px-3 py-2 text-sm hover:bg-panel-muted">{{ i18n "advancedReset" }}</button>
             </div>
           </details>
         </div>
       </div>
     {{ end }}
-    <div role="group" aria-label="表示テーマ" class="ml-auto inline-flex items-center gap-1 lg:ml-0"><button id="theme-toggle" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-panel text-ink" aria-label="テーマを切り替え" title="テーマを切り替え"><span id="theme-icon" aria-hidden="true">◐</span></button><button id="theme-auto" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-panel text-ink" aria-label="OSのテーマ設定に追従" title="OSのテーマ設定に追従"><svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></button></div>
+    <div role="group" aria-label="{{ i18n "themeGroup" }}" class="ml-auto inline-flex items-center gap-1 lg:ml-0"><button id="theme-toggle" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-panel text-ink" aria-label="{{ i18n "themeToggle" }}" title="{{ i18n "themeToggle" }}"><span id="theme-icon" aria-hidden="true">◐</span></button><button id="theme-auto" type="button" class="inline-flex h-10 w-10 items-center justify-center rounded-lg border border-line bg-panel text-ink" aria-label="{{ i18n "themeAuto" }}" title="{{ i18n "themeAuto" }}"><svg aria-hidden="true" viewBox="0 0 24 24" width="19" height="19" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="13" rx="2"/><path d="M8 21h8m-4-4v4"/></svg></button></div>
   </div>
 </header>

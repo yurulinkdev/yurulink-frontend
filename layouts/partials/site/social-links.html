@@ -18,9 +18,13 @@
       {{ $first := index (split $path "/") 0 }}
       {{ $account := $label }}
       {{ if $first }}{{ $account = printf "@%s" $first }}{{ end }}
-      <a class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 hover:bg-panel-muted hover:text-accent" href="{{ $parsed.String | safeURL }}" target="_blank" rel="noopener noreferrer" aria-label="YuruLinkの{{ $label }}を開く">
+      <a class="inline-flex items-center gap-1.5 rounded-md px-1.5 py-1 hover:bg-panel-muted hover:text-accent" href="{{ $parsed.String | safeURL }}" target="_blank" rel="noopener noreferrer" aria-label="{{ i18n "socialOpen" (dict "site" $.Site.Title "network" $label) }}">
         <img src="{{ printf "icons/social/%s.svg" $key | relURL }}" width="18" height="18" class="h-[18px] w-[18px] shrink-0 dark:invert" alt="" loading="lazy" decoding="async" aria-hidden="true">
-        <span>{{ $label }} <span class="font-semibold">{{ $account }}</span></span>
+        {{ if eq $key "x" }}
+          <span class="font-semibold">{{ $account }}</span>
+        {{ else }}
+          <span>{{ $label }} <span class="font-semibold">{{ $account }}</span></span>
+        {{ end }}
       </a>
     {{ end }}
   {{ end }}

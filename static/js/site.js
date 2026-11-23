@@ -1,3 +1,11 @@
+(() => {
+/* Hugo i18n supplies localized UI strings. Fallbacks support isolated DOM fixtures. */
+const ylUITexts = (() => {
+  try { return JSON.parse(document.getElementById('yl-ui-messages')?.textContent || '{}'); }
+  catch { return {}; }
+})();
+const ylText = (key, fallback) => typeof ylUITexts[key] === 'string' && ylUITexts[key] ? ylUITexts[key] : fallback;
+
 (async () => {
   const catalog = document.getElementById('catalog');
   if (!catalog) return;
@@ -22,7 +30,7 @@
     if (!items.length) throw new Error('Catalog is empty');
   } catch (error) {
     console.error('YuruLink: deferred catalog load failed', error);
-    if (loading) loading.firstChild.textContent = 'リンク一覧を読み込めませんでした。通信状態を確認して再読み込みするか、';
+    if (loading) loading.firstChild.textContent = ylText('catalogLoadingFailed', 'リンク一覧を読み込めませんでした。通信状態を確認して再読み込みするか、');
     return;
   }
   // Diagnostics and E2E assertions inspect the complete detached public catalog.
@@ -41,7 +49,7 @@
   const typeCheckboxes = [...document.querySelectorAll('#content-type-filter input[name="content-type"]')];
   const typeFilterDisclosure = document.getElementById('content-type-filter');
   const typeFilterStatus = document.getElementById('content-type-filter-status');
-  const typeLabels = {video:'動画',playlist:'プレイリスト',short:'ショート',live:'ライブ',site:'サイト・ツール',social:'SNS',other:'その他'};
+  const typeLabels = {video:ylText('typeVideo','動画'),playlist:ylText('typePlaylist','プレイリスト'),short:ylText('typeShort','ショート'),live:ylText('typeLive','ライブ'),site:ylText('typeSite','サイト・ツール'),social:ylText('typeSocial','SNS'),other:ylText('typeOther','その他')};
   const validTypes = ['video', 'playlist', 'short', 'live', 'site', 'social', 'other'];
   const parseTypes = query => new Set((query || '').split(',').filter(value => validTypes.includes(value)));
   const playlistTitle = document.getElementById('selected-category-title');
@@ -86,7 +94,7 @@
   if (personFilterOptions) {
     if (!peopleDefinitions.length) {
       const p = document.createElement('p');
-      p.textContent = '出演者の確定データは現在準備中です。';
+      p.textContent = ylText('catalogParticipantPending', '出演者の確定データは現在準備中です。');
       p.className = 'text-muted-ink';
       personFilterOptions.append(p);
     } else {
@@ -228,35 +236,35 @@
     node.dataset.taxonomyId, node.dataset.label
   ]));
   const virtualLabels = new Map([
-    ['browse:video', 'YouTube動画（すべて）'],
-    ['browse:youtube-group:official', '公式チャンネル'],
-    ['browse:youtube-group:related', 'コラボ・公認・関連'],
-    ['browse:youtube-group:other', 'その他'],
-    ['browse:playlists', 'プレイリスト（すべて）'],
-    ['browse:channel-status:official', '公式チャンネル'],
-    ['browse:channel-status:authorized', '公認チャンネル'],
-    ['browse:channel-status:unofficial', '非公式チャンネル'],
-    ['browse:channel-status:unknown', '公式性未確認チャンネル'],
-    ['browse:short', 'ショート（すべて）'],
-    ['browse:live', 'ライブ（すべて）'],
-    ['browse:single', 'チャンネル・プレイリスト未所属の動画'],
-    ['browse:social', 'SNSアカウント'],
-    ['browse:social-profiles', 'SNSプロフィール'],
-    ['browse:social-posts', 'SNSの投稿・リール'],
-    ['browse:note-articles', 'noteの記事'],
-    ['browse:note-series', 'noteのシリーズ'],
-    ['browse:web-official', '公式関連サイト'],
-    ['browse:web-community', '有志・非公式サイト'],
-    ['browse:web-other', '公式性未確認サイト'],
-    ['browse:social-official', '公式SNSアカウント'],
-    ['browse:social-community', '有志・非公式SNS'],
-    ['browse:social-other', '公式性未確認SNS'],
-    ['browse:video-official', '公式動画（確認済み）'],
-    ['browse:video-channel', '収集対象チャンネルの投稿'],
-    ['browse:video-community', '有志制作の動画'],
-    ['browse:video-open-mic', 'オープンマイク動画'],
-    ['browse:video-guest', 'ゲスト出演動画'],
-    ['browse:video-related', 'その他の関連動画（未確認）']
+    ['browse:video', ylText('virtual_browse_video', 'YouTube動画（すべて）')],
+    ['browse:youtube-group:official', ylText('virtual_browse_youtube_group_official', '公式チャンネル')],
+    ['browse:youtube-group:related', ylText('virtual_browse_youtube_group_related', 'コラボ・公認・関連')],
+    ['browse:youtube-group:other', ylText('virtual_browse_youtube_group_other', 'その他')],
+    ['browse:playlists', ylText('virtual_browse_playlists', 'プレイリスト（すべて）')],
+    ['browse:channel-status:official', ylText('virtual_browse_channel_status_official', '公式チャンネル')],
+    ['browse:channel-status:authorized', ylText('virtual_browse_channel_status_authorized', '公認チャンネル')],
+    ['browse:channel-status:unofficial', ylText('virtual_browse_channel_status_unofficial', '非公式チャンネル')],
+    ['browse:channel-status:unknown', ylText('virtual_browse_channel_status_unknown', '公式性未確認チャンネル')],
+    ['browse:short', ylText('virtual_browse_short', 'ショート（すべて）')],
+    ['browse:live', ylText('virtual_browse_live', 'ライブ（すべて）')],
+    ['browse:single', ylText('virtual_browse_single', 'チャンネル・プレイリスト未所属の動画')],
+    ['browse:social', ylText('virtual_browse_social', 'SNSアカウント')],
+    ['browse:social-profiles', ylText('virtual_browse_social_profiles', 'SNSプロフィール')],
+    ['browse:social-posts', ylText('virtual_browse_social_posts', 'SNSの投稿・リール')],
+    ['browse:note-articles', ylText('virtual_browse_note_articles', 'noteの記事')],
+    ['browse:note-series', ylText('virtual_browse_note_series', 'noteのシリーズ')],
+    ['browse:web-official', ylText('virtual_browse_web_official', '公式関連サイト')],
+    ['browse:web-community', ylText('virtual_browse_web_community', '有志・非公式サイト')],
+    ['browse:web-other', ylText('virtual_browse_web_other', '公式性未確認サイト')],
+    ['browse:social-official', ylText('virtual_browse_social_official', '公式SNSアカウント')],
+    ['browse:social-community', ylText('virtual_browse_social_community', '有志・非公式SNS')],
+    ['browse:social-other', ylText('virtual_browse_social_other', '公式性未確認SNS')],
+    ['browse:video-official', ylText('virtual_browse_video_official', '公式動画（確認済み）')],
+    ['browse:video-channel', ylText('virtual_browse_video_channel', '収集対象チャンネルの投稿')],
+    ['browse:video-community', ylText('virtual_browse_video_community', '有志制作の動画')],
+    ['browse:video-open-mic', ylText('virtual_browse_video_open_mic', 'オープンマイク動画')],
+    ['browse:video-guest', ylText('virtual_browse_video_guest', 'ゲスト出演動画')],
+    ['browse:video-related', ylText('virtual_browse_video_related', 'その他の関連動画（未確認）')]
   ]);
   for (const [virtualId,taxId] of [
     ['browse:web-official','official_site'],
@@ -328,27 +336,27 @@
       else {
         const duration = formatDuration(record.duration);
         durationNode.textContent = duration;
-        durationNode.setAttribute('aria-label', '再生時間 ' + duration);
+        durationNode.setAttribute('aria-label', ylText('durationLabel', '再生時間') + ' ' + duration);
       }
     }
     if (isVideo(record)) {
       const views = item.querySelector('.catalog-item-views');
       if (views) views.textContent = record.views === null
-        ? '再生数: 未取得' : '再生数: ' + formatViewCount.format(record.views);
+        ? ylText('viewsPrefix','再生数:') + ' ' + ylText('valueNotFetched','未取得') : ylText('viewsPrefix','再生数:') + ' ' + formatViewCount.format(record.views);
       const likes = item.querySelector('.catalog-item-likes');
       if (likes) likes.textContent = record.likes === null
-        ? '高評価数: 未取得' : '高評価数: ' + formatViewCount.format(record.likes);
+        ? ylText('likesPrefix','高評価数:') + ' ' + ylText('valueNotFetched','未取得') : ylText('likesPrefix','高評価数:') + ' ' + formatViewCount.format(record.likes);
       const formatLabel = item.querySelector('[data-format-label]');
       if (formatLabel) formatLabel.textContent = ({
-        video:'動画', short:'ショート', live:'ライブ配信'
-      })[formatOf(record)] || '動画';
+        video:ylText('typeVideo','動画'), short:ylText('typeShort','ショート'), live:ylText('typeLiveStream','ライブ配信')
+      })[formatOf(record)] || ylText('typeVideo','動画');
     }
     const date = item.querySelector('time.catalog-item-date');
     if (date) {
       const value = jstText(date.getAttribute('datetime'));
       date.textContent = value
-        ? '公開日: ' + value + (value.length === 10 ? '（時刻未取得）' : '')
-        : '公開日: 未取得';
+        ? ylText('publishedPrefix','公開日:') + ' ' + value + (value.length === 10 ? ylText('catalogTimeNotFetched','（時刻未取得）') : '')
+        : ylText('publishedPrefix','公開日:') + ' ' + ylText('valueNotFetched','未取得');
     }
     item.dataset.uiFormatted = '1';
   };
@@ -484,7 +492,7 @@
   const hasServerNavigation = Boolean(buttons?.querySelector('[data-server-nav-root]'));
   if (!hasServerNavigation) {
     buttons?.replaceChildren();
-    buttons?.append(makeButton('すべてのコンテンツ', ''));
+    buttons?.append(makeButton(ylText('allContents','すべてのコンテンツ'), ''));
   }
 
   // Book1の収集対象に存在しない投稿元チャンネルは、リンク所属を維持したままナビから除外する。
@@ -523,28 +531,28 @@
 
   // 非ホームページもHugoが出力する共通ツリーを使用する。テスト用の空DOMだけは従来生成にフォールバック。
   for (const [id, meta] of channels) {
-    categoryLabels.set(`browse:video:${id}`, meta.label + 'の動画');
-    categoryLabels.set(`browse:playlists:${id}`, meta.label + 'のプレイリスト');
-    categoryLabels.set(`browse:short:${id}`, meta.label + 'のショート');
-    categoryLabels.set(`browse:live:${id}`, meta.label + 'のライブ');
+    categoryLabels.set(`browse:video:${id}`, meta.label + ylText('suffixVideo','の動画'));
+    categoryLabels.set(`browse:playlists:${id}`, meta.label + ylText('suffixPlaylist','のプレイリスト'));
+    categoryLabels.set(`browse:short:${id}`, meta.label + ylText('suffixShort','のショート'));
+    categoryLabels.set(`browse:live:${id}`, meta.label + ylText('suffixLive','のライブ'));
   }
   for (const [id,label] of virtualLabels) categoryLabels.set(id,label);
   if (!hasServerNavigation) {
   if (channels.length) {
-    const group = makeGroup('YouTubeチャンネル', true);
+    const group = makeGroup(ylText('navYoutubeChannels','YouTubeチャンネル'), true);
     for (const [id, meta] of channels) {
       const children = nested.get(id) || [];
       const channel = makeGroup(meta.label, category === id ||
         [`browse:video:${id}`,`browse:playlists:${id}`,`browse:short:${id}`,`browse:live:${id}`].includes(category) ||
         children.some(([playlistId]) => playlistId === category));
       channel.details.classList.add('ml-1');
-      categoryLabels.set(`browse:video:${id}`, meta.label + 'の動画');
-      channel.children.append(makeButton('動画', `browse:video:${id}`));
+      categoryLabels.set(`browse:video:${id}`, meta.label + ylText('suffixVideo','の動画'));
+      channel.children.append(makeButton(ylText('typeVideo','動画'), `browse:video:${id}`));
       const playlistCategory = `browse:playlists:${id}`;
-      categoryLabels.set(playlistCategory, meta.label + 'のプレイリスト');
-      categoryLabels.set(`browse:short:${id}`, meta.label + 'のショート');
-      categoryLabels.set(`browse:live:${id}`, meta.label + 'のライブ');
-      const playlistGroup = makeGroup('プレイリスト', category === playlistCategory ||
+      categoryLabels.set(playlistCategory, meta.label + ylText('suffixPlaylist','のプレイリスト'));
+      categoryLabels.set(`browse:short:${id}`, meta.label + ylText('suffixShort','のショート'));
+      categoryLabels.set(`browse:live:${id}`, meta.label + ylText('suffixLive','のライブ'));
+      const playlistGroup = makeGroup(ylText('typePlaylist','プレイリスト'), category === playlistCategory ||
         children.some(([playlistId]) => playlistId === category));
       // プレイリスト見出し自体を選んでも、リンク一覧へ切り替える。
       playlistGroup.details.querySelector('summary')?.addEventListener('click', () => {
@@ -553,17 +561,17 @@
         page = 1;
         update();
       });
-      playlistGroup.children.append(makeButton('プレイリスト一覧', playlistCategory));
+      playlistGroup.children.append(makeButton(ylText('navPlaylistList','プレイリスト一覧'), playlistCategory));
       children.forEach(([playlistId, playlist]) => playlistGroup.children.append(makeButton(playlist.label, playlistId)));
       channel.children.append(playlistGroup.details);
-      channel.children.append(makeButton('ショート', `browse:short:${id}`));
-      channel.children.append(makeButton('ライブ', `browse:live:${id}`));
+      channel.children.append(makeButton(ylText('typeShort','ショート'), `browse:short:${id}`));
+      channel.children.append(makeButton(ylText('typeLive','ライブ'), `browse:live:${id}`));
       group.children.append(channel.details);
     }
     buttons?.append(group.details);
   }
   if (ungrouped.length) {
-    const group = makeGroup('その他のプレイリスト', ungrouped.some(([id]) => id === category));
+    const group = makeGroup(ylText('navOtherPlaylists','その他のプレイリスト'), ungrouped.some(([id]) => id === category));
     ungrouped.forEach(([id, meta]) => group.children.append(makeButton(meta.label, id)));
     buttons?.append(group.details);
   }
@@ -579,22 +587,22 @@
     'browse:video-open-mic','browse:video-guest','browse:video-related','browse:single'
   ];
   if (relevantVideoIds.some(id => records.some(record => matchesCategory(record,id)))) {
-    const group = makeGroup('動画の位置づけ', relevantVideoIds.includes(category));
+    const group = makeGroup(ylText('navVideoPosition','動画の位置づけ'), relevantVideoIds.includes(category));
     for (const id of relevantVideoIds) appendAvailable(group.children,id);
     buttons?.append(group.details);
   }
   const siteGroupDefs = [
-    ['公式関連',['browse:web-official','browse:social-official']],
-    ['有志・非公式',['browse:web-community','browse:social-community']],
-    ['公式性未確認',['browse:web-other','browse:social-other']]
+    [ylText('navOfficialRelated','公式関連'),['browse:web-official','browse:social-official']],
+    [ylText('navCommunity','有志・非公式'),['browse:web-community','browse:social-community']],
+    [ylText('navUnknown','公式性未確認'),['browse:web-other','browse:social-other']]
   ];
-  const site = makeGroup('サイト・SNS',siteGroupDefs.some(([,ids])=>ids.includes(category)));
+  const site = makeGroup(ylText('navSiteSocial','サイト・SNS'),siteGroupDefs.some(([,ids])=>ids.includes(category)));
   for(const [label, ids] of siteGroupDefs){
     const sub=makeGroup(label,ids.includes(category));
     for(const id of ids)appendAvailable(sub.children,id);
     site.children.append(sub.details);
   }
-  const socialContent = makeGroup('SNSコンテンツ・note', ['browse:social-profiles','browse:social-posts','browse:note-articles','browse:note-series'].includes(category));
+  const socialContent = makeGroup(ylText('navSocialNote','SNSコンテンツ・note'), ['browse:social-profiles','browse:social-posts','browse:note-articles','browse:note-series'].includes(category));
   for (const id of ['browse:social-profiles','browse:social-posts','browse:note-articles','browse:note-series']) appendAvailable(socialContent.children,id);
   site.children.append(socialContent.details);
   if (site.children.childElementCount) buttons?.append(site.details);
@@ -609,7 +617,7 @@
   const other = categories.filter(([id]) => !known.has(id) && id !== 'video' &&
     !siteLeafIds.has(id) && !id.startsWith('browse:'));
   if (other.length) {
-    const group = makeGroup('その他のカテゴリー', other.some(([id]) => id === category));
+    const group = makeGroup(ylText('navOtherCategories','その他のカテゴリー'), other.some(([id]) => id === category));
     other.forEach(([id, meta]) => group.children.append(makeButton(meta.label,id)));
     buttons?.append(group.details);
   }
@@ -661,7 +669,7 @@
         });
         pagination.append(button);
       };
-      add('前へ', page - 1, page === 1);
+      add(ylText('catalogPrevious','前へ'), page - 1, page === 1);
       const visible = new Set([1,pages,page-2,page-1,page,page+1,page+2].filter(n=>n>=1&&n<=pages));
       let previous = 0;
       for (const n of [...visible].sort((a,b)=>a-b)) {
@@ -674,7 +682,7 @@
         add(String(n),n,false,n===page);
         previous=n;
       }
-      add('次へ', page + 1, page === pages);
+      add(ylText('catalogNext','次へ'), page + 1, page === pages);
     }
   };
   const compareItems = (a,b) => {
@@ -731,7 +739,7 @@
   const update = () => {
     if (typeFilterStatus) {
       const labels = validTypes.filter(type => selectedTypes.has(type)).map(type => typeLabels[type]);
-      typeFilterStatus.textContent = labels.length ? '選択中：' + labels.join('・') : 'すべて表示';
+      typeFilterStatus.textContent = labels.length ? ylText('catalogSelectionPrefix','選択中：') + labels.join('・') : ylText('catalogAllShown','すべて表示');
     }
     const q = (search?.value || '').trim().toLocaleLowerCase('ja');
     const matching = records.filter(record => matchesCategory(record) && matchesType(record) && matchesAdvanced(record) && record.query.includes(q)).sort(compareItems);
@@ -752,11 +760,11 @@
     catalog.append(fragment);
     catalog.classList.add('catalog-ready');
     const label = categoryLabels.get(category) || virtualLabels.get(category)
-      || (category.startsWith('browse:playlists:') ? 'プレイリスト一覧' : '')
-      || (category.startsWith('browse:video:') ? '動画' : '')
-      || (category.startsWith('browse:short:') ? 'ショート' : '')
-      || (category.startsWith('browse:live:') ? 'ライブ' : '')
-      || 'すべてのコンテンツ';
+      || (category.startsWith('browse:playlists:') ? ylText('navPlaylistList','プレイリスト一覧') : '')
+      || (category.startsWith('browse:video:') ? ylText('typeVideo','動画') : '')
+      || (category.startsWith('browse:short:') ? ylText('typeShort','ショート') : '')
+      || (category.startsWith('browse:live:') ? ylText('typeLive','ライブ') : '')
+      || ylText('allContents','すべてのコンテンツ');
     if (playlistTitle) playlistTitle.textContent = label;
     else if (selected) selected.textContent = label;
     const playlistId = category.startsWith('youtube-playlist:') ? category.slice('youtube-playlist:'.length) : '';
@@ -769,7 +777,7 @@
         playlistTitleLink.href = 'https://www.youtube.com/playlist?list=' + encodeURIComponent(playlistId);
       }
     }
-    if (count) count.textContent = matching.length + ' 件 / 全 ' + items.length + ' 件';
+    if (count) count.textContent = ylText('catalogCount', '{matching} 件 / 全 {total} 件').replace('{matching}', String(matching.length)).replace('{total}', String(items.length));
     if (empty) empty.hidden = matching.length > 0 || items.length === 0;
     buttons?.querySelectorAll('button[data-category]').forEach(button => {
       button.setAttribute('aria-current', String(button.dataset.category === category));
@@ -846,5 +854,6 @@
 })().catch(error => {
   console.error('YuruLink: catalog initialization failed', error);
   const loading = document.getElementById('catalog-loading');
-  if (loading) loading.textContent = 'リンク一覧の初期化に失敗しました。再読み込みするか、HTML一覧を直接開いてください。';
+  if (loading) loading.textContent = ylText('catalogInitFailed', 'リンク一覧の初期化に失敗しました。再読み込みするか、HTML一覧を直接開いてください。');
 });
+})();

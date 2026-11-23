@@ -10,9 +10,13 @@
 
 ## 性能とデータ読み込み
 - `/` と `/welcome/` は全件カードHTMLを取得しない。共通JSに `site.js` を含めず、ロゴ・ナビ・テーマ・初回訪問ガイドだけを動かす。
-- `/catalog/` は検索UIを先に表示し、`/catalog-data/` からHugo生成HTMLを非同期取得。約4,800件はinertなtemplateへ保持し、DOMは20〜100件だけ描画する。
+- `/catalog/` は検索UIを先に表示し、`/catalog-data/` からHugo生成HTMLを非同期取得。取得したリンク一覧はinertなtemplateへ保持し、DOMには選択された1ページ分の20〜100件だけを描画する。
 - `/catalog-data/` はnoindexの直接閲覧可能なHTML代替。データ分割と軽量索引は追加最適化候補であり、未実装を実装済みと誤認しない。
 - CIのFCPはChromiumの参考値であり、実iPhoneのコールドロードを計測したことにはならない。計測はルート案内表示と検索ページの操作可能時刻を別々に評価する。
+
+## カタログ不在時
+
+`site/catalog-available.html`は公開JSONの存在、`schema_version: 2`、非空の`items`を確認する。条件を満たさない場合、検索欄・リンクカード・カテゴリーメニュー・検索用JavaScript・Welcomeの検索CTAを出力しない。記事・ヘルプ・案内の本文と、サイト内の基本ナビゲーションは生成する。JSONの構文不正はHugoビルドエラーとして扱う。
 
 ## 動作テスト
 - Hugo Smoke: `/`・`/welcome/`・`/catalog/` の生成と、トップに検索・カタログが存在しないことを検証。

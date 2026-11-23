@@ -38,6 +38,12 @@ PCでは左サイドバー、スマートフォンでは左上のカテゴリド
 | `/submit/` | Google Formsによる掲載候補の投稿 |
 | `/change-log/` | 公開された変更の月別履歴 |
 
+## Hugoコンテンツと共通UI
+
+「ようこそ」の文章は`content/welcome/_index.md`、共通の操作文言は`i18n/ja.toml`で管理します。サイトタイトルとアイコンの参照先は`hugo.toml`の`title`と`params.brand_logo`／`params.favicon_*`／`params.apple_touch_icon`に設定します。
+
+カタログJSONが不在または空の場合、検索画面・カテゴリーツリー・検索JavaScriptを出力しません。案内・ヘルプ・記事などは、通常のHugoページとして生成します。構成とi18n追加手順は[Hugoテンプレート設計](docs/hugo-template-architecture.md)を参照してください。
+
 ## 技術とローカル実行
 
 - Hugo Extended 0.152.2、Node.js 22、Tailwind CSS v4
@@ -59,10 +65,11 @@ npm run build
 | `main` | Production | https://www.yurulink.com/ |
 | `staging` | Preview | https://staging.yurulink.com/ |
 
-Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。2026-11-23に`www.yurulink.com`（Production）と`staging.yurulink.com`（Preview）を同一PagesプロジェクトのCustom Domainとして登録し、Cloudflare DNSにプロキシ有効のCNAMEを設定しました。`*.pages.dev`の既存ホストは引き続き補助的に利用できます。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードのマージが自動デプロイを起動する可能性を前提に扱い、Production反映・DNS変更は事前承認を要します。
+Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。2026-11-23に`www.yurulink.com`（Production）と`staging.yurulink.com`（Preview）を同一PagesプロジェクトのCustom Domainとして登録し、Cloudflare DNSにプロキシ有効のCNAMEを設定しました。`*.pages.dev`の既存ホストは引き続き補助的に利用できます。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードの`main`へのマージや初回Production公開・DNS変更は事前承認を要します。**例外として、Backend定期ジョブによる`data/public/catalog.json`のみの更新は、`staging`と`main`の両方で承認済みのデータ配信です。** Pagesの自動ビルドによって最新データをサイトに反映します。
 
 ## 詳細仕様
 
+- [公開コンテンツの検索・絞り込みガイド](content/help/search-guide.md)
 - [公開カタログのデータ契約](docs/public-catalog-contract-v2.md)
 - [カテゴリ・性能要件](docs/frontend-refactoring-performance-category-20261122.md)
 - [UI・操作の回帰契約](docs/frontend-ui-regression-contract-20261122.md)
@@ -81,7 +88,6 @@ YuruLinkはゆる界隈の関連コンテンツを集約する**非公式の統�
 - 基調色：アクセント `#A35B46`、背景 `#FBF9F6`、主文字 `#342B28`。標準のHTML `theme-color` は `hugo.toml` の `params.theme_color` を参照します。Open Graphには標準のテーマカラー属性がないため独自の `og:color` は追加しません。
 - 画像制作は**HTML-to-Image（HTML/CSS/SVG → Playwright Chromium → PNG）を必須**とし、新規の生成AIによる描画は行いません。承認済みSVGを共通マスターとし、ロゴを独立して描き直しません。
 - 編集正本：AutomationLabの[HTML-to-Imageツールキット](https://github.com/yurulinkdev/yurulink-automation-lab/tree/feat/brand-html-image-pipeline-20261119/visuals)。同期先：Google Drive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120`。配置画像とREADME・制作ソースを合わせて更新します。
-- 本変更は`staging`への反映です。`main`およびProductionの初期変更は別途承認を要します。
 
 ### Staging専用のOGP
 
