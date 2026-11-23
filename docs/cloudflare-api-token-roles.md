@@ -27,7 +27,7 @@ Repository → Settings → Secrets and variables → Actions:
 - **Repository Variables（新規）**: `CLOUDFLARE_ZONE_ID`（`yurulink.com`の32桁16進数Zone ID）。DNS用トークンに不要なZone Readを付与して`GET /zones`で探索する代わりに、既知のIDを渡す。Zone IDは認証情報そのものではない。
 - **旧Secret（暫定維持）**: `CLOUDFLARE_API_TOKEN`。切替後、全参照が消え検証完了してから削除し、Cloudflare側の旧Tokenも失効させる。
 
-GitHub Secretsの値はAPIから読み出せない。登録確認と有効権限確認は、実際の**読み取り専用API呼び出し**により行う。トークン本文をチャット、Issue、ログ、Artifact、文書、コミットに記録しない。
+GitHub Secretsの値はAPIから読み出せない。登録確認は**読み取り専用API呼び出し**により行う。ただし、DNSレコードGETが成功しても**DNS Write権限が実際にあることの証明にはならない**。Writeの付与設定はCloudflareのTokenポリシー画面で確認し、実書き込み試験は別の明示承認がある場合に限定する。トークン本文をチャット、Issue、ログ、Artifact、文書、コミットに記録しない。
 
 ## コード上の対応表
 
