@@ -163,6 +163,9 @@ jobs:
             inventory/old-deployments-summary.json
           retention-days: 7
           if-no-files-found: error
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
       - name: Validate Discord event routes
         run: node ops/notifications/validate-routes.js
       - name: Notify Discord (optional)
