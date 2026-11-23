@@ -18,7 +18,7 @@ jobs:
         env:
           CLOUDFLARE_PAGES_API_TOKEN: ${{ secrets.CLOUDFLARE_PAGES_API_TOKEN }}
         run: |
-          test -n "$CLOUDFLARE_PAGES_API_TOKEN" || { echo "::error::Missing CLOUDFLARE_API_TOKEN"; exit 1; }
+          test -n "$CLOUDFLARE_PAGES_API_TOKEN" || { echo "::error::Missing CLOUDFLARE_PAGES_API_TOKEN"; exit 1; }
           test -n "$CLOUDFLARE_ACCOUNT_ID" || { echo "::error::Missing variable CLOUDFLARE_ACCOUNT_ID"; exit 1; }
       - name: Inspect Pages project configuration via read-only API
         shell: bash
@@ -28,7 +28,7 @@ jobs:
           set -euo pipefail
           mkdir -p inventory
           curl --fail --silent --show-error --retry 2 \
-            -H "Authorization: Bearer $CLOUDFLARE_API_TOKEN" \
+            -H "Authorization: Bearer $CLOUDFLARE_PAGES_API_TOKEN" \
             "https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects?per_page=100" \
             > inventory/projects-response.json
           jq -e '.success == true' inventory/projects-response.json >/dev/null
