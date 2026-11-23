@@ -14,7 +14,7 @@
 
 - いずれもGlobal API Keyは使わず、可能ならCloudflareの**Account-owned API Token**を採用する。両Tokenのアクセス範囲を最小化し、運用上妥当な有効期限を設定する。トークンはユーザーがCloudflare側で作成し、GitHub Secretsに直接登録する。
 - Pagesの閲覧用トークンに**Pages Edit/Writeを含めない**。Pagesの作成・削除・設定変更を伴う一回限りの作業には、独立した事前承認と一時権限を設ける。通常の監査CIに管理権限を常設しない。
-- DNSの閲覧自体はDNS Write権限で実行可能だが、DNS Writeを持つトークンが漏えいした場合の改ざん影響は残る。承認付きWorkflowと実行経路の保護を別途必要とする。**今回の移行ではDNS変更用Workflowを追加しない。**
+- DNSの閲覧自体はDNS Write権限で実行可能だが、DNS Writeを持つトークンが漏えいした場合の改ざん影響は残る。**DNSトークンは通常の自動CIから分離し、mainで手動実行する読み取り確認Workflowだけに渡す。** 承認付きWorkflowと実行経路の保護を別途必要とし、今回の移行ではDNS変更用Workflowを追加しない。
 - PagesのProduction/Preview配信は既存のGitHub連携による。現行CIの読み取り確認にPagesの書き込み権限は不要。
 - GitHub側の`permissions: contents: read`はGitHubの`GITHUB_TOKEN`の権限であり、Cloudflare API Tokenの権限とは別。
 
@@ -34,7 +34,8 @@ GitHub Secretsの値はAPIから読み出せない。登録確認と有効権限
 | ファイル | 移行後の認証 |
 | --- | --- |
 | `.github/workflows/cloudflare-pages-inventory.yml` | Pages Secretのみ。REST APIによる参照 |
-| `.github/workflows/cloudflare-inventory-request.yml` | Pages参照StepはPages Secret、DNS参照StepはDNS Secret（Zone ID指定） |
+| `.github/workflows/cloudflare-inventory-request.yml` | Pages Secretのみ。DNSの認証情報を受け取らない |
+| `.github/workflows/cloudflare-dns-token-check.yml` | **手動実行のみ**。DNS SecretとZone IDを使用しDNSレコードGETだけで権限を確認 |
 | `.github/workflows/cloudflare-preview-verify.yml` | Pages Secretのみ。SHA一致確認Stepに限定 |
 | `.github/workflows/frontend-validation-request.yml` | Pages Secretのみ。Preview照合Stepに限定 |
 | `.github/workflows/staging-browser.yml` | Pages Secretのみ。デプロイ待機Stepに限定 |
@@ -47,7 +48,7 @@ Wranglerは環境変数`CLOUDFLARE_API_TOKEN`を標準的に使用するが、**
 1. 運営者が2種類のCloudflare API Tokenを権限・Resource・有効期限付きで新規作成する。実Token値はチャットに送らずGitHub Repository Secretsへ登録する。
 2. `CLOUDFLARE_ZONE_ID`をActions Variablesへ登録する。`CLOUDFLARE_ACCOUNT_ID`は既存値を維持する。
 3. 作業ブランチの差分、WorkflowのStep単位のSecretスコープ、YAML構文、Python構文を確認する。**`main`へのマージは運営者の明示承認を要する。**
-4. マージ後、`cloudflare-pages-inventory.yml`の手動実行でPages一覧を読み、`cloudflare-inventory-request.yml`の手動実行でPages/DNS各読み取りAPIが成功することを確認する。DNS書き込みは実行しない。
+4. マージ後、`cloudflare-pages-inventory.yml`と`cloudflare-inventory-request.yml`の手動実行でPages一覧・構成を読み、`cloudflare-dns-token-check.yml`を**mainで手動実行**しDNSの読み取りAPIが成功することを確認する。DNS書き込みは実行しない。
 5. 次に`staging`のPreview照合とBrowser検証のRunを確認し、対象SHAが一致することを検証する。Productionは公開済み状態を保護し、単にCIが成功したことを本番変更の承認と見なさない。
 6. 新規Secretのみを参照することと全ての必要なCIの動作を確認した後、旧`CLOUDFLARE_API_TOKEN`のGitHub Secretを削除し、Cloudflare側の旧広範Tokenも失効させる。
 
