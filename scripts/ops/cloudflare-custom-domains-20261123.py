@@ -201,6 +201,25 @@ def main():
             "name": project.get("name"), "production_branch": project.get("production_branch"),
             "source_repo": repo, "domains": project.get("domains", []),
         }
+        deployments = api("GET", project_path + "/deployments?per_page=25", pages_token)
+        selected = {}
+        for d in deployments if isinstance(deployments, list) else []:
+            branch_info = ((d.get("deployment_trigger") or {}).get("metadata") or {})
+            branch_name = branch_info.get("branch")
+            env_name = d.get("environment")
+            key = ("production" if env_name == "production" else
+                   "staging" if branch_name == "staging" else None)
+            if key and key not in selected:
+                stages = d.get("stages") or []
+                selected[key] = {
+                    "environment": env_name,
+                    "branch": branch_name,
+                    "commit_hash": branch_info.get("commit_hash"),
+                    "deployment_url": d.get("url"),
+                    "created_on": d.get("created_on"),
+                    "latest_stage": (stages[-1].get("status") if stages else None),
+                }
+        report["latest_deployments"] = selected
         zone = os.environ.get("CLOUDFLARE_ZONE_ID", "").strip()
         if not re.fullmatch(r"[0-9a-f]{32}", zone):
             results = api("GET", "/zones?name=" + ZONE_NAME + "&per_page=20", dns_token)
