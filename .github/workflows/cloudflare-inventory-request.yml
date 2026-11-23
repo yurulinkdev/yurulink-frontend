@@ -135,9 +135,19 @@ jobs:
           set -euo pipefail
           api="https://api.cloudflare.com/client/v4"
           hdr="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
-          curl -fsS -H "$hdr" "$api/user/tokens/verify" > inventory/token-verification.json
-          jq -e '.success == true and .result.status == "active"' inventory/token-verification.json >/dev/null
-          echo "Cloudflare API token verification: active"
+          verified=false
+          for verifier in "user/tokens/verify" "accounts/$CLOUDFLARE_ACCOUNT_ID/tokens/verify"; do
+            status=$(curl -sS -o inventory/token-verification.json -w '%{http_code}' -H "$hdr" "$api/$verifier")
+            if [[ "$status" == 200 ]] && jq -e '.success == true and .result.status == "active"' inventory/token-verification.json >/dev/null; then
+              echo "Cloudflare token active (verified through $verifier)"
+              verified=true
+              break
+            fi
+            echo "Token verification endpoint $verifier returned HTTP $status; trying compatible endpoint"
+          done
+          if [[ "$verified" != true ]]; then
+            echo "::warning::Token verification endpoint was unavailable; checking effective Pages and DNS API access directly"
+          fi
           curl -fsS -H "$hdr" "$api/zones?name=yurulink.com&per_page=5" > inventory/zones-response.json
           zone=$(jq -er '.result[] | select(.name == "yurulink.com") | .id' inventory/zones-response.json | head -1)
           if [[ ! "$zone" =~ ^[0-9a-f]{32}$ ]]; then
