@@ -1,0 +1,31 @@
+name: Verify Cloudflare DNS token access (read only)
+
+on:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  check-dns-token:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check DNS-scoped token using only a GET request
+        shell: bash
+        env:
+          CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
+          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
+        run: |
+          set -euo pipefail
+          test -n "$CLOUDFLARE_DNS_API_TOKEN" || { echo "::error::Missing CLOUDFLARE_DNS_API_TOKEN"; exit 1; }
+          [[ "$CLOUDFLARE_ZONE_ID" =~ ^[0-9a-f]{32}$ ]] || { echo "::error::Missing/invalid CLOUDFLARE_ZONE_ID"; exit 1; }
+          response="$(mktemp)"
+          trap 'rm -f "$response"' EXIT
+          curl --fail --silent --show-error --retry 2 \
+            -H "Authorization: Bearer $CLOUDFLARE_DNS_API_TOKEN" \
+            "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?per_page=1" \
+            > "$response"
+          jq -e '.success == true and (.result | type == "array")' "$response" > /dev/null
+          echo "DNS records GET succeeded with scoped token; no records created, changed or deleted"
