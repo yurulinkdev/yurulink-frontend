@@ -17,6 +17,7 @@
   {{ if and (eq .Section "catalog") (partial "site/catalog-available.html" .) }}<script src="{{ "js/site.js" | relURL }}" defer></script>{{ end }}
 </head>
 <body class="min-h-screen bg-page text-ink">
+  {{ partial "site/ui-translations.html" . }}
   <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-panel focus:p-3">本文へ移動</a>
   <div class="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
     {{ partial "site/sidebar.html" . }}

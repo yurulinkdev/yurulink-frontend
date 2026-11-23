@@ -12,3 +12,534 @@ other = "（STAGING・検証環境）"
 
 [socialOpen]
 other = "{{ .site }}の{{ .network }}を開く"
+
+[siteHome]
+other = "{{ . }} トップページ"
+
+[home]
+other = "ホーム"
+
+[siteNav]
+other = "サイトナビゲーション"
+
+[siteAbout]
+other = "このサイトについて"
+
+[sitePosts]
+other = "記事・お知らせ"
+
+[siteChangeLog]
+other = "更新履歴"
+
+[siteHelp]
+other = "ヘルプ"
+
+[siteCategoryTitle]
+other = "カテゴリー・番組"
+
+[siteCatalogCategory]
+other = "リンク集のカテゴリー"
+
+[siteSNS]
+other = "SNS"
+
+[siteSNSLinks]
+other = "{{ . }}のSNS"
+
+[siteRecentChanges]
+other = "最近の更新履歴"
+
+[siteChangeLogPending]
+other = "本公開後に掲載します。"
+
+[siteAllChanges]
+other = "すべての更新履歴"
+
+[siteFooterNav]
+other = "フッターナビゲーション"
+
+[menuOpen]
+other = "メニューを開く"
+
+[menuClose]
+other = "カテゴリメニューを閉じる"
+
+[themeGroup]
+other = "表示テーマ"
+
+[themeToggle]
+other = "テーマを切り替え"
+
+[themeAuto]
+other = "OSのテーマ設定に追従"
+
+[skipToMain]
+other = "本文へ移動"
+
+[searchLabel]
+other = "コンテンツを検索"
+
+[searchPlaceholder]
+other = "タイトル・説明・番組名で検索"
+
+[searchHelpOpen]
+other = "検索の使い方を開く"
+
+[searchHelp]
+other = "検索の使い方"
+
+[advancedSearch]
+other = "日付・出演者の詳細検索"
+
+[dateFilter]
+other = "日付による絞り込み"
+
+[dateField]
+other = "対象の日付"
+
+[publishedDate]
+other = "公開日"
+
+[updatedDateKnown]
+other = "更新日（更新日時があるコンテンツのみ）"
+
+[startDate]
+other = "開始日"
+
+[endDate]
+other = "終了日"
+
+[participantTag]
+other = "出演者タグ"
+
+[participantVerified]
+other = "確認済みの出演情報のみ対象です。番組の所属だけでは付与しません。"
+
+[advancedReset]
+other = "詳細条件を解除"
+
+[noPosts]
+other = "まだ公開された記事はありません。"
+
+[aboutNoPosts]
+other = "記事・お知らせは準備中です。"
+
+[notFound]
+other = "ページが見つかりません"
+
+[notFoundText]
+other = "このページは移動または削除された可能性があります。"
+
+[notFoundHome]
+other = "リンク集へ戻る"
+
+[submitBreadcrumb]
+other = "リンクを投稿する"
+
+[submitFrameTitle]
+other = "{{ . }} リンク投稿 Googleフォーム"
+
+[submitFrameHelp]
+other = "フォームが表示されない場合は、Googleフォームを直接開いてください。送信完了はフォーム内でご確認ください。"
+
+[submitFrameUnavailable]
+other = "このページ内でのフォーム表示は現在利用できません。"
+
+[submitExternal]
+other = "Googleフォームを別タブで開く"
+
+[submitCTA]
+other = "リンクを投稿する"
+
+[submitCTAScope]
+other = "サイト内の投稿ページを開きます。"
+
+[submitCTAHelp]
+other = "掲載候補の情報をお寄せください"
+
+[submitCTAArea]
+other = "{{ . }}へリンクを投稿"
+
+[analyticsText]
+other = "閲覧状況の改善にGoogle Analyticsを利用します。同意がある場合のみ計測します。"
+
+[analyticsAllow]
+other = "計測に同意する"
+
+[analyticsDeny]
+other = "同意しない"
+
+[analyticsChange]
+other = "設定を変更"
+
+[catalogCurrentCategory]
+other = "閲覧中のカテゴリー"
+
+[catalogPlaylistOpen]
+other = "プレイリストを開く"
+
+[catalogSort]
+other = "並び順"
+
+[catalogSortAria]
+other = "コンテンツの並び順"
+
+[catalogNew]
+other = "公開日：新しい順"
+
+[catalogOld]
+other = "公開日：古い順"
+
+[catalogTitleAsc]
+other = "タイトル：昇順"
+
+[catalogTitleDesc]
+other = "タイトル：降順"
+
+[catalogViewsDesc]
+other = "再生数：多い順"
+
+[catalogViewsAsc]
+other = "再生数：少ない順"
+
+[catalogLikesDesc]
+other = "高評価数：多い順"
+
+[catalogLikesAsc]
+other = "高評価数：少ない順"
+
+[catalogDurationDesc]
+other = "再生時間：長い順"
+
+[catalogDurationAsc]
+other = "再生時間：短い順"
+
+[catalogPageSize]
+other = "表示件数"
+
+[catalogPageSizeAria]
+other = "1ページの表示件数"
+
+[catalogViewAria]
+other = "リンク一覧の表示形式"
+
+[catalogGrid]
+other = "カード"
+
+[catalogList]
+other = "リスト"
+
+[catalogTypeDisclosure]
+other = "種類で絞り込みを展開または折りたたむ"
+
+[catalogTypeFilter]
+other = "種類で絞り込み（複数選択可）"
+
+[catalogAllShown]
+other = "すべて表示"
+
+[catalogKindsAria]
+other = "コンテンツの種類で絞り込み"
+
+[typeVideo]
+other = "動画"
+
+[typePlaylist]
+other = "プレイリスト"
+
+[typeShort]
+other = "ショート"
+
+[typeLive]
+other = "ライブ"
+
+[typeSite]
+other = "サイト・ツール"
+
+[typeSocial]
+other = "SNS"
+
+[typeOther]
+other = "その他"
+
+[typeLiveStream]
+other = "ライブ配信"
+
+[catalogClear]
+other = "解除"
+
+[catalogKindsHint]
+other = "未選択ならすべて表示。種類の指定はOR条件です。5分未満のYouTube動画は「ショート」に分類します。"
+
+[catalogPageTop]
+other = "ページ切り替え（上部）"
+
+[catalogPage]
+other = "ページ切り替え"
+
+[catalogLoading]
+other = "リンク一覧を読み込んでいます。先にカテゴリー・検索欄・サイト案内をご利用いただけます。"
+
+[catalogOpenHTML]
+other = "HTML一覧を直接開く"
+
+[catalogNoResults]
+other = "該当するリンクがありません。"
+
+[catalogNoData]
+other = "統合形式の公開カタログを準備中です。"
+
+[catalogPlaylistAria]
+other = "YouTubeのプレイリストを開く"
+
+[catalogPlaylistFull]
+other = "YouTubeプレイリスト"
+
+[catalogPlaylistOnYouTube]
+other = "YouTubeでプレイリストを開く"
+
+[catalogSocialOpen]
+other = "SNSプロフィールを開く"
+
+[durationLabel]
+other = "再生時間"
+
+[publishedPrefix]
+other = "公開日:"
+
+[viewsPrefix]
+other = "再生数:"
+
+[likesPrefix]
+other = "高評価数:"
+
+[valueNotFetched]
+other = "未取得"
+
+[statusOfficial]
+other = "公式"
+
+[statusAuthorized]
+other = "公認"
+
+[statusUnofficial]
+other = "非公式"
+
+[catalogLoadingFailed]
+other = "リンク一覧を読み込めませんでした。通信状態を確認して再読み込みするか、"
+
+[catalogInitFailed]
+other = "リンク一覧の初期化に失敗しました。再読み込みするか、HTML一覧を直接開いてください。"
+
+[catalogParticipantPending]
+other = "出演者の確定データは現在準備中です。"
+
+[catalogSelectionPrefix]
+other = "選択中："
+
+[catalogCount]
+other = "{matching} 件 / 全 {total} 件"
+
+[catalogPrevious]
+other = "前へ"
+
+[catalogNext]
+other = "次へ"
+
+[catalogTimeNotFetched]
+other = "（時刻未取得）"
+
+[catalogSingleVideo]
+other = "チャンネル・プレイリスト未所属の動画"
+
+[onboardingMobile]
+other = "左上のメニューボタンから、番組やカテゴリーを選べます。"
+
+[onboardingDesktop]
+other = "左側のカテゴリーから、見たい番組や種類を選べます。"
+
+[onboardingClose]
+other = "案内を閉じる"
+
+[channelGroup_official]
+other = "公式チャンネル"
+
+[channelGroup_related]
+other = "コラボ・公認・関連"
+
+[channelGroup_other]
+other = "その他"
+
+[navYoutube]
+other = "YouTube動画"
+
+[navOther]
+other = "その他サイト・SNS"
+
+[navSection_web]
+other = "Webサイト"
+
+[navSection_social]
+other = "SNS"
+
+[navBrowse_web_official]
+other = "公式・公認"
+
+[navBrowse_web_community]
+other = "非公式"
+
+[navBrowse_social_official]
+other = "公式/関係者"
+
+[navBrowse_social_other]
+other = "その他"
+
+[navGroupAll]
+other = "この分類のすべて"
+
+[navChannelAll]
+other = "このチャンネルのすべて"
+
+[navPlaylistList]
+other = "プレイリスト一覧"
+
+[navOtherPlaylists]
+other = "その他のプレイリスト"
+
+[catalogKindsTypeLegend]
+other = "表示するコンテンツの種類"
+
+[navYoutubeChannels]
+other = "YouTubeチャンネル"
+
+[navVideoPosition]
+other = "動画の位置づけ"
+
+[navOfficialRelated]
+other = "公式関連"
+
+[navCommunity]
+other = "有志・非公式"
+
+[navUnknown]
+other = "公式性未確認"
+
+[navSiteSocial]
+other = "サイト・SNS"
+
+[navSocialNote]
+other = "SNSコンテンツ・note"
+
+[navOtherCategories]
+other = "その他のカテゴリー"
+
+[suffixVideo]
+other = "の動画"
+
+[suffixPlaylist]
+other = "のプレイリスト"
+
+[suffixShort]
+other = "のショート"
+
+[suffixLive]
+other = "のライブ"
+
+[analyticsStatusPrefix]
+other = "Google Analyticsの計測設定："
+
+[analyticsStatusAllowed]
+other = "同意済み"
+
+[analyticsStatusDenied]
+other = "同意しない"
+
+[analyticsDefaultNotice]
+other = "サイト改善のためGoogle Analyticsを利用します。ご同意のときだけ計測します。"
+
+[virtual_browse_video]
+other = "YouTube動画（すべて）"
+
+[virtual_browse_youtube_group_official]
+other = "公式チャンネル"
+
+[virtual_browse_youtube_group_related]
+other = "コラボ・公認・関連"
+
+[virtual_browse_youtube_group_other]
+other = "その他"
+
+[virtual_browse_playlists]
+other = "プレイリスト（すべて）"
+
+[virtual_browse_channel_status_official]
+other = "公式チャンネル"
+
+[virtual_browse_channel_status_authorized]
+other = "公認チャンネル"
+
+[virtual_browse_channel_status_unofficial]
+other = "非公式チャンネル"
+
+[virtual_browse_channel_status_unknown]
+other = "公式性未確認チャンネル"
+
+[virtual_browse_short]
+other = "ショート（すべて）"
+
+[virtual_browse_live]
+other = "ライブ（すべて）"
+
+[virtual_browse_single]
+other = "チャンネル・プレイリスト未所属の動画"
+
+[virtual_browse_social]
+other = "SNSアカウント"
+
+[virtual_browse_social_profiles]
+other = "SNSプロフィール"
+
+[virtual_browse_social_posts]
+other = "SNSの投稿・リール"
+
+[virtual_browse_note_articles]
+other = "noteの記事"
+
+[virtual_browse_note_series]
+other = "noteのシリーズ"
+
+[virtual_browse_web_official]
+other = "公式関連サイト"
+
+[virtual_browse_web_community]
+other = "有志・非公式サイト"
+
+[virtual_browse_web_other]
+other = "公式性未確認サイト"
+
+[virtual_browse_social_official]
+other = "公式SNSアカウント"
+
+[virtual_browse_social_community]
+other = "有志・非公式SNS"
+
+[virtual_browse_social_other]
+other = "公式性未確認SNS"
+
+[virtual_browse_video_official]
+other = "公式動画（確認済み）"
+
+[virtual_browse_video_channel]
+other = "収集対象チャンネルの投稿"
+
+[virtual_browse_video_community]
+other = "有志制作の動画"
+
+[virtual_browse_video_open_mic]
+other = "オープンマイク動画"
+
+[virtual_browse_video_guest]
+other = "ゲスト出演動画"
+
+[virtual_browse_video_related]
+other = "その他の関連動画（未確認）"

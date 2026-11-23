@@ -2,11 +2,11 @@
 {{ $id := .Site.Params.analytics.ga4_measurement_id | default "" }}
 {{ if gt (len (findRE "^G-[A-Z0-9]+$" $id)) 0 }}
   <section class="mt-5 max-w-xl rounded-lg border border-line p-3 text-xs" id="analytics-consent" data-ga4-id="{{ $id }}" data-allowed-hostnames="{{ delimit (.Site.Params.analytics.ga4_hostnames | default (slice)) "," }}" hidden>
-    <p>閲覧状況の改善にGoogle Analyticsを利用します。同意がある場合のみ計測します。</p>
+    <p>{{ i18n "analyticsText" }}</p>
     <div class="mt-2 flex flex-wrap gap-2">
-      <button type="button" id="analytics-allow" class="rounded border border-line bg-panel-muted px-3 py-1.5">計測に同意する</button>
-      <button type="button" id="analytics-deny" class="rounded border border-line px-3 py-1.5">同意しない</button>
-      <button type="button" id="analytics-change" class="text-accent underline" hidden>設定を変更</button>
+      <button type="button" id="analytics-allow" class="rounded border border-line bg-panel-muted px-3 py-1.5">{{ i18n "analyticsAllow" }}</button>
+      <button type="button" id="analytics-deny" class="rounded border border-line px-3 py-1.5">{{ i18n "analyticsDeny" }}</button>
+      <button type="button" id="analytics-change" class="text-accent underline" hidden>{{ i18n "analyticsChange" }}</button>
     </div>
   </section>
 {{ end }}

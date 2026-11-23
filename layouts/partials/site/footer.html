@@ -1,11 +1,11 @@
 <footer class="mx-auto mt-10 max-w-7xl border-t border-line px-4 py-6 text-sm text-muted-ink sm:px-7">
-  <nav aria-label="フッターナビゲーション" class="flex flex-wrap items-center gap-4">
-    <a href="{{ "about/" | relURL }}" class="hover:underline">このサイトについて</a>
-    <a href="{{ "about/#articles" | relURL }}" class="hover:underline">{{ .Site.Params.navigation.posts_label | default "記事・お知らせ" }}</a>
-    <a href="{{ "change-log/" | relURL }}" class="hover:underline">更新履歴</a>
-    <a href="{{ "help/" | relURL }}" class="hover:underline">ヘルプ</a>
+  <nav aria-label="{{ i18n "siteFooterNav" }}" class="flex flex-wrap items-center gap-4">
+    <a href="{{ "about/" | relURL }}" class="hover:underline">{{ i18n "siteAbout" }}</a>
+    <a href="{{ "about/#articles" | relURL }}" class="hover:underline">{{ .Site.Params.navigation.posts_label | default (i18n "sitePosts") }}</a>
+    <a href="{{ "change-log/" | relURL }}" class="hover:underline">{{ i18n "siteChangeLog" }}</a>
+    <a href="{{ "help/" | relURL }}" class="hover:underline">{{ i18n "siteHelp" }}</a>
   </nav>
-  <nav class="mt-3 flex flex-wrap gap-2" aria-label="YuruLink公式SNS">{{ partial "site/social-links.html" . }}</nav>
+  <nav class="mt-3 flex flex-wrap gap-2" aria-label="{{ i18n "siteSNSLinks" .Site.Title }}">{{ partial "site/social-links.html" . }}</nav>
   <p class="mt-3">{{ .Site.Title }} — {{ i18n "siteDescriptor" }}</p>
   {{ partial "site/analytics-consent.html" . }}
 </footer>
