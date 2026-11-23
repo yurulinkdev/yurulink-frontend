@@ -1,5 +1,5 @@
 {
   "schema_version": 1,
-  "mode": "plan",
-  "request_id": "yl-domains-plan-20261123-02"
+  "mode": "apply",
+  "request_id": "yl-domains-activate-20261123-01"
 }
