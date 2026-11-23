@@ -36,14 +36,14 @@
       "title_present": true
     },
     "www.yurulink.com": {
-      "canonical_custom_host": false,
-      "canonical_url": "https://yurulink-frontend.pages.dev/",
+      "canonical_custom_host": true,
+      "canonical_url": "https://www.yurulink.com/",
       "expected_ogp": true,
       "final_hostname": "www.yurulink.com",
       "hostname": "www.yurulink.com",
       "http_status": 200,
       "noindex": false,
-      "og_image": "https://yurulink-frontend.pages.dev/ogp/yurulink-light.png",
+      "og_image": "https://www.yurulink.com/ogp/yurulink-light.png",
       "robots_content": null,
       "title_present": true
     }
@@ -51,17 +51,17 @@
   "latest_deployments": {
     "production": {
       "branch": "main",
-      "commit_hash": "b7adb5617d2da18979f684ddbbd59cc6efb29820",
-      "created_on": "2026-11-23T07:38:36.730842Z",
-      "deployment_url": "https://e48b10b0.yurulink-frontend.pages.dev",
+      "commit_hash": "c49ead7f84e337007b078fdc1270188fa71314b1",
+      "created_on": "2026-11-23T07:40:43.022576Z",
+      "deployment_url": "https://b6efe97a.yurulink-frontend.pages.dev",
       "environment": "production",
       "latest_stage": "idle"
     },
     "staging": {
       "branch": "staging",
-      "commit_hash": "8805973432598c832658d3195d68899936e97e6f",
-      "created_on": "2026-11-23T07:36:53.271803Z",
-      "deployment_url": "https://5fb2f8a2.yurulink-frontend.pages.dev",
+      "commit_hash": "aea16797d9271fcd9dbb0192517a213aaae3562c",
+      "created_on": "2026-11-23T07:40:03.731998Z",
+      "deployment_url": "https://68739938.yurulink-frontend.pages.dev",
       "environment": "preview",
       "latest_stage": "idle"
     }
@@ -94,10 +94,11 @@
     "source_repo": "yurulink-frontend"
   },
   "project": "yurulink-frontend",
-  "request_id": "yl-domains-deploy-verify-20261123-01",
+  "request_id": "yl-domains-final-verify-20261123-01",
   "schema_version": 1,
   "state": "preflight_ok",
-  "time_utc": "2026-11-23T07:38:43.672228+00:00",
+  "time_utc": "2026-11-23T07:40:48.424009+00:00",
+  "workflow_run_id": "45132850563",
   "zone": "yurulink.com",
   "zone_status": "active"
 }
