@@ -1,9 +1,18 @@
 {
   "actions": [],
-  "dns": {},
-  "error": "Cloudflare HTTP 400 on GET /accounts/ccdd5448ef4f9f2cdd38f9601824ee35/pages/projects/yurulink-frontend/domains; error codes: 8000024",
+  "dns": {
+    "staging.yurulink.com": [],
+    "www.yurulink.com": []
+  },
   "mode": "plan",
-  "pages": {},
+  "pages": {
+    "staging.yurulink.com": {
+      "status": "not_attached"
+    },
+    "www.yurulink.com": {
+      "status": "not_attached"
+    }
+  },
   "pages_project": {
     "domains": [
       "yurulink-frontend.pages.dev"
@@ -13,10 +22,10 @@
     "source_repo": "yurulink-frontend"
   },
   "project": "yurulink-frontend",
-  "request_id": "yl-domains-plan-20261123-01",
+  "request_id": "yl-domains-plan-20261123-02",
   "schema_version": 1,
-  "state": "error",
-  "time_utc": "2026-11-23T07:33:30.110008+00:00",
+  "state": "preflight_ok",
+  "time_utc": "2026-11-23T07:34:18.622582+00:00",
   "zone": "yurulink.com",
   "zone_status": "active"
 }
