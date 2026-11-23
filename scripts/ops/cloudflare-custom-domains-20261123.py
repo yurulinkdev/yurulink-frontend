@@ -79,6 +79,34 @@ def safe_record_check(host, rows):
         raise RuntimeError("Multiple DNS records on " + host + "; operation stopped")
 
 
+
+def probe_host(host):
+    """Public HTTPS verification; no authentication, no external redirects trusted."""
+    result = {"hostname": host}
+    try:
+        req = urllib.request.Request("https://" + host + "/", headers={
+            "User-Agent": "Mozilla/5.0 (compatible; YuruLinkDomainVerify/1)",
+            "Accept": "text/html",
+        })
+        with urllib.request.urlopen(req, timeout=20) as resp:
+            body = resp.read(500_000).decode("utf-8", errors="replace")
+            final_url = resp.geturl()
+            result.update({
+                "http_status": resp.status,
+                "final_hostname": urllib.parse.urlsplit(final_url).hostname,
+                "title_present": "YuruLink" in body,
+                "canonical_custom_host": ('rel="canonical" href="https://' + host + '/') in body,
+                "noindex": 'name="robots" content="noindex' in body,
+                "expected_ogp": ("yurulink-staging.png" if host.startswith("staging.") else "yurulink-light.png") in body,
+            })
+    except urllib.error.HTTPError as ex:
+        result["http_status"] = ex.code
+        result["error"] = "HTTP " + str(ex.code)
+    except Exception as ex:
+        result["error"] = type(ex).__name__ + ": " + str(ex)[:180]
+    return result
+
+
 def github_report(report):
     token = os.environ.get("GITHUB_TOKEN", "")
     if not token:
@@ -177,6 +205,7 @@ def main():
             safe_record_check(host, rows)
         report["state"] = "preflight_ok"
         if mode == "plan":
+            report["https"] = {host: probe_host(host) for host in EXPECTED}
             return report
 
         # Attach both hostnames to Pages BEFORE creating any missing CNAME.
