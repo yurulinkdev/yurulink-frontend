@@ -125,23 +125,6 @@ jobs:
             echo "$project: deployment inventory retrieved"
           done
           rm -f inventory/deployments-response.json
-      - name: Audit DNS records with DNS-scoped token (read only)
-        shell: bash
-        env:
-          CLOUDFLARE_DNS_API_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
-          CLOUDFLARE_ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
-        run: |
-          set -euo pipefail
-          test -n "$CLOUDFLARE_DNS_API_TOKEN" || { echo "::error::Missing CLOUDFLARE_DNS_API_TOKEN"; exit 1; }
-          [[ "$CLOUDFLARE_ZONE_ID" =~ ^[0-9a-f]{32}$ ]] || { echo "::error::Missing or invalid CLOUDFLARE_ZONE_ID"; exit 1; }
-          curl --fail --silent --show-error --retry 2 \
-            -H "Authorization: Bearer $CLOUDFLARE_DNS_API_TOKEN" \
-            "https://api.cloudflare.com/client/v4/zones/$CLOUDFLARE_ZONE_ID/dns_records?per_page=5" \
-            > inventory/dns-response.json
-          jq -e '.success == true and (.result | type == "array")' inventory/dns-response.json >/dev/null
-          jq '{zone: "yurulink.com", result_count: (.result | length), total_records: (.result_info.total_count // null), access: "DNS records read succeeded; write not executed"}' inventory/dns-response.json > inventory/dns-access.json
-          rm -f inventory/dns-response.json
-          echo "DNS read succeeded via zone-scoped token; no DNS records changed"
       - name: Inspect retired separate Staging Pages project (read only)
         shell: bash
         env:
@@ -176,7 +159,6 @@ jobs:
             inventory/projects-details.json
             inventory/production-project.json
             inventory/yurulink-frontend-deployments.json
-            inventory/dns-access.json
             inventory/old-project.json
             inventory/old-deployments-summary.json
           retention-days: 7
