@@ -81,7 +81,14 @@ test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page 
   await expect(page.getByRole('heading',{name:'更新履歴',exact:true})).toBeVisible();
   await expect(page.locator('footer a[href="/change-log/"]')).toHaveCount(1);
   await expect(page.locator('#category-drawer nav[aria-label="サイト内ページ"] a[href="/change-log/"]')).toHaveCount(1);
-  await expect(page.locator('#category-drawer section[aria-label="最近の更新履歴"] li')).toHaveCount(0);
+  const recent = page.locator('#category-drawer section[aria-label="最近の更新履歴"]');
+  const months = recent.locator('li');
+  if (await months.count()) {
+    await expect(months.first().locator('a')).toHaveAttribute('href', /\/change-log\/\d{4}-\d{2}\/$/);
+    await expect(recent).not.toContainText('掲載データの更新履歴はまだありません。');
+  } else {
+    await expect(recent).toContainText('掲載データの更新履歴はまだありません。');
+  }
   for (const old of ['/history/','/news/changelog/']) {
     const res = await gotoAndWaitForCatalog(page,old);
     expect(res?.status(),old).toBe(404);
