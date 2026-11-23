@@ -48,7 +48,9 @@ sequenceDiagram
 4. **ブラウザ**：Playwright Chromiumで検索・ナビ・カテゴリ保存・ページネーション・カード／リスト・投稿導線を検査する。
 5. **本番反映前**：Production環境用のビルド設定、noindex解除の妥当性、canonical／OGP、GA4同意・ホスト制限、公開対象JSONを確認する。
 
-`staging`から`main`へのマージはコード変更だけでなくPages Productionの自動デプロイを伴い得る操作です。事前承認なしに実施しません。BackendのBlue／Green有効世代、初回データ公開、DNS切替も独立した承認対象です。
+Frontendのアプリケーションコード・Hugoテンプレート・設定を`main`へ変更する場合、初回Production公開、DNS／Pages設定変更、BackendのBlue／Green有効世代切替には事前承認が必要です。
+
+**定期データ更新の例外**：Backendが検証済み`catalog.json`を`data/public/catalog.json`へ配信する既存ジョブは、Frontend `staging`および`main`への自動更新を許可します。JSONだけのコミットでPagesのProductionビルドが起動しても、サイトの掲載内容更新として扱います。アプリケーションコードと設定を同じ更新処理に含めません。
 
 ## 検証の起動方法
 

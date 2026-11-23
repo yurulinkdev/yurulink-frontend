@@ -38,6 +38,12 @@ PCでは左サイドバー、スマートフォンでは左上のカテゴリド
 | `/submit/` | Google Formsによる掲載候補の投稿 |
 | `/change-log/` | 公開された変更の月別履歴 |
 
+## Hugoコンテンツと共通UI
+
+「ようこそ」の文章は`content/welcome/_index.md`、共通の操作文言は`i18n/ja.toml`で管理します。サイトタイトルとアイコンの参照先は`hugo.toml`の`title`と`params.brand_logo`／`params.favicon_*`／`params.apple_touch_icon`に設定します。
+
+カタログJSONが不在または空の場合、検索画面・カテゴリーツリー・検索JavaScriptを出力しません。案内・ヘルプ・記事などは、通常のHugoページとして生成します。構成とi18n追加手順は[Hugoテンプレート設計](docs/hugo-template-architecture.md)を参照してください。
+
 ## 技術とローカル実行
 
 - Hugo Extended 0.152.2、Node.js 22、Tailwind CSS v4
@@ -59,7 +65,7 @@ npm run build
 | `main` | Production | https://yurulink-frontend.pages.dev/ |
 | `staging` | Preview | https://staging.yurulink-frontend.pages.dev/ |
 
-Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードのマージが自動デプロイを起動する可能性を前提に扱い、Production反映・DNS変更は事前承認を要します。
+Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードの`main`へのマージや初回Production公開・DNS変更は事前承認を要します。**例外として、Backend定期ジョブによる`data/public/catalog.json`のみの更新は、`staging`と`main`の両方で承認済みのデータ配信です。** Pagesの自動ビルドによって最新データをサイトに反映します。
 
 ## 詳細仕様
 
