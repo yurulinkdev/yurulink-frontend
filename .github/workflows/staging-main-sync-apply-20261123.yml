@@ -1,0 +1,94 @@
+name: Integrate verified staging into main candidate
+on:
+  push:
+    branches: [integration/staging-main-sync-20261123]
+    paths:
+      - '.github/workflows/staging-main-sync-apply-20261123.yml'
+permissions:
+  contents: write
+concurrency:
+  group: yuru-frontend-staging-main-apply-20261123
+  cancel-in-progress: false
+jobs:
+  integrate:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Prepare two-parent merge with explicit documentation conflict resolution
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          test "$(git branch --show-current)" = "integration/staging-main-sync-20261123"
+          git fetch origin main staging
+          git reset --hard origin/main
+          if GIT_MERGE_AUTOEDIT=no git merge --no-ff --no-commit origin/staging; then
+            echo "No merge conflicts"
+          else
+            unresolved="$(git diff --name-only --diff-filter=U)"
+            expected="$(printf 'README.md\ndocs/environments.md')"
+            if [ "$unresolved" != "$expected" ]; then
+              echo "::error::Unexpected conflicts: $unresolved"
+              exit 1
+            fi
+            git checkout --theirs README.md
+            git checkout --ours docs/environments.md
+            git add README.md docs/environments.md
+          fi
+          python3 - <<'PY'
+          from pathlib import Path
+          readme=Path('README.md').read_text()
+          assert '## Hugoコンテンツと共通UI' in readme, 'Staging README must retain Hugo text externalization'
+          assert '定期ジョブによる' in readme, 'Staging README must retain catalog publication exception'
+          doc=Path('docs/environments.md')
+          body=doc.read_text()
+          target='\u0060staging\u0060から\u0060main\u0060へのマージはコード変更だけでなくPages Productionの自動デプロイを伴い得る操作です。事前承認なしに実施しません。BackendのBlue／Green有効世代、初回データ公開、DNS切替も独立した承認対象です。'
+          add=(
+            '\n\n**定期データ更新の例外**：Backendが検証済み\u0060catalog.json\u0060を'
+            '\u0060data/public/catalog.json\u0060へ配信する既存ジョブは、'
+            'Frontend \u0060staging\u0060および\u0060main\u0060への自動更新を許可します。'
+            'JSONのみの変更に伴うProductionの自動ビルドは通常の掲載内容更新として扱い、'
+            'アプリケーションコードの本番昇格と区別します。'
+            'JSON配信ジョブにコード・設定変更を混在させません。'
+          )
+          assert target in body, 'Expected main-side release approval policy to remain'
+          if '定期データ更新の例外' not in body: body=body.replace(target,target+add,1)
+          assert '### Custom Domain切替の実施' in body, 'Must retain Cloudflare custom domain activation history'
+          assert '### Cloudflare旧独立Staging削除' in body, 'Must retain audited Cloudflare changes'
+          doc.write_text(body)
+          PY
+          git add docs/environments.md
+          if [ -n "$(git diff --name-only --diff-filter=U)" ]; then
+            echo "::error::Unresolved merge files remain"
+            exit 1
+          fi
+          test "$(git show :scripts/prepare-site-build.mjs | grep -c 'https://www.yurulink.com/')" -ge 1
+          test "$(git show :scripts/prepare-site-build.mjs | grep -c 'https://staging.yurulink.com/')" -ge 1
+          git diff --cached --stat | tail -55
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - uses: peaceiris/actions-hugo@v3
+        with:
+          hugo-version: '0.152.2'
+          extended: true
+      - name: Build smoke and validate both environments before publishing candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm install --no-audit --no-fund
+          bash scripts/smoke-test.sh
+          node scripts/verify-site-environments.mjs
+      - name: Commit verified integration as real merge and push candidate branch
+        shell: bash
+        run: |
+          set -euo pipefail
+          git add -A
+          git commit -m "Merge staging UI and content into main candidate; retain production DNS and catalog controls"
+          git push origin HEAD:integration/staging-main-sync-20261123
+          echo "MERGE_CANDIDATE_SHA=$(git rev-parse HEAD)"
