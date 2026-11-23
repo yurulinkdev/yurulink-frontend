@@ -129,6 +129,43 @@ jobs:
             echo "$project: deployment inventory retrieved"
           done
           rm -f inventory/deployments-response.json
+      - name: Verify updated API token and DNS access (read only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4"
+          hdr="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          curl -fsS -H "$hdr" "$api/user/tokens/verify" > inventory/token-verification.json
+          jq -e '.success == true and .result.status == "active"' inventory/token-verification.json >/dev/null
+          echo "Cloudflare API token verification: active"
+          curl -fsS -H "$hdr" "$api/zones?name=yurulink.com&per_page=5" > inventory/zones-response.json
+          zone=$(jq -er '.result[] | select(.name == "yurulink.com") | .id' inventory/zones-response.json | head -1)
+          if [[ ! "$zone" =~ ^[0-9a-f]{32}$ ]]; then
+            echo "::error::yurulink.com zone is unavailable to updated token"
+            exit 1
+          fi
+          echo "Cloudflare zone discovery: yurulink.com accessible"
+          curl -fsS -H "$hdr" "$api/zones/$zone/dns_records?per_page=5" > inventory/dns-response.json
+          jq -e '.success == true and (.result | type == "array")' inventory/dns-response.json >/dev/null
+          jq '{zone: "yurulink.com", result_count: (.result | length), total_records: (.result_info.total_count // null), access: "DNS records read succeeded; write not executed"}' inventory/dns-response.json > inventory/dns-access.json
+          echo "DNS records API: access verified without modifying any record"
+          rm -f inventory/token-verification.json inventory/zones-response.json inventory/dns-response.json
+      - name: Inspect old separate Staging Pages project (read only)
+        shell: bash
+        run: |
+          set -euo pipefail
+          api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects"
+          hdr="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
+          curl -fsS -H "$hdr" "$api/yurulink-frontend-staging" > inventory/old-response.json
+          jq -e '.success == true and .result.name == "yurulink-frontend-staging"' inventory/old-response.json >/dev/null
+          jq '{name: .result.name, subdomain: .result.subdomain, domains: .result.domains, source_repo: .result.source.config.repo_name, source_branch: .result.source.config.production_branch, project_id: .result.id}' inventory/old-response.json > inventory/old-project.json
+          curl -fsS -H "$hdr" "$api/yurulink-frontend-staging/deployments?per_page=1" > inventory/old-deployments-response.json
+          jq -e '.success == true' inventory/old-deployments-response.json >/dev/null
+          jq '{total_deployments: (.result_info.total_count // null), page_count: (.result_info.total_pages // null), sampled: (.result | length)}' inventory/old-deployments-response.json > inventory/old-deployments-summary.json
+          echo "Old separate Pages project located; deployment summary attached"
+          jq -c '{name,subdomain,domains,source_repo,source_branch}' inventory/old-project.json
+          jq -c '.' inventory/old-deployments-summary.json
+          rm -f inventory/old-response.json inventory/old-deployments-response.json
       - name: Upload inventory
         uses: actions/upload-artifact@v4
         with:
@@ -138,6 +175,9 @@ jobs:
             inventory/projects-details.json
             inventory/production-project.json
             inventory/yurulink-frontend-deployments.json
+            inventory/dns-access.json
+            inventory/old-project.json
+            inventory/old-deployments-summary.json
           retention-days: 7
           if-no-files-found: error
       - name: Validate Discord event routes
