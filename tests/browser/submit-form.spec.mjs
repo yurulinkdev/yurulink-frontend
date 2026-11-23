@@ -18,7 +18,7 @@ test('リンク投稿ページを埋め込み、既存フォームへの外部�
   await expect(page.locator('#submission-external-link')).toHaveAttribute(
     'href', 'https://forms.gle/hgYcATGs2oHEbf9v9');
   await expect(page.locator('#submission-external-link')).toHaveAttribute('rel', 'noopener noreferrer');
-  await expect(page.getByText('送信しただけではYuruLinkには掲載されません')).toBeVisible();
+  await expect(page.getByText('送信した時点では公開されません。')).toBeVisible();
   // フォームの中身・送信・収集先はGoogle側。テストで勝手な投稿を行わない。
 });
 

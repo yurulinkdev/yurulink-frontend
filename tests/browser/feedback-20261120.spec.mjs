@@ -16,7 +16,7 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   await web.locator(':scope > summary').click();
   await expect(web.locator('a[data-category="browse:web-community"]')).toBeVisible();
   await gotoAndWaitForCatalog(page,'/help/search-guide/');
-  await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '検索・絞り込みガイド', exact: true })).toBeVisible();
   await gotoAndWaitForCatalog(page,'/change-log/');
   await expect(page.getByRole('heading', { name: '更新履歴', exact: true })).toBeVisible();
   // 旧URL・存在しないURLがトップページへ200でフォールバックしないことを検証。
