@@ -1,4 +1,4 @@
-baseURL = "https://staging.yurulink-frontend.pages.dev/"
+baseURL = "https://staging.yurulink.com/"
 # サイトの公開URL。導入先に合わせて指定します。
 title = "YuruLink"
 defaultContentLanguage = "ja"
