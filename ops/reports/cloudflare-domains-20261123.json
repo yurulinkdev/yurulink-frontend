@@ -1,16 +1,41 @@
 {
-  "actions": [],
+  "actions": [
+    "pages_attached:www.yurulink.com",
+    "pages_attached:staging.yurulink.com",
+    "dns_created:www.yurulink.com",
+    "dns_created:staging.yurulink.com"
+  ],
   "dns": {
-    "staging.yurulink.com": [],
-    "www.yurulink.com": []
+    "staging.yurulink.com": [
+      {
+        "content": "staging.yurulink-frontend.pages.dev",
+        "id": "a751f8a67be5778592099c112a32d190",
+        "locked": null,
+        "name": "staging.yurulink.com",
+        "proxied": true,
+        "type": "CNAME"
+      }
+    ],
+    "www.yurulink.com": [
+      {
+        "content": "yurulink-frontend.pages.dev",
+        "id": "e2d95093f1de17a0877689470225c162",
+        "locked": null,
+        "name": "www.yurulink.com",
+        "proxied": true,
+        "type": "CNAME"
+      }
+    ]
   },
-  "mode": "plan",
+  "mode": "apply",
   "pages": {
     "staging.yurulink.com": {
-      "status": "not_attached"
+      "status": "initializing",
+      "verification_data_present": true
     },
     "www.yurulink.com": {
-      "status": "not_attached"
+      "status": "pending",
+      "verification_data_present": true
     }
   },
   "pages_project": {
@@ -22,10 +47,10 @@
     "source_repo": "yurulink-frontend"
   },
   "project": "yurulink-frontend",
-  "request_id": "yl-domains-plan-20261123-02",
+  "request_id": "yl-domains-activate-20261123-01",
   "schema_version": 1,
-  "state": "preflight_ok",
-  "time_utc": "2026-11-23T07:34:18.622582+00:00",
+  "state": "configured_dns_readback_ok",
+  "time_utc": "2026-11-23T07:34:43.278115+00:00",
   "zone": "yurulink.com",
   "zone_status": "active"
 }
