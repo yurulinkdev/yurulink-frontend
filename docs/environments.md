@@ -6,11 +6,11 @@ Cloudflare Pagesは`yurulink-frontend`という**単一プロジェクト**で�
 
 | 用途 | Gitブランチ | Pages環境 | 既存ホスト |
 | --- | --- | --- | --- |
-| 公開版 | `main` | Production | https://yurulink-frontend.pages.dev/ |
-| 検証版 | `staging` | Preview | https://staging.yurulink-frontend.pages.dev/ |
+| 公開版 | `main` | Production | https://www.yurulink.com/ |
+| 検証版 | `staging` | Preview | https://staging.yurulink.com/ |
 | 個別変更の確認 | PR等のブランチ | Preview | デプロイ固有URL |
 
-カスタムドメインを接続する場合は、ProductionとStagingのURL・DNS・TLS・検索インデックス制御を別々に検証します。想定する公開用ホストは`www.yurulink.com`、Staging用は`staging.yurulink.com`ですが、実接続済みかどうかはCloudflareの現在設定で確認してください。
+2026-11-23、Cloudflare PagesのCustom Domainとして`www.yurulink.com`と`staging.yurulink.com`を登録しました。両DNSレコードはプロキシ有効。`*.pages.dev`の旧ホスト名は接続維持し、ブラウザー向けcanonical/OGPは独自ドメインを正本とします。ProductionとStagingのTLS・検索インデックス制御は別々に確認します。
 
 ## ビルド仕様
 
@@ -65,7 +65,7 @@ sequenceDiagram
 - 画像は採用済みのHTML-to-Imageライト版にHTML/CSSで検証ラベルを合成し、Playwright Chromiumで1200×630 PNGに描画。生成AIの新規画像生成はしません。制作原本・配布物はAutomationLabとDrive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120` に同期します。
 
 
-### Production初期公開のビルド・受付ゲート（2026-11-23）
+### Production初期公開のビルド・受付ゲート（2026-11-23・独自ドメイン接続前の履歴）
 
 現時点でCloudflare Pages `yurulink-frontend` の `domains` 一覧に登録されているのは `yurulink-frontend.pages.dev` のみです。PagesのProduction branchは`main`、Previewは`staging`。独自ドメイン `www.yurulink.com` はPagesのCustom Domainに未登録のため、最初のProduction公開では既存のPagesホストをcanonical/OGPに採用し、独自ドメイン接続後に切り替えます。
 
@@ -87,3 +87,12 @@ Pagesの既存コマンド `npm run css:build && hugo --minify` は変更せず�
 - 削除およびDNS試験用の一回限りの特権Workflow・操作要求・実装スクリプトは完了後にリポジトリから削除。読み取り専用棚卸しWorkflowは保持し、旧プロジェクトがHTTP 404の場合を正常な廃止済み状態として記録する。
 - 現行トークンはPages Writeがアカウント全体、DNS/Zone Writeが`yurulink.com`に付与され、有効期限なし。今後、運用上必要な権限だけに分離した短期有効のPages用／DNS用トークンへの切り分けを推奨する。Secret値をコード・ログ・文書に記録しない。
 - `www.yurulink.com`のPages Custom Domain接続・DNSの本番変更は今回実行していない。
+
+### Custom Domain切替の実施（2026-11-23・現行）
+
+- Cloudflare Pages `yurulink-frontend` 1プロジェクトへ `www.yurulink.com`（`main` Production）と `staging.yurulink.com`（`staging` Preview）をCustom Domain登録し、API検証で両ドメイン `active` を確認。
+- Cloudflare DNS（Zone `yurulink.com`）のCNAME：`www` → `yurulink-frontend.pages.dev`、`staging` → `staging.yurulink-frontend.pages.dev`。どちらも `proxied=true`。登録・DNS更新後の読み戻し確認済み。
+- `scripts/prepare-site-build.mjs` のブランチ別 `baseURL` を各独自ドメインへ変更。`scripts/verify-site-environments.mjs` の期待canonical/OGPも変更。`hugo.toml` の初期baseURLはStaging独自ドメイン。
+- Productionは検索エンジン登録許可（`noindex=false`）、Stagingは非登録（`noindex=true`）。Productionのフォーム投稿導線は審査系の全体動作確認が終わるまで無効、Stagingは有効のまま。
+- 作業用のCloudflare操作は固定ホスト名・事前チェック・差分のみ変更・変更後の読み戻しで制御。`ops/requests/cloudflare-domains-20261123.json` と専用Workflow、GitHubの `ops/cloudflare-domain-status-20261123` ブランチに検査報告を保存。検証完了後は一時的な書込み権限を再点検する。
+- 旧 `*.pages.dev` 正本を記した上記の同日初期公開セクションは**接続前の履歴**であり、現行のホスト設定は本節が優先。
