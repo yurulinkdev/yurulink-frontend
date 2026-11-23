@@ -182,6 +182,7 @@ def main():
         "schema_version": 1, "mode": mode, "request_id": request["request_id"],
         "time_utc": datetime.datetime.now(datetime.timezone.utc).isoformat(),
         "state": "started", "zone": ZONE_NAME, "project": PROJECT,
+        "workflow_run_id": os.environ.get("GITHUB_RUN_ID"),
         "pages": {}, "dns": {}, "actions": [],
     }
     try:
