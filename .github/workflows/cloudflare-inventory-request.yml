@@ -160,21 +160,28 @@ jobs:
           jq '{zone: "yurulink.com", result_count: (.result | length), total_records: (.result_info.total_count // null), access: "DNS records read succeeded; write not executed"}' inventory/dns-response.json > inventory/dns-access.json
           echo "DNS records API: access verified without modifying any record"
           rm -f inventory/token-verification.json inventory/zones-response.json inventory/dns-response.json
-      - name: Inspect old separate Staging Pages project (read only)
+      - name: Inspect retired separate Staging Pages project (read only)
         shell: bash
         run: |
           set -euo pipefail
           api="https://api.cloudflare.com/client/v4/accounts/$CLOUDFLARE_ACCOUNT_ID/pages/projects"
           hdr="Authorization: Bearer $CLOUDFLARE_API_TOKEN"
-          curl -fsS -H "$hdr" "$api/yurulink-frontend-staging" > inventory/old-response.json
-          jq -e '.success == true and .result.name == "yurulink-frontend-staging"' inventory/old-response.json >/dev/null
-          jq '{name: .result.name, subdomain: .result.subdomain, domains: .result.domains, source_repo: .result.source.config.repo_name, source_branch: .result.source.config.production_branch, project_id: .result.id}' inventory/old-response.json > inventory/old-project.json
-          curl -fsS -H "$hdr" "$api/yurulink-frontend-staging/deployments?per_page=1" > inventory/old-deployments-response.json
-          jq -e '.success == true' inventory/old-deployments-response.json >/dev/null
-          jq '{total_deployments: (.result_info.total_count // null), page_count: (.result_info.total_pages // null), sampled: (.result | length)}' inventory/old-deployments-response.json > inventory/old-deployments-summary.json
-          echo "Old separate Pages project located; deployment summary attached"
-          jq -c '{name,subdomain,domains,source_repo,source_branch}' inventory/old-project.json
-          jq -c '.' inventory/old-deployments-summary.json
+          status=$(curl --silent --show-error -o inventory/old-response.json -w '%{http_code}' -H "$hdr" "$api/yurulink-frontend-staging")
+          if [[ "$status" == 404 ]]; then
+            jq -n '{name:"yurulink-frontend-staging",deleted:true,domains:[]}' > inventory/old-project.json
+            jq -n '{deleted:true,total_deployments:0}' > inventory/old-deployments-summary.json
+            echo "Retired staging project: correctly absent (HTTP 404)"
+          elif [[ "$status" == 200 ]]; then
+            jq -e '.success == true and .result.name == "yurulink-frontend-staging"' inventory/old-response.json >/dev/null
+            jq '{name:.result.name,deleted:false,subdomain:.result.subdomain,domains:.result.domains,source_repo:.result.source.config.repo_name,source_branch:.result.source.config.production_branch,project_id:.result.id}' inventory/old-response.json > inventory/old-project.json
+            curl -fsS -H "$hdr" "$api/yurulink-frontend-staging/deployments?per_page=1" > inventory/old-deployments-response.json
+            jq -e '.success == true' inventory/old-deployments-response.json >/dev/null
+            jq '{deleted:false,total_deployments:(.result_info.total_count // null)}' inventory/old-deployments-response.json > inventory/old-deployments-summary.json
+            echo "Retired staging project still exists"
+          else
+            echo "::error::Unexpected legacy Pages response HTTP $status"
+            exit 1
+          fi
           rm -f inventory/old-response.json inventory/old-deployments-response.json
       - name: Upload inventory
         uses: actions/upload-artifact@v4

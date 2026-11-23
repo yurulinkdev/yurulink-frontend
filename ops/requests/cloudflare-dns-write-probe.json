@@ -1,6 +1,0 @@
-{
-  "schema_version": 1,
-  "action": "dns_txt_create_verify_delete",
-  "zone": "yurulink.com",
-  "request_id": "dns-write-check-20261123-01"
-}
