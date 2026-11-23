@@ -77,3 +77,13 @@ Pagesの既存コマンド `npm run css:build && hugo --minify` は変更せず�
 - ローカル再現：`YURULINK_SITE_TARGET=production npm run build` ／`YURULINK_SITE_TARGET=staging npm run build`。CIは`scripts/verify-site-environments.mjs`で両方の生成HTMLを検査します。
 
 公開後のGoogle Form受付再開には、回答受付・Book3→SubmissionMaster→Book4審査の実動作確認が必要です。Discord通知・DNS・旧独立Staging Pagesプロジェクトの削除は今回の同期対象に含めません。
+
+### Cloudflare旧独立Staging削除・GitHub Actions DNS権限検証（2026-11-23）
+
+- 現行Pages: `yurulink-frontend`。Productionホスト `https://yurulink-frontend.pages.dev/` と同一PagesプロジェクトのPreview `https://staging.yurulink-frontend.pages.dev/` を継続使用する。
+- 廃止した**別プロジェクト**: `yurulink-frontend-staging`（旧 `yurulink-frontend-staging.pages.dev`）。Cloudflare APIで名前・ID・ホスト・独自ドメインなしを照合し、最初の559件のデプロイ履歴から480件を個別削除、残り79件でプロジェクトを削除した。削除後のAPI 404と現行PagesのID不変を検証。証跡: [GitHub Actions Run 45087253709](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/45087253709)。
+- GitHub Secret `CLOUDFLARE_API_TOKEN` は**アカウント用トークン**。トークン確認は `GET /accounts/{account_id}/tokens/verify` でActive、Pages API・`yurulink.com` Zone/DNS Recordsの読み取り成功。[権限確認Run 45086959628](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/45086959628)。
+- DNSの実Write確認: GitHub Actionsから一意な専用TXTレコードを作成し、内容をAPIで読み戻し、削除し、検索結果0件まで再検証した。**既存DNSレコードは変更していない**。[DNS実操作Run 45087468057](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/45087468057)。
+- 削除およびDNS試験用の一回限りの特権Workflow・操作要求・実装スクリプトは完了後にリポジトリから削除。読み取り専用棚卸しWorkflowは保持し、旧プロジェクトがHTTP 404の場合を正常な廃止済み状態として記録する。
+- 現行トークンはPages Writeがアカウント全体、DNS/Zone Writeが`yurulink.com`に付与され、有効期限なし。今後、運用上必要な権限だけに分離した短期有効のPages用／DNS用トークンへの切り分けを推奨する。Secret値をコード・ログ・文書に記録しない。
+- `www.yurulink.com`のPages Custom Domain接続・DNSの本番変更は今回実行していない。
