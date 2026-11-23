@@ -11,7 +11,7 @@ function build(target){
   const root=html('');
   const catalog=html('catalog');
   const submit=html('submit');
-  const url=target==='production'?'https://yurulink-frontend.pages.dev/':'https://staging.yurulink-frontend.pages.dev/';
+  const url=target==='production'?'https://www.yurulink.com/':'https://staging.yurulink.com/';
   const canonical = doc => doc.match(/<link\b[^>]*\brel=(?:"canonical"|canonical)[^>]*>/i)?.[0] || '';
   const ogImage = doc => doc.match(/<meta\b[^>]*\bproperty=(?:"og:image"|og:image)[^>]*>/i)?.[0] || '';
   assert(canonical(root).includes(url),target+' canonical mismatch: '+canonical(root));
