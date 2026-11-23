@@ -48,13 +48,13 @@ sequenceDiagram
 4. **ブラウザ**：Playwright Chromiumで検索・ナビ・カテゴリ保存・ページネーション・カード／リスト・投稿導線を検査する。
 5. **本番反映前**：Production環境用のビルド設定、noindex解除の妥当性、canonical／OGP、GA4同意・ホスト制限、公開対象JSONを確認する。
 
-Frontendのアプリケーションコード・Hugoテンプレート・設定を`main`へ変更する場合、初回Production公開、DNS／Pages設定変更、BackendのBlue／Green有効世代切替には事前承認が必要です。
+`staging`から`main`へのマージはコード変更だけでなくPages Productionの自動デプロイを伴い得る操作です。事前承認なしに実施しません。BackendのBlue／Green有効世代、初回データ公開、DNS切替も独立した承認対象です。
 
-**定期データ更新の例外**：Backendが検証済み`catalog.json`を`data/public/catalog.json`へ配信する既存ジョブは、Frontend `staging`および`main`への自動更新を許可します。JSONだけのコミットでPagesのProductionビルドが起動しても、サイトの掲載内容更新として扱います。アプリケーションコードと設定を同じ更新処理に含めません。
+**定期データ更新の例外**：Backendが検証済み`catalog.json`を`data/public/catalog.json`へ配信する既存ジョブは、Frontendの`staging`と`main`双方への自動更新を許可します。JSON更新だけで起動するProductionの自動ビルドは通常の掲載内容更新として扱い、コードや設定の本番昇格とは区別します。JSON配信にコード変更を混在させません。
 
 ## 検証の起動方法
 
-通常のコードPushに対するSmoke・Preview・ブラウザ検証を維持しています。追加の読取専用検証は`ops/requests/frontend-validation.json`を入力とする同一Workflow内Jobで行います。使用可能なアクション、JSONの書式、結果と対象SHAの照合は[Staging ChatOps](staging-chatops.md)に従ってください。
+通常のコードPushに対するSmoke・Preview・ブラウザ検証を維持しています。チャットからの限定された追加検証は`ops/requests/frontend-validation.json`を入力とする同一Workflow内Jobで行います。使用可能なアクション、JSONの書式、結果と対象SHAの照合は[Staging ChatOps](staging-chatops.md)に従ってください。
 
 障害時には前回検証済みのデプロイまたはGitコミットへ復旧します。複数のCloudflare Pagesプロジェクトに同一Gitブランチを接続するとデプロイが重複するため、運用台帳では接続先・Custom Domain・環境変数を確認します。
 
@@ -79,6 +79,16 @@ Pagesの既存コマンド `npm run css:build && hugo --minify` は変更せず�
 - ローカル再現：`YURULINK_SITE_TARGET=production npm run build` ／`YURULINK_SITE_TARGET=staging npm run build`。CIは`scripts/verify-site-environments.mjs`で両方の生成HTMLを検査します。
 
 公開後のGoogle Form受付再開には、回答受付・Book3→SubmissionMaster→Book4審査の実動作確認が必要です。Discord通知・DNS・旧独立Staging Pagesプロジェクトの削除は今回の同期対象に含めません。
+
+### Cloudflare旧独立Staging削除・GitHub Actions DNS権限検証（2026-11-23）
+
+- 現行Pages: `yurulink-frontend`。Productionホスト `https://yurulink-frontend.pages.dev/` と同一PagesプロジェクトのPreview `https://staging.yurulink-frontend.pages.dev/` を継続使用する。
+- 廃止した**別プロジェクト**: `yurulink-frontend-staging`（旧 `yurulink-frontend-staging.pages.dev`）。Cloudflare APIで名前・ID・ホスト・独自ドメインなしを照合し、最初の559件のデプロイ履歴から480件を個別削除、残り79件でプロジェクトを削除した。削除後のAPI 404と現行PagesのID不変を検証。証跡: [GitHub Actions Run 45087253709](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/45087253709)。
+- GitHub Secret `CLOUDFLARE_API_TOKEN` は**アカウント用トークン**。トークン確認は `GET /accounts/{account_id}/tokens/verify` でActive、Pages API・`yurulink.com` Zone/DNS Recordsの読み取り成功。[権限確認Run 45086959628](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/45086959628)。
+- DNSの実Write確認: GitHub Actionsから一意な専用TXTレコードを作成し、内容をAPIで読み戻し、削除し、検索結果0件まで再検証した。**既存DNSレコードは変更していない**。[DNS実操作Run 45087468057](https://github.com/yurulinkdev/yurulink-frontend/actions/runs/45087468057)。
+- 削除およびDNS試験用の一回限りの特権Workflow・操作要求・実装スクリプトは完了後にリポジトリから削除。読み取り専用棚卸しWorkflowは保持し、旧プロジェクトがHTTP 404の場合を正常な廃止済み状態として記録する。
+- 現行トークンはPages Writeがアカウント全体、DNS/Zone Writeが`yurulink.com`に付与され、有効期限なし。今後、運用上必要な権限だけに分離した短期有効のPages用／DNS用トークンへの切り分けを推奨する。Secret値をコード・ログ・文書に記録しない。
+- `www.yurulink.com`のPages Custom Domain接続・DNSの本番変更は今回実行していない。
 
 ### Custom Domain切替の実施（2026-11-23・現行）
 
