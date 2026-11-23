@@ -18,6 +18,26 @@ jobs:
         with:
           fetch-depth: 0
           persist-credentials: true
+      - name: Record merge validation run ID for audit
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        shell: bash
+        run: |
+          python3 - <<'PY'
+          import base64,datetime,json,os,urllib.request
+          content=json.dumps({'state':'started','github_run_id':os.getenv('GITHUB_RUN_ID'),'at_utc':datetime.datetime.now(datetime.timezone.utc).isoformat()})
+          req=urllib.request.Request(
+              'https://api.github.com/repos/yurulinkdev/yurulink-frontend/contents/ops/reports/staging-main-validation-20261123.json',
+              method='PUT',
+              headers={'Authorization':'Bearer '+os.environ['GITHUB_TOKEN'],
+                       'Accept':'application/vnd.github+json','Content-Type':'application/json',
+                       'User-Agent':'YuruLink-staging-merge'},
+              data=json.dumps({'message':'ops: mark staging integration CI started',
+                               'branch':'ops/staging-main-sync-status-20261123',
+                               'content':base64.b64encode(content.encode()).decode()}).encode())
+          with urllib.request.urlopen(req,timeout=20) as response:
+              print('VALIDATION_STATUS_STARTED',response.status)
+          PY
       - name: Prepare two-parent merge with explicit documentation conflict resolution
         shell: bash
         run: |
