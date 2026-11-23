@@ -24,54 +24,62 @@
   },
   "https": {
     "staging.yurulink.com": {
-      "canonical_custom_host": false,
+      "canonical_custom_host": true,
+      "canonical_url": "https://staging.yurulink.com/",
       "expected_ogp": true,
       "final_hostname": "staging.yurulink.com",
       "hostname": "staging.yurulink.com",
       "http_status": 200,
-      "noindex": false,
+      "noindex": true,
+      "og_image": "https://staging.yurulink.com/ogp/yurulink-staging.png",
+      "robots_content": "noindex, nofollow",
       "title_present": true
     },
     "www.yurulink.com": {
       "canonical_custom_host": false,
+      "canonical_url": "https://yurulink-frontend.pages.dev/",
       "expected_ogp": true,
       "final_hostname": "www.yurulink.com",
       "hostname": "www.yurulink.com",
       "http_status": 200,
       "noindex": false,
+      "og_image": "https://yurulink-frontend.pages.dev/ogp/yurulink-light.png",
+      "robots_content": null,
       "title_present": true
     }
   },
   "mode": "plan",
   "pages": {
     "staging.yurulink.com": {
-      "status": "pending",
+      "status": "active",
       "validation_error": null,
-      "validation_status": "pending",
+      "validation_status": "active",
       "verification_error": null,
       "verification_status": "active"
     },
     "www.yurulink.com": {
-      "status": "pending",
+      "status": "active",
       "validation_error": null,
-      "validation_status": "pending",
+      "validation_status": "active",
       "verification_error": null,
       "verification_status": "active"
     }
   },
   "pages_project": {
     "domains": [
-      "yurulink-frontend.pages.dev"
+      "yurulink-frontend.pages.dev",
+      "staging.yurulink.com",
+      "www.yurulink.com"
     ],
     "name": "yurulink-frontend",
     "production_branch": "main",
     "source_repo": "yurulink-frontend"
   },
   "project": "yurulink-frontend",
-  "request_id": "yl-domains-https-verify-20261123-01",
+  "request_id": "yl-domains-https-verify-20261123-02",
   "schema_version": 1,
   "state": "preflight_ok",
-  "time_utc": "2026-11-23T07:36:55.633303+00:00",
+  "time_utc": "2026-11-23T07:37:57.245781+00:00",
   "zone": "yurulink.com",
   "zone_status": "active"
 }
