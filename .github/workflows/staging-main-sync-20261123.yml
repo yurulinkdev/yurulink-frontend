@@ -1,0 +1,58 @@
+name: Staging to main integration conflict inventory
+on:
+  push:
+    branches: [integration/staging-main-sync-20261123]
+    paths:
+      - '.github/workflows/staging-main-sync-20261123.yml'
+      - 'ops/requests/staging-main-sync-20261123.json'
+permissions:
+  contents: write
+concurrency:
+  group: staging-main-sync-20261123
+  cancel-in-progress: false
+jobs:
+  analyze-merge:
+    runs-on: ubuntu-24.04
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: true
+      - name: Diagnose true git merge conflicts without writing main
+        shell: bash
+        run: |
+          set -euo pipefail
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git fetch origin main staging
+          test "$(git branch --show-current)" = "integration/staging-main-sync-20261123"
+          base=$(git rev-parse HEAD)
+          head=$(git rev-parse origin/staging)
+          result=clean
+          if ! GIT_MERGE_AUTOEDIT=no git merge --no-ff --no-commit origin/staging > /tmp/merge-output.txt 2>&1; then
+            result=conflict
+          fi
+          RESULT="$result" BASE="$base" HEAD="$head" python3 - <<'PY'
+          import json, os, pathlib, subprocess, datetime
+          def output(*args):
+              return subprocess.run(args,capture_output=True,text=True,check=True).stdout.strip()
+          r={
+              'state':os.environ['RESULT'],
+              'source':'staging','destination':'main',
+              'base_sha':os.environ['BASE'],'staging_sha':os.environ['HEAD'],
+              'run_id':os.getenv('GITHUB_RUN_ID'),
+              'timestamp_utc':datetime.datetime.now(datetime.timezone.utc).isoformat(),
+              'conflict_files':output('git','diff','--name-only','--diff-filter=U').splitlines(),
+              'changed_files':output('git','diff','--name-only','--cached').splitlines(),
+              'merge_output':pathlib.Path('/tmp/merge-output.txt').read_text()[:6000],
+          }
+          pathlib.Path('/tmp/staging-main-result.json').write_text(json.dumps(r,ensure_ascii=False,indent=2)+'\n')
+          print(json.dumps(r,ensure_ascii=False,indent=2))
+          PY
+          git merge --abort || true
+          mkdir -p ops/reports
+          cp /tmp/staging-main-result.json ops/reports/staging-main-merge-20261123.json
+          git add ops/reports/staging-main-merge-20261123.json
+          git commit -m "ops: capture staging to main merge conflict inventory"
+          git push origin HEAD:integration/staging-main-sync-20261123
