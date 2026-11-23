@@ -63,6 +63,7 @@ Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用�
 
 ## 詳細仕様
 
+- [公開コンテンツの検索・絞り込みガイド](content/help/search-guide.md)
 - [公開カタログのデータ契約](docs/public-catalog-contract-v2.md)
 - [カテゴリ・性能要件](docs/frontend-refactoring-performance-category-20261122.md)
 - [UI・操作の回帰契約](docs/frontend-ui-regression-contract-20261122.md)
@@ -81,7 +82,6 @@ YuruLinkはゆる界隈の関連コンテンツを集約する**非公式の統�
 - 基調色：アクセント `#A35B46`、背景 `#FBF9F6`、主文字 `#342B28`。標準のHTML `theme-color` は `hugo.toml` の `params.theme_color` を参照します。Open Graphには標準のテーマカラー属性がないため独自の `og:color` は追加しません。
 - 画像制作は**HTML-to-Image（HTML/CSS/SVG → Playwright Chromium → PNG）を必須**とし、新規の生成AIによる描画は行いません。承認済みSVGを共通マスターとし、ロゴを独立して描き直しません。
 - 編集正本：AutomationLabの[HTML-to-Imageツールキット](https://github.com/yurulinkdev/yurulink-automation-lab/tree/feat/brand-html-image-pipeline-20261119/visuals)。同期先：Google Drive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120`。配置画像とREADME・制作ソースを合わせて更新します。
-- 本変更は`staging`への反映です。`main`およびProductionの初期変更は別途承認を要します。
 
 ### Staging専用のOGP
 

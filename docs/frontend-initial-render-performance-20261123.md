@@ -10,7 +10,7 @@
 
 ## 性能とデータ読み込み
 - `/` と `/welcome/` は全件カードHTMLを取得しない。共通JSに `site.js` を含めず、ロゴ・ナビ・テーマ・初回訪問ガイドだけを動かす。
-- `/catalog/` は検索UIを先に表示し、`/catalog-data/` からHugo生成HTMLを非同期取得。約4,800件はinertなtemplateへ保持し、DOMは20〜100件だけ描画する。
+- `/catalog/` は検索UIを先に表示し、`/catalog-data/` からHugo生成HTMLを非同期取得。取得したリンク一覧はinertなtemplateへ保持し、DOMには選択された1ページ分の20〜100件だけを描画する。
 - `/catalog-data/` はnoindexの直接閲覧可能なHTML代替。データ分割と軽量索引は追加最適化候補であり、未実装を実装済みと誤認しない。
 - CIのFCPはChromiumの参考値であり、実iPhoneのコールドロードを計測したことにはならない。計測はルート案内表示と検索ページの操作可能時刻を別々に評価する。
 
