@@ -22,15 +22,41 @@
       }
     ]
   },
+  "https": {
+    "staging.yurulink.com": {
+      "canonical_custom_host": false,
+      "expected_ogp": true,
+      "final_hostname": "staging.yurulink.com",
+      "hostname": "staging.yurulink.com",
+      "http_status": 200,
+      "noindex": false,
+      "title_present": true
+    },
+    "www.yurulink.com": {
+      "canonical_custom_host": false,
+      "expected_ogp": true,
+      "final_hostname": "www.yurulink.com",
+      "hostname": "www.yurulink.com",
+      "http_status": 200,
+      "noindex": false,
+      "title_present": true
+    }
+  },
   "mode": "plan",
   "pages": {
     "staging.yurulink.com": {
       "status": "pending",
-      "validation_data": true
+      "validation_error": null,
+      "validation_status": "pending",
+      "verification_error": null,
+      "verification_status": "active"
     },
     "www.yurulink.com": {
       "status": "pending",
-      "validation_data": true
+      "validation_error": null,
+      "validation_status": "pending",
+      "verification_error": null,
+      "verification_status": "active"
     }
   },
   "pages_project": {
@@ -42,10 +68,10 @@
     "source_repo": "yurulink-frontend"
   },
   "project": "yurulink-frontend",
-  "request_id": "yl-domains-verify-20261123-01",
+  "request_id": "yl-domains-https-verify-20261123-01",
   "schema_version": 1,
   "state": "preflight_ok",
-  "time_utc": "2026-11-23T07:36:00.556912+00:00",
+  "time_utc": "2026-11-23T07:36:55.633303+00:00",
   "zone": "yurulink.com",
   "zone_status": "active"
 }
