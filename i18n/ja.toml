@@ -1,0 +1,14 @@
+[welcomeSuffix]
+other = "へようこそ"
+
+[allContents]
+other = "すべてのコンテンツ"
+
+[siteDescriptor]
+other = "非公式リンク集"
+
+[previewImageSuffix]
+other = "（STAGING・検証環境）"
+
+[socialOpen]
+other = "{{ .site }}の{{ .network }}を開く"

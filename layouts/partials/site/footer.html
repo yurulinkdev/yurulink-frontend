@@ -6,6 +6,6 @@
     <a href="{{ "help/" | relURL }}" class="hover:underline">ヘルプ</a>
   </nav>
   <nav class="mt-3 flex flex-wrap gap-2" aria-label="YuruLink公式SNS">{{ partial "site/social-links.html" . }}</nav>
-  <p class="mt-3">YuruLink — 非公式リンク集</p>
+  <p class="mt-3">{{ .Site.Title }} — {{ i18n "siteDescriptor" }}</p>
   {{ partial "site/analytics-consent.html" . }}
 </footer>

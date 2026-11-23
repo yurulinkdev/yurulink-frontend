@@ -13,10 +13,12 @@
     <a class="block rounded-lg px-3 py-2 hover:bg-panel-muted" href="{{ "help/" | relURL }}">ヘルプ</a>
   </nav>
   {{ partial "site/submission-cta.html" . }}
+  {{ if partial "site/catalog-available.html" . }}
   <p id="categories-intro-anchor" class="mb-3 text-xs font-semibold tracking-wide text-muted-ink">カテゴリー・番組</p>
   <nav id="category-buttons" class="space-y-1" aria-label="リンク集のカテゴリー">
     {{ partial "site/category-fallback.html" . }}
   </nav>
+  {{ end }}
   {{ with .Site.Params.sidebar_notice }}<p class="mt-6 text-xs leading-relaxed text-muted-ink">{{ . }}</p>{{ end }}
   <div class="mt-auto pt-6">
     <section class="border-t border-line pt-4" aria-label="YuruLinkのSNS">

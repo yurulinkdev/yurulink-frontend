@@ -8,6 +8,15 @@ enableRobotsTXT = true
 [params]
 # ヘッダーとナビゲーションで使うブランドシンボル。static/以下の相対パスを指定します。
 brand_logo = "brand/yurulink-symbol-master.svg"
+# サイトアイコンの配置先（static/からの相対パス）。
+favicon_svg = "brand/yurulink-symbol-master.svg"
+favicon_png = "favicon-32.png"
+apple_touch_icon = "apple-touch-icon.png"
+# OGP代替テキスト。サイト名はテンプレートが末尾に追加します。
+og_alt_text = "ゆる関連を繋ぐ。ゆる言語学ラジオ関連コンテンツへの統合リンク"
+og_locale = "ja_JP"
+og_staging_image = "ogp/yurulink-staging.png"
+description = "ゆる学徒コンテンツの非公式リンク集"
 # サイドバー最下部の任意の補足文。空欄では表示しません。
 sidebar_notice = ""
 

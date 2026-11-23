@@ -1,4 +1,5 @@
 {{ define "main" }}
+{{ if partial "site/catalog-available.html" . }}
       <section class="mx-auto max-w-7xl px-4 py-6 sm:px-7">
         <div class="mb-5 flex flex-wrap items-end justify-between gap-3">
           <div>
@@ -130,8 +131,7 @@
 
           <nav id="pagination" class="mt-6 flex flex-wrap items-center justify-center gap-2" aria-label="ページ切り替え"></nav>
           <p id="no-results" class="rounded-xl border border-dashed border-line p-6 text-muted-ink" hidden>該当するリンクがありません。</p>
-        {{ else }}
-          <p class="rounded-xl border border-dashed border-line bg-panel p-6 text-muted-ink">統合形式の公開カタログを準備中です。</p>
         {{ end }}
       </section>
+{{ end }}
 {{ end }}

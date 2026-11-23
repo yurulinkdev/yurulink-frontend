@@ -1,0 +1,7 @@
+{{/* カタログに依存するUIの出力条件。JSON未配備・空のときは非表示。 */}}
+{{ $catalog := .Site.Data.public.catalog }}
+{{ $available := false }}
+{{ with $catalog }}
+  {{ $available = and (eq (int (.schema_version | default 0)) 2) (gt (len (.items | default (slice))) 0) }}
+{{ end }}
+{{ return $available }}

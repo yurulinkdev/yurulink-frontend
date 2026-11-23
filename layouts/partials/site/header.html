@@ -5,7 +5,7 @@
       <img src="{{ .Site.Params.brand_logo | default "brand/yurulink-symbol-approved-transparent.png" | relURL }}" alt="" width="36" height="36" class="h-9 w-9 shrink-0 object-contain" decoding="async">
       <span class="brand-wordmark">YuruLink</span>
     </a>
-    {{ if eq .Section "catalog" }}
+    {{ if and (eq .Section "catalog") (partial "site/catalog-available.html" .) }}
       <div class="relative order-3 w-full min-w-0 lg:order-none lg:flex-1">
         <div class="flex items-center gap-2">
           <div class="relative min-w-0 flex-1">
