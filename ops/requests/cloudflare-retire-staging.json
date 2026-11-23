@@ -1,0 +1,7 @@
+{
+  "schema_version": 1,
+  "action": "retire_old_pages_project",
+  "project": "yurulink-frontend-staging",
+  "confirm": "DELETE_yurulink-frontend-staging",
+  "request_id": "retire-old-staging-20261123-01"
+}
