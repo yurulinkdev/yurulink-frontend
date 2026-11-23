@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 """Wait for a specific Git SHA to finish deploying on Cloudflare Pages.
 
-Read-only. Requires CLOUDFLARE_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
+Read-only. Requires CLOUDFLARE_PAGES_API_TOKEN and CLOUDFLARE_ACCOUNT_ID.
 """
 import argparse
 import json
@@ -26,8 +26,11 @@ def main():
         p.error("interval must be 1..120 and timeout 1..3600 seconds")
     if not (len(args.sha) == 40 and all(c in "0123456789abcdef" for c in args.sha.lower())):
         p.error("sha must be a full 40-character commit hash")
-    token = os.environ["CLOUDFLARE_API_TOKEN"]
-    account = os.environ["CLOUDFLARE_ACCOUNT_ID"]
+    token = os.environ.get("CLOUDFLARE_PAGES_API_TOKEN")
+    account = os.environ.get("CLOUDFLARE_ACCOUNT_ID")
+    if not token or not account:
+        print("Missing CLOUDFLARE_PAGES_API_TOKEN or CLOUDFLARE_ACCOUNT_ID", file=sys.stderr)
+        return 2
     url = ("https://api.cloudflare.com/client/v4/accounts/"
            + urllib.parse.quote(account, safe="")
            + "/pages/projects/" + urllib.parse.quote(args.project, safe="")
