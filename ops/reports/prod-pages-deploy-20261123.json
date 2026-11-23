@@ -1,0 +1,356 @@
+{
+  "at_utc": "2026-11-23T09:56:34.652137+00:00",
+  "github_run_id": "45151526952",
+  "latest": {
+    "production": {
+      "environment": "production",
+      "branch": "main",
+      "commit_hash": "f489852aefae617c1e1a03a4229b64f634fc03a2",
+      "created_on": "2026-11-23T09:56:29.803015Z",
+      "deployment_url": "https://c9dbaaad.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "active"
+        },
+        {
+          "name": "initialize",
+          "status": "idle"
+        },
+        {
+          "name": "clone_repo",
+          "status": "idle"
+        },
+        {
+          "name": "build",
+          "status": "idle"
+        },
+        {
+          "name": "deploy",
+          "status": "idle"
+        }
+      ]
+    },
+    "staging": {
+      "environment": "preview",
+      "branch": "staging",
+      "commit_hash": "e8e464cd94e8de3f0f73f53ae7206b86cc0e56fa",
+      "created_on": "2026-11-23T09:51:13.526144Z",
+      "deployment_url": "https://5e85f39c.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "success"
+        },
+        {
+          "name": "deploy",
+          "status": "success"
+        }
+      ]
+    }
+  },
+  "latest_ten": [
+    {
+      "environment": "production",
+      "branch": "main",
+      "commit_hash": "f489852aefae617c1e1a03a4229b64f634fc03a2",
+      "created_on": "2026-11-23T09:56:29.803015Z",
+      "deployment_url": "https://c9dbaaad.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "active"
+        },
+        {
+          "name": "initialize",
+          "status": "idle"
+        },
+        {
+          "name": "clone_repo",
+          "status": "idle"
+        },
+        {
+          "name": "build",
+          "status": "idle"
+        },
+        {
+          "name": "deploy",
+          "status": "idle"
+        }
+      ]
+    },
+    {
+      "environment": "production",
+      "branch": "main",
+      "commit_hash": "e1608228666eb18881fd04b3e53810fc88934e65",
+      "created_on": "2026-11-23T09:53:30.180058Z",
+      "deployment_url": "https://024514ca.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "active"
+        },
+        {
+          "name": "deploy",
+          "status": "idle"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "integration/staging-main-validated-20261123",
+      "commit_hash": "8bc074dee201109953140d2c23b65daf895e35f1",
+      "created_on": "2026-11-23T09:52:44.181242Z",
+      "deployment_url": "https://b70667f9.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "success"
+        },
+        {
+          "name": "deploy",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "integration/staging-main-validated-20261123",
+      "commit_hash": "dadc9eafeb921f86b5bff2c1e6f5a6b5f8059c10",
+      "created_on": "2026-11-23T09:52:41.575835Z",
+      "deployment_url": "https://86699434.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "skipped"
+        },
+        {
+          "name": "initialize",
+          "status": "idle"
+        },
+        {
+          "name": "clone_repo",
+          "status": "idle"
+        },
+        {
+          "name": "build",
+          "status": "idle"
+        },
+        {
+          "name": "deploy",
+          "status": "idle"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "integration/staging-main-validated-20261123",
+      "commit_hash": "7add97f1b63b5e973e5ae33a97712a8ad1280564",
+      "created_on": "2026-11-23T09:52:37.391062Z",
+      "deployment_url": "https://54a7553a.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "skipped"
+        },
+        {
+          "name": "initialize",
+          "status": "idle"
+        },
+        {
+          "name": "clone_repo",
+          "status": "idle"
+        },
+        {
+          "name": "build",
+          "status": "idle"
+        },
+        {
+          "name": "deploy",
+          "status": "idle"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "integration/staging-main-validated-20261123",
+      "commit_hash": "d985e1df11ae161e25de85c3f635e2e7565a7055",
+      "created_on": "2026-11-23T09:52:34.164199Z",
+      "deployment_url": "https://378128c4.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "skipped"
+        },
+        {
+          "name": "initialize",
+          "status": "idle"
+        },
+        {
+          "name": "clone_repo",
+          "status": "idle"
+        },
+        {
+          "name": "build",
+          "status": "idle"
+        },
+        {
+          "name": "deploy",
+          "status": "idle"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "staging",
+      "commit_hash": "e8e464cd94e8de3f0f73f53ae7206b86cc0e56fa",
+      "created_on": "2026-11-23T09:51:13.526144Z",
+      "deployment_url": "https://5e85f39c.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "success"
+        },
+        {
+          "name": "deploy",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "staging",
+      "commit_hash": "3f229951a0a9d38d1c5dce4dff683238490cebd5",
+      "created_on": "2026-11-23T09:51:10.725201Z",
+      "deployment_url": "https://9d0b34f7.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "success"
+        },
+        {
+          "name": "deploy",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "integration/staging-main-validated-20261123",
+      "commit_hash": "3c01c3011aa423eb9a195cf5a4d08f614940d1ae",
+      "created_on": "2026-11-23T09:50:19.680692Z",
+      "deployment_url": "https://2b598b66.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "success"
+        },
+        {
+          "name": "deploy",
+          "status": "success"
+        }
+      ]
+    },
+    {
+      "environment": "preview",
+      "branch": "integration/staging-main-sync-20261123",
+      "commit_hash": "20311a9db93f55725bd4d05a6d6cd0df1d9d56c1",
+      "created_on": "2026-11-23T09:47:42.83029Z",
+      "deployment_url": "https://7c9eb28c.yurulink-frontend.pages.dev",
+      "stages": [
+        {
+          "name": "queued",
+          "status": "success"
+        },
+        {
+          "name": "initialize",
+          "status": "success"
+        },
+        {
+          "name": "clone_repo",
+          "status": "success"
+        },
+        {
+          "name": "build",
+          "status": "success"
+        },
+        {
+          "name": "deploy",
+          "status": "success"
+        }
+      ]
+    }
+  ]
+}
