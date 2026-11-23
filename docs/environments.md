@@ -87,3 +87,7 @@ Pagesの既存コマンド `npm run css:build && hugo --minify` は変更せず�
 - 削除およびDNS試験用の一回限りの特権Workflow・操作要求・実装スクリプトは完了後にリポジトリから削除。読み取り専用棚卸しWorkflowは保持し、旧プロジェクトがHTTP 404の場合を正常な廃止済み状態として記録する。
 - 現行トークンはPages Writeがアカウント全体、DNS/Zone Writeが`yurulink.com`に付与され、有効期限なし。今後、運用上必要な権限だけに分離した短期有効のPages用／DNS用トークンへの切り分けを推奨する。Secret値をコード・ログ・文書に記録しない。
 - `www.yurulink.com`のPages Custom Domain接続・DNSの本番変更は今回実行していない。
+
+### Cloudflare API Tokenの役割分離（移行準備：2026-11-23）
+
+CloudflareのPages参照とDNS操作のAPI Tokenを分離する移行案を作業ブランチで準備しています。変更対象のWorkflow・スクリプト、GitHub Secret／Variableの命名、Cloudflare側の最小権限、移行順序および承認ゲートは[Cloudflare API Tokenの役割分離・移行計画](cloudflare-api-token-roles.md)を参照してください。**本節は移行案の記録であり、現行GitHub SecretsやProductionの切替完了を意味しません。**
