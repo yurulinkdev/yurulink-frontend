@@ -16,7 +16,7 @@ test('トップのお知らせ枠を撤去・About独立・ヘルプと更新履
   await web.locator(':scope > summary').click();
   await expect(web.locator('a[data-category="browse:web-community"]')).toBeVisible();
   await gotoAndWaitForCatalog(page,'/help/search-guide/');
-  await expect(page.getByRole('heading', { name: 'YuruLink の検索・絞り込みガイド' })).toBeVisible();
+  await expect(page.getByRole('heading', { name: '検索・絞り込みガイド', exact: true })).toBeVisible();
   await gotoAndWaitForCatalog(page,'/change-log/');
   await expect(page.getByRole('heading', { name: '更新履歴', exact: true })).toBeVisible();
   // 旧URL・存在しないURLがトップページへ200でフォールバックしないことを検証。
@@ -77,6 +77,10 @@ test('GA4設定済みだがStagingホストでは測定しない・公式Xを表
   await expect(page.locator('script[src*="newrelic.com"]')).toHaveCount(0);
   await expect(page.locator('footer nav[aria-label*="SNS"] a')).toHaveCount(1);
   await expect(page.locator('footer nav[aria-label*="SNS"] a')).toHaveAttribute('href','https://x.com/YuruLinkDev');
+  const xLink = page.locator('footer nav[aria-label*="SNS"] a[href="https://x.com/YuruLinkDev"]');
+  await expect(xLink).toHaveText('@YuruLinkDev');
+  await expect(xLink).toHaveAccessibleName('YuruLinkのXを開く');
+  await expect(xLink.locator('img')).toHaveAttribute('src', /\/icons\/social\/x\.svg$/);
   const updates = page.locator('aside section[aria-label="最近の更新履歴"] li');
   expect(await updates.count()).toBe(0);
   await expect(page.getByRole('link',{name:'すべての更新履歴'})).toHaveAttribute('href',/change-log\//);

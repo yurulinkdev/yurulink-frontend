@@ -52,6 +52,12 @@ npm run build
 
 開発中は`npm run css:watch`と`hugo server`を別ターミナルで起動します。
 
+## Hugoコンテンツと共通UI
+
+「ようこそ」の文章は`content/welcome/_index.md`、共通の操作文言は`i18n/ja.toml`で管理します。サイトタイトルとアイコンの参照先は`hugo.toml`の`title`と`params.brand_logo`／`params.favicon_*`／`params.apple_touch_icon`に設定します。
+
+カタログJSONが不在または空の場合、検索画面・カテゴリーツリー・検索JavaScriptを出力しません。案内・ヘルプ・記事などは、通常のHugoページとして生成します。構成とi18n追加手順は[Hugoテンプレート設計](docs/hugo-template-architecture.md)を参照してください。
+
 ## デプロイと公開判断
 
 | ブランチ | Pages環境 | URL |
@@ -59,7 +65,7 @@ npm run build
 | `main` | Production | https://www.yurulink.com/ |
 | `staging` | Preview | https://staging.yurulink.com/ |
 
-Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。2026-11-23に`www.yurulink.com`（Production）と`staging.yurulink.com`（Preview）を同一PagesプロジェクトのCustom Domainとして登録し、Cloudflare DNSにプロキシ有効のCNAMEを設定しました。`*.pages.dev`の既存ホストは引き続き補助的に利用できます。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードのマージが自動デプロイを起動する可能性を前提に扱い、Production反映・DNS変更は事前承認を要します。
+Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。2026-11-23に`www.yurulink.com`（Production）と`staging.yurulink.com`（Preview）を同一PagesプロジェクトのCustom Domainとして登録し、Cloudflare DNSにプロキシ有効のCNAMEを設定しました。`*.pages.dev`の既存ホストは引き続き補助的に利用できます。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードのマージが自動デプロイを起動する可能性を前提に扱い、Production反映・DNS変更は事前承認を要します。 **例外：Backendの定期ジョブによる`data/public/catalog.json`のみの更新は既存データ配信として自動反映します。**
 
 ## 詳細仕様
 
@@ -73,6 +79,8 @@ Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用�
 - [計測サービスの設定](docs/observability-evaluation.md)
 - [Backendリポジトリ](https://github.com/yurulinkdev/yurulink-backend)
 
+- [公開コンテンツの検索・絞り込みガイド](content/help/search-guide.md)
+
 ## 運営方針とブランド画像
 
 YuruLinkはゆる界隈の関連コンテンツを集約する**非公式の統合リンク集**です。過去の活動やいわゆる「黒歴史」も公開範囲・権利を尊重して対象とし、利用者の情報提供をもとに集合知として継続的に整備します。運営方針の原本は運営者Ryohei側GitHubの[principle.md](https://github.com/Halhira/WebSite/blob/main/docs/yurulink/principle.md)です。
@@ -81,7 +89,7 @@ YuruLinkはゆる界隈の関連コンテンツを集約する**非公式の統�
 - 基調色：アクセント `#A35B46`、背景 `#FBF9F6`、主文字 `#342B28`。標準のHTML `theme-color` は `hugo.toml` の `params.theme_color` を参照します。Open Graphには標準のテーマカラー属性がないため独自の `og:color` は追加しません。
 - 画像制作は**HTML-to-Image（HTML/CSS/SVG → Playwright Chromium → PNG）を必須**とし、新規の生成AIによる描画は行いません。承認済みSVGを共通マスターとし、ロゴを独立して描き直しません。
 - 編集正本：AutomationLabの[HTML-to-Imageツールキット](https://github.com/yurulinkdev/yurulink-automation-lab/tree/feat/brand-html-image-pipeline-20261119/visuals)。同期先：Google Drive `YuruLink_Assets/05-HTML-to-Image-Toolkit-20261120`。配置画像とREADME・制作ソースを合わせて更新します。
-- 本変更は`staging`への反映です。`main`およびProductionの初期変更は別途承認を要します。
+- 初期公開後のアプリケーション変更はレビューと承認を経て`main`に取り込みます。承認済みのBackend定期JSON更新はこのコード変更とは分離します。
 
 ### Staging専用のOGP
 

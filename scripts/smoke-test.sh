@@ -95,7 +95,13 @@ test -s public/index.html
 test -s public/about/index.html
 test -s public/change-log/index.html
 test -s public/about/smoke-ci/index.html
-grep -q '統合形式の公開カタログを準備中' public/catalog/index.html
+! grep -q 'id="catalog"' public/catalog/index.html
+! grep -q 'id="query"' public/catalog/index.html
+! grep -q 'id="category-buttons"' public/index.html
+! grep -q 'id="category-buttons"' public/about/index.html
+! grep -q 'js/site.js' public/catalog/index.html
+! grep -q 'welcome-catalog-link' public/index.html
+grep -q 'YuruLinkへようこそ' public/index.html
 ! grep -q 'id="catalog"' public/index.html
 echo "::endgroup::"
 grep -q "catalog-list-view" assets/css/input.css

@@ -52,42 +52,42 @@
 {{ end }}
 
 <div data-server-nav-root>
-  {{ partial "site/nav-item.html" (dict "context" $root "label" "すべてのコンテンツ" "category" "") }}
+  {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "allContents") "category" "") }}
   <details class="mt-2" data-nav-group="youtube-channels" open>
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $nav.youtube.label }}</summary>
+    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ i18n "navYoutube" }}</summary>
     <div class="ml-3 border-l border-line pl-2">
       {{ range $nav.youtube.groups }}
         {{ $group := . }}
         <details class="mt-1" data-nav-group="channel-group:{{ $group.id }}">
-          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $group.label }}</summary>
+          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ i18n (printf "channelGroup_%s" $group.id) }}</summary>
           <div class="ml-3 border-l border-line pl-2">
-            {{ partial "site/nav-item.html" (dict "context" $root "label" "この分類のすべて" "category" (printf "browse:youtube-group:%s" $group.id)) }}
+            {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "navGroupAll") "category" (printf "browse:youtube-group:%s" $group.id)) }}
             {{ range $channel := $channels }}
               {{ if eq $channel.group $group.id }}
                 <details class="mt-1" data-nav-group="channel:{{ $channel.id }}">
                   {{/* チャンネル名に公式性判定ラベルを追加しない。 */}}
                   <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">{{ $channel.name }}</summary>
                   <div class="ml-3 border-l border-line pl-2">
-                    {{ partial "site/nav-item.html" (dict "context" $root "label" "このチャンネルのすべて" "category" $channel.id) }}
-                    {{ partial "site/nav-item.html" (dict "context" $root "label" "動画" "category" (printf "browse:video:%s" $channel.id)) }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "navChannelAll") "category" $channel.id) }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "typeVideo") "category" (printf "browse:video:%s" $channel.id)) }}
                     <details class="mt-1" data-nav-group="playlists:{{ $channel.id }}">
-                      <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">プレイリスト</summary>
+                      <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">{{ i18n "typePlaylist" }}</summary>
                       <div class="ml-3 border-l border-line pl-2">
-                        {{ partial "site/nav-item.html" (dict "context" $root "label" "プレイリスト一覧" "category" (printf "browse:playlists:%s" $channel.id)) }}
+                        {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "navPlaylistList") "category" (printf "browse:playlists:%s" $channel.id)) }}
                         {{ range (index $playlistsByChannel $channel.id | default (slice)) }}
                           {{ partial "site/nav-item.html" (dict "context" $root "label" .name "category" .id) }}
                         {{ end }}
                       </div>
                     </details>
-                    {{ partial "site/nav-item.html" (dict "context" $root "label" "ショート" "category" (printf "browse:short:%s" $channel.id)) }}
-                    {{ partial "site/nav-item.html" (dict "context" $root "label" "ライブ" "category" (printf "browse:live:%s" $channel.id)) }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "typeShort") "category" (printf "browse:short:%s" $channel.id)) }}
+                    {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n "typeLive") "category" (printf "browse:live:%s" $channel.id)) }}
                   </div>
                 </details>
               {{ end }}
             {{ end }}
             {{ if and (eq $group.id "other") $ungrouped }}
               <details class="mt-1" data-nav-group="other-playlists">
-                <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">その他のプレイリスト</summary>
+                <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm hover:bg-panel-muted">{{ i18n "navOtherPlaylists" }}</summary>
                 <div class="ml-3 border-l border-line pl-2">
                   {{ range $ungrouped }}
                     {{ partial "site/nav-item.html" (dict "context" $root "label" .name "category" .id) }}
@@ -101,14 +101,14 @@
     </div>
   </details>
   <details class="mt-2" data-nav-group="site-social">
-    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $nav.other.label }}</summary>
+    <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ i18n "navOther" }}</summary>
     <div class="ml-3 border-l border-line pl-2">
       {{ range $section := $nav.other.groups }}
         <details class="mt-1" data-nav-group="{{ $section.id }}{{ if eq $section.id "web" }}-sites{{ end }}">
-          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ $section.label }}</summary>
+          <summary class="cursor-pointer rounded-lg px-3 py-2 text-sm font-semibold hover:bg-panel-muted">{{ i18n (printf "navSection_%s" $section.id) }}</summary>
           <div class="ml-3 border-l border-line pl-2">
             {{ range $section.children }}
-              {{ partial "site/nav-item.html" (dict "context" $root "label" .label "category" .id) }}
+              {{ partial "site/nav-item.html" (dict "context" $root "label" (i18n (printf "navBrowse_%s" (replace (strings.TrimPrefix "browse:" .id) "-" "_"))) "category" .id) }}
             {{ end }}
           </div>
         </details>

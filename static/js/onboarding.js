@@ -4,6 +4,8 @@
  */
 (() => {
   const key = 'yurulink-first-visit-hint-v1';
+  const ui = (() => { try { return JSON.parse(document.getElementById('yl-ui-messages')?.textContent || '{}'); } catch { return {}; } })();
+  const tr = (name, fallback) => ui[name] || fallback;
   try { if (localStorage.getItem(key)) return; } catch { /* ブラウザ設定により保存不可 */ }
   const mobile = matchMedia('(max-width: 1023px)').matches;
   const target = document.getElementById(mobile ? 'open-categories' : 'categories-intro-anchor');
@@ -13,10 +15,11 @@
   hint.id = 'onboarding-hint';
   hint.className = 'onboarding-hint ' + (mobile ? 'onboarding-hint--mobile' : 'onboarding-hint--desktop');
   hint.setAttribute('role', 'status');
-  hint.innerHTML = '<p></p><button type="button" aria-label="案内を閉じる">×</button>';
+  hint.innerHTML = '<p></p><button type="button" aria-label="PLACEHOLDER">×</button>';
+  hint.querySelector('button').setAttribute('aria-label', tr('onboardingClose','案内を閉じる'));
   hint.querySelector('p').textContent = mobile
-    ? '左上のメニューボタンから、番組やカテゴリーを選べます。'
-    : '左側のカテゴリーから、見たい番組や種類を選べます。';
+    ? tr('onboardingMobile','左上のメニューボタンから、番組やカテゴリーを選べます。')
+    : tr('onboardingDesktop','左側のカテゴリーから、見たい番組や種類を選べます。');
 
   // Mobile: position relative to the header, immediately below its menu button.
   // Desktop: render in the sidebar flow below the category label.
