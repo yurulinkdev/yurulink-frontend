@@ -48,6 +48,24 @@
       "title_present": true
     }
   },
+  "latest_deployments": {
+    "production": {
+      "branch": "main",
+      "commit_hash": "b7adb5617d2da18979f684ddbbd59cc6efb29820",
+      "created_on": "2026-11-23T07:38:36.730842Z",
+      "deployment_url": "https://e48b10b0.yurulink-frontend.pages.dev",
+      "environment": "production",
+      "latest_stage": "idle"
+    },
+    "staging": {
+      "branch": "staging",
+      "commit_hash": "8805973432598c832658d3195d68899936e97e6f",
+      "created_on": "2026-11-23T07:36:53.271803Z",
+      "deployment_url": "https://5fb2f8a2.yurulink-frontend.pages.dev",
+      "environment": "preview",
+      "latest_stage": "idle"
+    }
+  },
   "mode": "plan",
   "pages": {
     "staging.yurulink.com": {
@@ -76,10 +94,10 @@
     "source_repo": "yurulink-frontend"
   },
   "project": "yurulink-frontend",
-  "request_id": "yl-domains-https-verify-20261123-02",
+  "request_id": "yl-domains-deploy-verify-20261123-01",
   "schema_version": 1,
   "state": "preflight_ok",
-  "time_utc": "2026-11-23T07:37:57.245781+00:00",
+  "time_utc": "2026-11-23T07:38:43.672228+00:00",
   "zone": "yurulink.com",
   "zone_status": "active"
 }
