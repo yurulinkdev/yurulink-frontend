@@ -163,7 +163,7 @@ def main():
         report["zone_status"] = zone_info.get("status")
         if zone_info.get("status") != "active":
             raise RuntimeError("Cloudflare DNS zone is not active")
-        domains = api("GET", project_path + "/domains?per_page=100", pages_token)
+        domains = api("GET", project_path + "/domains?per_page=25", pages_token)
         if not isinstance(domains, list):
             raise RuntimeError("Unexpected Pages custom domain list")
         names = {d.get("name"): d for d in domains}
