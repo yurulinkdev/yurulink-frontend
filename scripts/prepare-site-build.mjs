@@ -17,8 +17,8 @@ const branch = process.env.CF_PAGES_BRANCH || process.env.GITHUB_REF_NAME || '';
 const target = forced || (branch === 'main' ? 'production' : 'staging');
 const production = target === 'production';
 const url = production
-  ? 'https://yurulink-frontend.pages.dev/'
-  : 'https://staging.yurulink-frontend.pages.dev/';
+  ? 'https://www.yurulink.com/'
+  : 'https://staging.yurulink.com/';
 
 const file = resolve('hugo.toml');
 let src = readFileSync(file, 'utf8');
