@@ -8,9 +8,19 @@
       {{ range $pages }}
         <li class="rounded-xl border border-line bg-panel p-5">
           <article>
-            <time class="text-sm text-muted-ink" datetime="{{ .Params.last_update | default (.Date.Format "2006-01-02") }}">{{ .Params.last_update | default (.Date.Format "2006-01-02") }}</time>
-            <h2 class="mt-2 text-lg font-semibold"><a class="text-accent hover:underline" href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-            {{ with .Params.latest_summary | default (.Description | default (.Summary | plainify | truncate 140)) }}<p class="mt-2 text-sm text-muted-ink">{{ . }}</p>{{ end }}
+            {{ if and (eq $.Section "change-log") .Params.daily_summaries }}
+              {{ $month := . }}
+              <h2 class="text-lg font-semibold"><a class="text-accent hover:underline" href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+              <ul class="mt-3 space-y-2 text-sm text-muted-ink">
+                {{ range .Params.daily_summaries }}
+                  <li><a class="hover:text-accent hover:underline" href="{{ $month.RelPermalink }}#{{ .date }}"><time datetime="{{ .date }}">{{ .date }}</time>：{{ .summary }}</a></li>
+                {{ end }}
+              </ul>
+            {{ else }}
+              <time class="text-sm text-muted-ink" datetime="{{ .Params.last_update | default (.Date.Format "2006-01-02") }}">{{ .Params.last_update | default (.Date.Format "2006-01-02") }}</time>
+              <h2 class="mt-2 text-lg font-semibold"><a class="text-accent hover:underline" href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
+              {{ with .Params.latest_summary | default (.Description | default (.Summary | plainify | truncate 140)) }}<p class="mt-2 text-sm text-muted-ink">{{ . }}</p>{{ end }}
+            {{ end }}
           </article>
         </li>
       {{ end }}

@@ -84,7 +84,7 @@ test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page 
   const recent = page.locator('#category-drawer section[aria-label="最近の更新履歴"]');
   const months = recent.locator('li');
   if (await months.count()) {
-    await expect(months.first().locator('a')).toHaveAttribute('href', /\/change-log\/\d{4}-\d{2}\/$/);
+    await expect(months.first().locator('a')).toHaveAttribute('href', /\/change-log\/\d{4}-\d{2}\/(?:#\d{4}-\d{2}-\d{2})?$/);
     await expect(recent).not.toContainText('掲載データの更新履歴はまだありません。');
   } else {
     await expect(recent).toContainText('掲載データの更新履歴はまだありません。');
