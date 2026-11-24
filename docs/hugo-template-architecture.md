@@ -84,7 +84,7 @@ Backendが検証済み`catalog.json`をFrontend `staging`と`main`の`data/publi
 
 ## 更新履歴の生成
 
-Backendのカタログ配信処理は、Frontendブランチにある直前の公開JSONと生成済みJSONの差分を計算する。掲載内容に変更があるときは、公開JSONと当月のMarkdownを同じGitコミットで更新する。月別記事は`date`、`last_update`、`latest_summary`を持ち、同じ日付の差分は同じ日付見出しへ追記する。
+Backendのカタログ配信処理は、Frontendブランチにある直前の公開JSONと生成済みJSONの差分を計算する。掲載内容に変更があるときは、公開JSONと当月のMarkdownを同じGitコミットで更新する。月別記事は`date`、`last_update`、`latest_summary`を持つ。Backendが当月のMarkdownを再生成し、`## WeekN`の下に`### YYYY-MM-DD`と「カテゴリ：タイトル」の全件明細を配置する。月初を含む週をWeek1とし、JSTの月曜00:00に週番号を増やす。週・日とも新しい順。同じ日付の明細は同じ見出しにまとめる。月が変わると別ファイルのWeek1に切り替える。
 
 サイドバーは`/change-log/`配下の月別ページを最新更新日順に5件取得し、各記事の`last_update`と`latest_summary`を表示する。月別一覧も最新変更概要を表示する。統計値だけが変わった場合は、更新履歴に新しい項目を作らない。未公開の記事・架空の初回公開記録は生成しない。
 
