@@ -8,15 +8,15 @@
       {{ range $pages }}
         <li class="rounded-xl border border-line bg-panel p-5">
           <article>
-            <time class="text-sm text-muted-ink" datetime="{{ .Date.Format "2006-01-02" }}">{{ .Date.Format "2006-01-02" }}</time>
+            <time class="text-sm text-muted-ink" datetime="{{ .Params.last_update | default (.Date.Format "2006-01-02") }}">{{ .Params.last_update | default (.Date.Format "2006-01-02") }}</time>
             <h2 class="mt-2 text-lg font-semibold"><a class="text-accent hover:underline" href="{{ .RelPermalink }}">{{ .Title }}</a></h2>
-            {{ with .Description | default (.Summary | plainify | truncate 140) }}<p class="mt-2 text-sm text-muted-ink">{{ . }}</p>{{ end }}
+            {{ with .Params.latest_summary | default (.Description | default (.Summary | plainify | truncate 140)) }}<p class="mt-2 text-sm text-muted-ink">{{ . }}</p>{{ end }}
           </article>
         </li>
       {{ end }}
     </ul>
   {{ else }}
-    <p class="rounded-xl border border-line bg-panel p-5 text-muted-ink">{{ i18n "noPosts" }}</p>
+    <p class="rounded-xl border border-line bg-panel p-5 text-muted-ink">{{ if eq $.Section "change-log" }}{{ i18n "siteChangeLogPending" }}{{ else }}{{ i18n "noPosts" }}{{ end }}</p>
   {{ end }}
 </section>
 {{ end }}

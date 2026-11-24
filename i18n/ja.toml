@@ -50,7 +50,7 @@ other = "{{ . }}のSNS"
 other = "最近の更新履歴"
 
 [siteChangeLogPending]
-other = "本公開後に掲載します。"
+other = "掲載データの更新履歴はまだありません。"
 
 [siteAllChanges]
 other = "すべての更新履歴"
