@@ -82,7 +82,23 @@ test('GA4設定済みだがStagingホストでは測定しない・公式Xを表
   await expect(xLink).toHaveAccessibleName('YuruLinkのXを開く');
   await expect(xLink.locator('img')).toHaveAttribute('src', /\/icons\/social\/x\.svg$/);
   const updates = page.locator('aside section[aria-label="最近の更新履歴"] li');
-  expect(await updates.count()).toBe(0);
+  // Published catalog history can contain entries; validate the sidebar contract, not a fixed empty state.
+  const recent = await updates.evaluateAll(items => items.map(li => ({
+    date: li.querySelector('time')?.getAttribute('datetime'),
+    href: li.querySelector('a')?.getAttribute('href'),
+    text: li.textContent.trim()
+  })));
+  expect(recent.length).toBeLessThanOrEqual(5);
+  for (const item of recent) {
+    expect(item.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(item.href).toMatch(/\/change-log\//);
+    expect(item.text.length).toBeGreaterThan(10);
+  }
+  expect(recent.map(item => item.date)).toEqual(recent.map(item => item.date).sort().reverse());
+  if (recent.length) {
+    const response = await page.request.get(recent[0].href);
+    expect(response.ok()).toBe(true);
+  }
   await expect(page.getByRole('link',{name:'すべての更新履歴'})).toHaveAttribute('href',/change-log\//);
 });
 
