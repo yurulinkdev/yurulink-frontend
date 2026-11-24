@@ -2,7 +2,7 @@
 set -euo pipefail
 
 cleanup() {
-  rm -f content/about/smoke-ci.md
+  rm -f content/about/smoke-ci.md content/change-log/2001-01.md
   if [[ -d "${BACKUP_DIR:-}" ]]; then
     for file in catalog.json videos.json; do
       if [[ -f "$BACKUP_DIR/$file" ]]; then
@@ -83,6 +83,62 @@ grep -q 'Smoke CI 記事' public/about/smoke-ci/index.html
 grep -q 'テスト見出し' public/about/smoke-ci/index.html
 grep -Eq 'rel=("canonical"|canonical)([ >])' public/about/smoke-ci/index.html || { echo '::error::Missing canonical'; exit 1; }
 grep -q 'og:title' public/about/smoke-ci/index.html
+echo "::endgroup::"
+
+echo "::group::Monthly changelog and sidebar"
+# テスト用記事は実公開の変更履歴に含めない。
+test ! -e content/change-log/2001-01.md
+cat > content/change-log/2001-01.md <<'EOF'
+---
+title: "2001年1月"
+date: 2001-01-09T00:00:00+09:00
+lastmod: 2001-01-09T00:00:00+09:00
+last_update: "2001-01-09"
+latest_summary: "追加2件"
+---
+## Week2
+
+### 2001-01-09
+
+下記のリンクを更新しました。
+
+- テスト番組：動画A
+- Webサイト：サイトB
+
+### 2001-01-08
+
+下記のリンクを更新しました。
+
+- テスト番組：動画C
+
+## Week1
+
+### 2001-01-02
+
+下記のリンクを更新しました。
+
+- テスト番組：動画D
+EOF
+npm run build
+test -s public/change-log/2001-01/index.html
+grep -q '追加2件' public/index.html
+grep -q '2001-01-09' public/index.html
+grep -q '追加2件' public/change-log/index.html
+grep -q 'テスト番組：動画A' public/change-log/2001-01/index.html
+node --input-type=module <<'EOF'
+import {readFileSync} from 'node:fs';
+import assert from 'node:assert/strict';
+const html = readFileSync('public/change-log/2001-01/index.html', 'utf8');
+const headings = Array.from(html.matchAll(/<h[23](?:\s[^>]*)?>([^<]+)<\/h[23]>/g), match => match[1]);
+assert.deepEqual(headings.filter(text => /^(Week\d|2001-01-\d\d)$/.test(text)),
+  ['Week2', '2001-01-09', '2001-01-08', 'Week1', '2001-01-02']);
+assert.ok(html.includes('Webサイト：サイトB'));
+assert.ok(html.includes('下記のリンクを更新しました。'));
+EOF
+rm content/change-log/2001-01.md
+rm -rf public/change-log/2001-01
+npm run build
+test ! -e public/change-log/2001-01/index.html
 echo "::endgroup::"
 
 echo "::group::Build without catalog JSON"

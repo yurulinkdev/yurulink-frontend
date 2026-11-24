@@ -65,7 +65,7 @@ npm run build
 | `main` | Production | https://www.yurulink.com/ |
 | `staging` | Preview | https://staging.yurulink.com/ |
 
-Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。2026-11-23に`www.yurulink.com`（Production）と`staging.yurulink.com`（Preview）を同一PagesプロジェクトのCustom Domainとして登録し、Cloudflare DNSにプロキシ有効のCNAMEを設定しました。`*.pages.dev`の既存ホストは引き続き補助的に利用できます。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードのマージが自動デプロイを起動する可能性を前提に扱い、Production反映・DNS変更は事前承認を要します。 **例外：Backendの定期ジョブによる`data/public/catalog.json`のみの更新は既存データ配信として自動反映します。**
+Cloudflare Pagesは**単一の`yurulink-frontend`プロジェクト**を使用します。2026-11-23に`www.yurulink.com`（Production）と`staging.yurulink.com`（Preview）を同一PagesプロジェクトのCustom Domainとして登録し、Cloudflare DNSにプロキシ有効のCNAMEを設定しました。`*.pages.dev`の既存ホストは引き続き補助的に利用できます。`staging`の設定は`noindex`と開発向け`baseURL`を含むため、`main`へ取り込む際には環境別のHugoビルド設定、canonical／OGP、検索エンジン制御を検証します。コードのマージが自動デプロイを起動する可能性を前提に扱い、Production反映・DNS変更は事前承認を要します。 **例外：Backendの定期ジョブによる`data/public/catalog.json`と掲載差分に由来する`content/change-log/YYYY-MM.md`の更新は、既存データ配信として自動反映します。**
 
 ## 詳細仕様
 

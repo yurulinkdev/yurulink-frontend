@@ -16,6 +16,7 @@ YuruLink Frontendは、Hugoの静的サイトを基盤として、記事・案�
 | ボタン、メニュー、検索・並び替えの短い文言 | `i18n/ja.toml` | Goテンプレートの `i18n`。JavaScriptには `site/ui-translations.html` 経由で渡す |
 | YouTube対象の表示分類、投稿カテゴリID | `data/taxonomy.json`（Backend `config/taxonomy.v1.json` の複製） | カテゴリーツリー。表示名は翻訳テーブル側に分離 |
 | 公開リンク、番組、プレイリスト、所属関係 | `data/public/catalog.json` | Hugoが `/catalog-data/` に全件カードHTMLを生成 |
+| カタログの公開差分・月別更新履歴 | `content/change-log/YYYY-MM.md` | `/change-log/YYYY-MM/` と、サイドバー下部の最新更新日・変更概要 |
 | 計測、Googleフォーム、SNSのURL | `hugo.toml` の `params.analytics`、`params.submission`、`params.social` | 設定が有効で、指定した条件を満たす場合のみ出力 |
 
 `layouts/index.html`と`layouts/welcome/list.html`は同じ`site/welcome.html`を参照する。案内文の重複管理を避けるため、本文はMarkdownの`.Content`から描画する。
@@ -80,3 +81,11 @@ Backendが検証済み`catalog.json`をFrontend `staging`と`main`の`data/publi
 - 同じコミットSHAについてSmoke・Pages Preview・Playwrightの結果を確認する。GitHub ActionsのJob成功はProductionサイトでの表示検証とは別に記録する。
 
 関連：[Frontend環境とデプロイ](environments.md)／[初期表示・ページ境界](frontend-initial-render-performance-20261123.md)／[UI回帰仕様](frontend-ui-regression-contract-20261122.md)。
+
+## 更新履歴の生成
+
+Backendのカタログ配信処理は、Frontendブランチにある直前の公開JSONと生成済みJSONの差分を計算する。掲載内容に変更があるときは、公開JSONと当月のMarkdownを同じGitコミットで更新する。月別記事は`date`、`last_update`、`latest_summary`を持つ。Backendが当月のMarkdownを再生成し、`## WeekN`の下に`### YYYY-MM-DD`と「カテゴリ：タイトル」の全件明細を配置する。月初を含む週をWeek1とし、JSTの月曜00:00に週番号を増やす。週・日とも新しい順。同じ日付の明細は同じ見出しにまとめる。月が変わると別ファイルのWeek1に切り替える。
+
+サイドバーは`/change-log/`配下の月別ページを最新更新日順に5件取得し、各記事の`last_update`と`latest_summary`を表示する。月別一覧も最新変更概要を表示する。統計値だけが変わった場合は、更新履歴に新しい項目を作らない。未公開の記事・架空の初回公開記録は生成しない。
+
+更新履歴の書込範囲、障害時の扱い、検証事項はBackendの[公開差分・更新履歴配信設計](https://github.com/yurulinkdev/yurulink-backend/blob/develop/docs/catalog-changelog-publication.md)を参照する。

@@ -32,7 +32,19 @@
       {{ if $months }}
         <ul class="space-y-2 text-xs text-muted-ink">
           {{ range $months }}
-            <li><a class="hover:text-accent hover:underline" href="{{ .RelPermalink }}">{{ .Title }}</a></li>
+            {{ $month := . }}
+            <li>
+              <a class="block hover:text-accent hover:underline" href="{{ .RelPermalink }}">
+                {{ with .Params.last_update }}
+                  <time class="block font-medium" datetime="{{ . }}">{{ . }}</time>
+                {{ else }}
+                  <span class="block font-medium">{{ $month.Title }}</span>
+                {{ end }}
+                {{ with .Params.latest_summary }}
+                  <span class="block leading-relaxed">{{ . }}</span>
+                {{ end }}
+              </a>
+            </li>
           {{ end }}
         </ul>
       {{ else }}
