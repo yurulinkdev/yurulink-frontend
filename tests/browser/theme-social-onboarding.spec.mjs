@@ -63,6 +63,7 @@ for (const os of ['light','dark']) {
     await page.evaluate(() => {
       const row = document.createElement('div');
       row.id = 'test-social-icons';
+      row.style.cssText = 'display:flex;gap:8px;flex-wrap:wrap;background:var(--page);padding:8px';
       for (const key of ['x','instagram','youtube','bluesky','threads','discord','tiktok','facebook']) {
         const img = document.createElement('img');
         img.src = new URL('icons/social/'+key+'.svg', document.baseURI.split('/about/')[0]+'/').href;
@@ -75,13 +76,41 @@ for (const os of ['light','dark']) {
     const icons = page.locator('#test-social-icons img');
     await expect(icons).toHaveCount(8);
     await expect.poll(() => icons.evaluateAll(es=>es.every(e=>e.complete && e.naturalWidth>0))).toBe(true);
+    // Inspect actual rendered screenshot pixels, not only the computed CSS filter.
+    const checkPixels = async (locator, theme) => {
+      await locator.scrollIntoViewIfNeeded();
+      await expect.poll(() => locator.evaluate(e => e.complete && e.naturalWidth > 0)).toBe(true);
+      const png = await locator.screenshot({animations:'disabled', scale:'css'});
+      const counts = await page.evaluate(async data => {
+        const image = new Image();
+        image.src = 'data:image/png;base64,' + data;
+        await image.decode();
+        const canvas = document.createElement('canvas');
+        canvas.width = image.naturalWidth;
+        canvas.height = image.naturalHeight;
+        const context = canvas.getContext('2d');
+        context.drawImage(image, 0, 0);
+        const rgba = context.getImageData(0, 0, canvas.width, canvas.height).data;
+        let black = 0, white = 0;
+        for (let i = 0; i < rgba.length; i += 4) {
+          if (Math.max(rgba[i], rgba[i+1], rgba[i+2]) < 45) black++;
+          if (Math.min(rgba[i], rgba[i+1], rgba[i+2]) > 220) white++;
+        }
+        return {black, white, total:rgba.length/4};
+      }, png.toString('base64'));
+      expect(theme === 'dark' ? counts.white : counts.black).toBeGreaterThan(counts.total * 0.05);
+      console.log('SNS_ICON_PIXELS', await locator.getAttribute('src'), theme, JSON.stringify(counts));
+    };
     const check = async theme => {
       if (await page.locator('html').getAttribute('data-theme') !== theme)
         await page.locator('#theme-toggle').click();
       await expect(page.locator('html')).toHaveAttribute('data-theme',theme);
       await expect(x).toHaveCSS('filter',theme==='dark'?'invert(1)':'none');
-      for (const img of await icons.all())
+      await checkPixels(x, theme);
+      for (const img of await icons.all()) {
         await expect(img).toHaveCSS('filter',theme==='dark'?'invert(1)':'none');
+        await checkPixels(img, theme);
+      }
     };
     await check('light');
     await check('dark');
