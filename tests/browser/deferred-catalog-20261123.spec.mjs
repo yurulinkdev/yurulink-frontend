@@ -123,10 +123,10 @@ test('モバイル初回ガイドは左上メニュー直下に配置・クリ�
     };
   });
   expect(geometry.inHeader).toBe(true);
-  expect(geometry.position).toBe('absolute');
+  expect(geometry.position).toBe('relative');
   expect(geometry.hintTop).toBeGreaterThanOrEqual(geometry.menuBottom);
-  expect(geometry.hintTop).toBeGreaterThanOrEqual(geometry.headerBottom);
-  expect(geometry.hintTop - geometry.headerBottom).toBeLessThan(24);
+  expect(geometry.hintBottom).toBeLessThanOrEqual(geometry.headerBottom);
+  await expect(hint.locator('p')).toHaveText('メニューはこちら');
   expect(geometry.hintBottom).toBeLessThan(geometry.viewportHeight * 0.7);
   await page.locator('#open-categories').click();
   await expect(hint).toHaveCount(0);
