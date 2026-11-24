@@ -7,7 +7,8 @@
   const ui = (() => { try { return JSON.parse(document.getElementById('yl-ui-messages')?.textContent || '{}'); } catch { return {}; } })();
   const tr = (name, fallback) => ui[name] || fallback;
   try { if (localStorage.getItem(key)) return; } catch { /* ブラウザ設定により保存不可 */ }
-  const mobile = matchMedia('(max-width: 1023px)').matches;
+  const viewport = matchMedia('(max-width: 1023px)');
+  const mobile = viewport.matches;
   const target = document.getElementById(mobile ? 'open-categories' : 'categories-intro-anchor');
   if (!target) return;
 
@@ -18,8 +19,8 @@
   hint.innerHTML = '<p></p><button type="button" aria-label="PLACEHOLDER">×</button>';
   hint.querySelector('button').setAttribute('aria-label', tr('onboardingClose','案内を閉じる'));
   hint.querySelector('p').textContent = mobile
-    ? tr('onboardingMobile','左上のメニューボタンから、番組やカテゴリーを選べます。')
-    : tr('onboardingDesktop','左側のカテゴリーから、見たい番組や種類を選べます。');
+    ? tr('onboardingMobile','メニューはこちら')
+    : tr('onboardingDesktop','カテゴリから番組や種類を選べます');
 
   // Mobile: position relative to the header, immediately below its menu button.
   // Desktop: render in the sidebar flow below the category label.
@@ -36,6 +37,7 @@
     target.classList.remove('onboarding-highlight');
     target.removeAttribute('aria-describedby');
     document.removeEventListener('keydown', onKey);
+    viewport.removeEventListener?.('change', clear);
   };
   const onKey = e => { if (e.key === 'Escape') clear(); };
 
@@ -46,6 +48,7 @@
   // 案内の下にあるリンクも通常どおり押せるようにし、操作開始時に案内を閉じる。
   document.getElementById('category-buttons')?.addEventListener('click', clear, { once: true });
   document.addEventListener('keydown', onKey);
+  viewport.addEventListener?.('change', clear);
 
   try { localStorage.setItem(key, '1'); } catch { /* 次回も案内表示の可能性あり */ }
 })();
