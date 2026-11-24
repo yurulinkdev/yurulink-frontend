@@ -1,0 +1,129 @@
+{
+  "release": "2026-11-24-B",
+  "status": "approved master; staging only",
+  "source": "Google Drive YuruLink_Assets",
+  "method": "HTML/CSS/SVG -> Playwright Chromium",
+  "colors": {
+    "accent": "#A35B46",
+    "inner_fill": "#F4EFE7",
+    "background": "#FBF9F6",
+    "foreground": "#342B28"
+  },
+  "files": [
+    {
+      "path": "01-main/01-original/YuruLink-symbol-approved-reference.jpg",
+      "git_blob": "f5fcdf3650a0c26d60ca15786fb8e99535f92c44",
+      "drive_id": "145ljbyXFFfWL6cW2KXTnUT7_uhKGrVSC"
+    },
+    {
+      "path": "01-main/02-vector/YuruLink-symbol-v2-single-color-master.svg",
+      "git_blob": "26111ed182d600523260a82712661e0a4bc8e68c",
+      "drive_id": "1qMwDWs86JGTjrMH9X4xu15ZtgJ77m0UU"
+    },
+    {
+      "path": "01-main/02-vector/yurulink-symbol-master-ivory-20261124.svg",
+      "git_blob": "f9c422b727eadd3dc6473ca3bfd3324ea352ec3a",
+      "drive_id": "1jH2EVB34G1qNOxzS14NNybZ61eFXQw2s"
+    },
+    {
+      "path": "01-main/03-transparent/YuruLink-symbol-v2-flat-transparent-1024.png",
+      "git_blob": "be4304d605465dc76eec3dbef2b7ce8057e7fd54",
+      "drive_id": "1G-I_3c_uC-s-j21YN7lDq5ECptixhHIZ"
+    },
+    {
+      "path": "01-main/03-transparent/YuruLink-icon-B-ivory-512-20261124.png",
+      "git_blob": "d5e8bdf8ac210d91eb17dac137102121aa5c9f2d",
+      "drive_id": "1yXaDyIORUDn9RVyMIlbMtxuXQKdiZVnX"
+    },
+    {
+      "path": "01-main/03-transparent/YuruLink-icon-B-ivory-1024-20261124.png",
+      "git_blob": "6c921fe9e0122f86c5da30d16f5f0900e4fff193",
+      "drive_id": "1Mv648Oqfh2x4YtvXpAql1wYGIKVzyKgX"
+    },
+    {
+      "path": "01-main/03-transparent/YuruLink-icon-256-B-20261124.png",
+      "git_blob": "fd4750fa9be64cab7fe0d5af5bf53958c228867a",
+      "drive_id": "1o_CcEC_Tg2_8Sh_k8FzwYim5dbmazkvt"
+    },
+    {
+      "path": "02-usage/web/YuruLink-apple-touch-icon-180-B-20261124.png",
+      "git_blob": "72a79e66af06fc2614227fa6c3be7449967a3e06",
+      "drive_id": "1H246l6s3VtLFbiulgG4ODoqcInfac8Zd"
+    },
+    {
+      "path": "02-usage/web/YuruLink-favicon-32-B-20261124.png",
+      "git_blob": "68ff2c99cfec635f0bc309af2ccae83de542070f",
+      "drive_id": "1KX7G0-E8o4bJ1dbY9jyZWTweIIBY5BZR"
+    },
+    {
+      "path": "02-usage/web/YuruLink-hero-light-B-20261124.png",
+      "git_blob": "6e7218e0d2877ffac1e5c456ed96cccd9f8b47dd",
+      "drive_id": "11sd2H7uVKtsHyQz4tJ4Ag16mC_be9Tpv"
+    },
+    {
+      "path": "02-usage/forms/YuruLink-form-header-1600x400-B-20261124.png",
+      "git_blob": "cb266c1d94d008f00e940f3d82783c9b949caa2d",
+      "drive_id": "16SyZR5B18L64RuGYiSXaoJt7f6bLx0kG"
+    },
+    {
+      "path": "02-usage/ogp/YuruLink-ogp-light-B-20261124.png",
+      "git_blob": "eb558be199426c0459c7e36b6b0b6d09c5e64cc8",
+      "drive_id": "11dw2ZC1rY7LlAAz7kHRMwJqlx_5Bjdmf"
+    },
+    {
+      "path": "02-usage/ogp/YuruLink-ogp-staging-B-20261124.png",
+      "git_blob": "3d7feb91e23f09dc6a0cbb3cbc4501d096b77143",
+      "drive_id": "1yyrRpbNfn0-e5fEkE5p3prks4Ca3-HHW"
+    },
+    {
+      "path": "02-usage/ogp/YuruLink-ogp-dark-B-20261124.png",
+      "git_blob": "41736b787081ee6a8cf484e31843ad4b5f0cd5da",
+      "drive_id": "1Ol_-d2dlK_vdRqPiYjm15OvncSRzLfH8"
+    },
+    {
+      "path": "02-usage/x/YuruLink-sns-avatar-light-400-B-20261124.png",
+      "git_blob": "645e67014d93ec42f86007c2aa4fbf27bc259413",
+      "drive_id": "1DP7e5by7huw-7KhUgZhRtG_NS5-8PYcM"
+    },
+    {
+      "path": "02-usage/x/YuruLink-sns-avatar-light-512-B-20261124.png",
+      "git_blob": "5b1191087e2e07e7bf3513daee1d96ea62c76e83",
+      "drive_id": "1FntIdBSjfwsDAa2Ruc0qe8C_mEx_ZvbC"
+    },
+    {
+      "path": "02-usage/x/YuruLink-sns-avatar-transparent-400-B-20261124.png",
+      "git_blob": "2a9a8b785781801fe2b7543e25ad17d6a2634a08",
+      "drive_id": "1BEe2Hvwcak2WQiaVtYr4RoofWg7C2MH9"
+    },
+    {
+      "path": "02-usage/x/YuruLink-sns-avatar-transparent-512-B-20261124.png",
+      "git_blob": "a50dac6c54d126c4598705057501125adfcc2521",
+      "drive_id": "17ZfNJ4PpDFmgOn3GKriRMRr4tE_QNTuf"
+    },
+    {
+      "path": "02-usage/x/YuruLink-x-header-light-safe-1500x500-B-20261124.png",
+      "git_blob": "bb66982d58a43613e9ef3b12c05b80a522d8960d",
+      "drive_id": "19GOYMebM97ETazDDvXJPsNYFvnA4t9a9"
+    },
+    {
+      "path": "02-usage/x/YuruLink-x-header-light-safe-3000x1000-B-20261124.png",
+      "git_blob": "b88481b98885272ee0b01b8c71c8ee2ff3771d53",
+      "drive_id": "1uwE6nEGpgMGN-gcu1MdAdd72u0R-9GUk"
+    }
+  ],
+  "public_aliases": {
+    "static/brand/yurulink-symbol-master.svg": "01-main/02-vector/yurulink-symbol-master-ivory-20261124.svg",
+    "static/brand/yurulink-symbol-approved.svg": "01-main/02-vector/yurulink-symbol-master-ivory-20261124.svg",
+    "static/brand/yurulink-symbol-approved-transparent.png": "01-main/03-transparent/YuruLink-icon-B-ivory-512-20261124.png",
+    "static/brand/yurulink-symbol-flat-1024.png": "01-main/03-transparent/YuruLink-icon-B-ivory-1024-20261124.png",
+    "static/brand/yurulink-icon-256.png": "01-main/03-transparent/YuruLink-icon-256-B-20261124.png",
+    "static/apple-touch-icon.png": "02-usage/web/YuruLink-apple-touch-icon-180-B-20261124.png",
+    "static/favicon-32.png": "02-usage/web/YuruLink-favicon-32-B-20261124.png",
+    "static/brand/hero-light-1600x900.png": "02-usage/web/YuruLink-hero-light-B-20261124.png",
+    "static/brand/yurulink-hero-light.png": "02-usage/web/YuruLink-hero-light-B-20261124.png",
+    "static/brand/form-header-1600x400.png": "02-usage/forms/YuruLink-form-header-1600x400-B-20261124.png",
+    "static/ogp/yurulink-light.png": "02-usage/ogp/YuruLink-ogp-light-B-20261124.png",
+    "static/ogp/yurulink-staging.png": "02-usage/ogp/YuruLink-ogp-staging-B-20261124.png",
+    "static/ogp/yurulink-dark.png": "02-usage/ogp/YuruLink-ogp-dark-B-20261124.png"
+  }
+}
