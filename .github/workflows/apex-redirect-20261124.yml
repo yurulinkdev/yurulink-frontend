@@ -23,22 +23,20 @@ jobs:
             dig +time=3 +tries=1 +short AAAA "$host" @1.1.1.1 || true
             curl -sS -I --max-time 10 "https://$host/" | grep -Ei '^(HTTP/|location:)' || true
           done
-      - name: Inspect apex and apply only with both scoped credentials and safe preflight
+      - name: One-time apex repair using existing DNS credential and dedicated redirect token
         shell: bash
         env:
-          DNS_TOKEN: ${{ secrets.CLOUDFLARE_DNS_API_TOKEN }}
+          DNS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           REDIRECT_TOKEN: ${{ secrets.CLOUDFLARE_REDIRECT_API_TOKEN }}
-          ZONE_ID: ${{ vars.CLOUDFLARE_ZONE_ID }}
         run: |
           python3 - <<'PY'
           import json, os, re, urllib.request, urllib.error
           host = "yurulink.com"
           dns = os.environ.get("DNS_TOKEN", "")
           redirect = os.environ.get("REDIRECT_TOKEN", "")
-          zone = os.environ.get("ZONE_ID", "")
-          if not re.fullmatch("[0-9a-f]{32}", zone):
-              raise SystemExit("BLOCKED: missing or invalid CLOUDFLARE_ZONE_ID")
-          base = "https://api.cloudflare.com/client/v4/zones/" + zone
+          base = "https://api.cloudflare.com/client/v4"
+          if not dns or not redirect:
+              raise SystemExit("BLOCKED: required existing DNS or dedicated redirect credential missing")
           def api(method, path, token, body=None, notfound=False):
               if not token:
                   raise RuntimeError("missing scoped token")
@@ -47,12 +45,14 @@ jobs:
                   with urllib.request.urlopen(req, timeout=20) as resp:
                       obj=json.load(resp)
               except urllib.error.HTTPError as e:
-                  if e.code==404 and notfound:
+                  try:
                       obj=json.loads(e.read())
-                      # Cloudflare explicitly reports a missing phase entrypoint.
-                      if any(x.get("code")==10003 for x in obj.get("errors",[])):
-                          return None
-                  raise RuntimeError(f"{method} {path.split('?')[0]} HTTP {e.code}") from None
+                      codes=[x.get("code") for x in obj.get("errors",[])]
+                  except Exception:
+                      codes=[]
+                  if e.code==404 and notfound and 10003 in codes:
+                      return None
+                  raise RuntimeError(f"{method} {path.split('?')[0]} HTTP {e.code}, codes={codes}") from None
               if not obj.get("success"):
                   raise RuntimeError("Cloudflare rejected "+method+" "+path.split("?")[0])
               return obj.get("result")
@@ -61,8 +61,12 @@ jobs:
               if not isinstance(rows,list) or len(rows)>=100:
                   raise RuntimeError("unexpected DNS list")
               return [r for r in rows if r.get("name","").rstrip(".").lower()==name]
-          if not dns:
-              raise SystemExit("BLOCKED: missing CLOUDFLARE_DNS_API_TOKEN")
+          zones=api("GET","/zones?name=yurulink.com&per_page=20",dns)
+          matches=[z for z in zones if z.get("name")==host and z.get("status")=="active"]
+          if len(matches)!=1 or not re.fullmatch("[0-9a-f]{32}",matches[0].get("id","")):
+              raise SystemExit("BLOCKED: expected exactly one active yurulink.com zone")
+          base += "/zones/"+matches[0]["id"]
+          print("ZONE_DISCOVERY_OK",flush=True)
           rows=records(dns,host)
           print("APEX_DNS_TYPES="+str([{"type":r.get("type"),"proxied":r.get("proxied")} for r in rows]),flush=True)
           www=records(dns,"www."+host)
