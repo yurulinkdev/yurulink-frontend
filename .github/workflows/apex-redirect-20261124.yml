@@ -1,120 +1,46 @@
-name: YuruLink apex redirect - scoped check and repair
+name: YuruLink apex redirect - public verification
 on:
   push:
     branches: [ops/apex-redirect-20261124]
     paths: ['.github/workflows/apex-redirect-20261124.yml']
 permissions:
   contents: read
-concurrency:
-  group: yurulink-apex-redirect-20261124
-  cancel-in-progress: false
 jobs:
-  apex:
-    if: github.ref == 'refs/heads/ops/apex-redirect-20261124'
+  verify:
     runs-on: ubuntu-latest
-    timeout-minutes: 5
+    timeout-minutes: 4
     steps:
-      - name: Check public DNS and HTTP before changes
+      - name: Verify DNS and exact redirect without credentials
         shell: bash
-        run: |
-          for host in yurulink.com www.yurulink.com staging.yurulink.com; do
-            echo "HOST=$host"
-            dig +time=3 +tries=1 +short A "$host" @1.1.1.1 || true
-            dig +time=3 +tries=1 +short AAAA "$host" @1.1.1.1 || true
-            curl -sS -I --max-time 10 "https://$host/" | grep -Ei '^(HTTP/|location:)' || true
-          done
-      - name: One-time apex repair using existing DNS credential and dedicated redirect token
-        shell: bash
-        env:
-          DNS_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
-          REDIRECT_TOKEN: ${{ secrets.CLOUDFLARE_REDIRECT_API_TOKEN }}
         run: |
           python3 - <<'PY'
-          import json, os, re, urllib.request, urllib.error
-          host = "yurulink.com"
-          dns = os.environ.get("DNS_TOKEN", "")
-          redirect = os.environ.get("REDIRECT_TOKEN", "")
-          base = "https://api.cloudflare.com/client/v4"
-          if not dns or not redirect:
-              raise SystemExit("BLOCKED: required existing DNS or dedicated redirect credential missing")
-          def api(method, path, token, body=None, notfound=False):
-              if not token:
-                  raise RuntimeError("missing scoped token")
-              req = urllib.request.Request(base+path, method=method, headers={"Authorization":"Bearer "+token,"Content-Type":"application/json"}, data=json.dumps(body).encode() if body is not None else None)
+          import subprocess, time, urllib.request, urllib.error
+          class NoRedirect(urllib.request.HTTPRedirectHandler):
+              def redirect_request(self, *args, **kwargs):
+                  return None
+          opener=urllib.request.build_opener(NoRedirect())
+          cases=[("https://yurulink.com/","https://www.yurulink.com/"),("http://yurulink.com/","https://www.yurulink.com/"),("https://yurulink.com/catalog/?apex_probe=1","https://www.yurulink.com/catalog/?apex_probe=1"),("http://yurulink.com/catalog/?apex_probe=1","https://www.yurulink.com/catalog/?apex_probe=1")]
+          def probe(url):
+              req=urllib.request.Request(url,method="GET",headers={"User-Agent":"YuruLinkApexVerify/1"})
               try:
-                  with urllib.request.urlopen(req, timeout=20) as resp:
-                      obj=json.load(resp)
+                  with opener.open(req,timeout=8) as r:
+                      return r.status,r.headers.get("Location")
               except urllib.error.HTTPError as e:
-                  try:
-                      obj=json.loads(e.read())
-                      codes=[x.get("code") for x in obj.get("errors",[])]
-                  except Exception:
-                      codes=[]
-                  if e.code==404 and notfound and 10003 in codes:
-                      return None
-                  raise RuntimeError(f"{method} {path.split('?')[0]} HTTP {e.code}, codes={codes}") from None
-              if not obj.get("success"):
-                  raise RuntimeError("Cloudflare rejected "+method+" "+path.split("?")[0])
-              return obj.get("result")
-          def records(token, name):
-              rows=api("GET","/dns_records?name="+name+"&per_page=100",token)
-              if not isinstance(rows,list) or len(rows)>=100:
-                  raise RuntimeError("unexpected DNS list")
-              return [r for r in rows if r.get("name","").rstrip(".").lower()==name]
-          zones=api("GET","/zones?name=yurulink.com&per_page=20",dns)
-          matches=[z for z in zones if z.get("name")==host and z.get("status")=="active"]
-          if len(matches)!=1 or not re.fullmatch("[0-9a-f]{32}",matches[0].get("id","")):
-              raise SystemExit("BLOCKED: expected exactly one active yurulink.com zone")
-          base += "/zones/"+matches[0]["id"]
-          print("ZONE_DISCOVERY_OK",flush=True)
-          rows=records(dns,host)
-          print("APEX_DNS_TYPES="+str([{"type":r.get("type"),"proxied":r.get("proxied")} for r in rows]),flush=True)
-          www=records(dns,"www."+host)
-          if not any(r.get("type")=="CNAME" and r.get("proxied")==True and r.get("content","").rstrip(".").lower()=="yurulink-frontend.pages.dev" for r in www):
-              raise SystemExit("BLOCKED: existing www record not as expected; no writes")
-          addresses=[r for r in rows if r.get("type") in ("A","AAAA","CNAME")]
-          if addresses and not all(r.get("type")=="A" and r.get("content")=="192.0.2.1" and r.get("proxied")==True for r in addresses):
-              raise SystemExit("BLOCKED: apex has an existing address record; preserve it for manual review")
-          if not redirect:
-              raise SystemExit("BLOCKED: CLOUDFLARE_REDIRECT_API_TOKEN not registered; no writes performed")
-          phase="/rulesets/phases/http_request_dynamic_redirect/entrypoint"
-          desired={"ref":"yurulink_apex_to_www","description":"YuruLink apex to www (301, preserve path and query)","expression":'(http.host eq "yurulink.com")',"action":"redirect","enabled":True,"action_parameters":{"from_value":{"target_url":{"expression":'concat("https://www.yurulink.com", http.request.uri.path)'},"status_code":301,"preserve_query_string":True}}}
-          state=api("GET",phase,redirect,notfound=True)
-          def exact(rule):
-              return all(rule.get(k)==desired[k] for k in ("expression","action","enabled","action_parameters"))
-          if state is not None:
-              rules=state.get("rules",[])
-              if not isinstance(rules,list):
-                  raise SystemExit("BLOCKED: unexpected ruleset")
-              if any(exact(r) for r in rules):
-                  if not exact(rules[0]):
-                      raise SystemExit("BLOCKED: existing earlier rules require review")
-                  print("REDIRECT_ALREADY_PRESENT")
-              elif rules:
-                  raise SystemExit("BLOCKED: existing redirect rules require manual conflict review; no writes")
-              else:
-                  api("POST","/rulesets/"+state["id"]+"/rules",redirect,desired)
-                  print("REDIRECT_RULE_CREATED")
-          else:
-              api("POST","/rulesets",redirect,{"name":"YuruLink redirects","kind":"zone","phase":"http_request_dynamic_redirect","rules":[desired]})
-              print("REDIRECT_RULESET_CREATED")
-          confirmed=api("GET",phase,redirect)
-          if not confirmed.get("rules") or not exact(confirmed["rules"][0]):
-              raise SystemExit("BLOCKED: redirect readback mismatch; DNS unchanged")
-          if not addresses:
-              api("POST","/dns_records",dns,{"type":"A","name":host,"content":"192.0.2.1","proxied":True,"ttl":1})
-              print("APEX_DNS_CREATED")
-          else:
-              print("APEX_DNS_ALREADY_PRESENT")
-          if not any(r.get("type")=="A" and r.get("proxied")==True and r.get("content")=="192.0.2.1" for r in records(dns,host)):
-              raise SystemExit("DNS readback mismatch")
-          print("CONFIG_READBACK_OK")
+                  return e.code,e.headers.get("Location")
+              except Exception as e:
+                  return None,type(e).__name__+": "+str(e)
+          for attempt in range(6):
+              print("ATTEMPT",attempt+1,flush=True)
+              subprocess.run(["dig","+time=2","+tries=1","+short","A","yurulink.com","@1.1.1.1"],check=False)
+              results=[(u,expected,probe(u)) for u,expected in cases]
+              for u,expected,actual in results:
+                  print(u,actual,flush=True)
+              controls=[(u,probe(u)) for u in ["https://www.yurulink.com/","https://staging.yurulink.com/"]]
+              print("CONTROLS",controls,flush=True)
+              if all(actual==(301,expected) for u,expected,actual in results) and all(a[0]==200 for u,a in controls):
+                  print("PUBLIC_REDIRECT_VERIFIED",flush=True)
+                  break
+              if attempt==5:
+                  raise SystemExit("Public redirect not yet fully verified")
+              time.sleep(10)
           PY
-      - name: Check redirect after configuration
-        if: always()
-        shell: bash
-        run: |
-          for scheme in http https; do
-            curl -sS -I --max-time 12 "$scheme://yurulink.com/catalog/?apex_probe=1" | grep -Ei '^(HTTP/|location:)' || true
-          done
-          curl -sS -I --max-time 12 "https://www.yurulink.com/" | grep -Ei '^(HTTP/|location:)' || true
