@@ -353,10 +353,10 @@ other = "（時刻未取得）"
 other = "チャンネル・プレイリスト未所属の動画"
 
 [onboardingMobile]
-other = "左上のメニューボタンから、番組やカテゴリーを選べます。"
+other = "メニューはこちら"
 
 [onboardingDesktop]
-other = "左側のカテゴリーから、見たい番組や種類を選べます。"
+other = "カテゴリから番組や種類を選べます"
 
 [onboardingClose]
 other = "案内を閉じる"
