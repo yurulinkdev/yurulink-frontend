@@ -17,7 +17,8 @@ function build(target, native=false){
   assert(canonical(root).includes(url),target+' canonical mismatch: '+canonical(root));
   assert(ogImage(root).includes(url+'ogp/yurulink-'+(target==='production'?'light':'staging')+'.png'),target+' OGP URL mismatch: '+ogImage(root));
   assert(root.includes('G-8Y659Y3Y8Y')===(target==='production'),target+' GA4 ID mismatch');
-  if(target==='production') assert(root.includes('www.yurulink.com'), 'GA4 host mismatch');
+  assert(/\bid=(?:"analytics-consent"|analytics-consent)(?:\s|>)/i.test(root)===(target==='production'),target+' GA4 consent state mismatch');
+  if(target==='production') assert(/\bdata-allowed-hostnames=(?:"www\.yurulink\.com"|www\.yurulink\.com)(?:\s|>)/i.test(root), 'GA4 host mismatch');
   assert(canonical(catalog).includes(url+'catalog/'),target+' catalog canonical mismatch: '+canonical(catalog));
   const noindex=/<meta\b[^>]*\bname=(?:"robots"|robots)[^>]*noindex/i.test(root);
   assert(noindex===(target!=='production'),target+' noindex mismatch');
