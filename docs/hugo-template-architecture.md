@@ -10,14 +10,14 @@ YuruLink Frontendは、Hugoの静的サイトを基盤として、記事・案�
 
 | 管理対象 | 正本・設定箇所 | 出力への反映 |
 | --- | --- | --- |
-| サイトタイトル、ブランドSVG、ファビコン、Apple Touch Icon、OGP、説明文 | `hugo.toml` の `title`、`params.brand_logo`、`params.favicon_*`、`params.og_*`、`params.description` | ヘッダー、サイドバー、HTML `head`、フッター |
+| サイトタイトル、ブランドSVG、ファビコン、Apple Touch Icon、OGP、説明文 | `config/_default/hugo.toml` の `title`、`params.brand_logo`、`params.favicon_*`、`params.og_*`、`params.description` | ヘッダー、サイドバー、HTML `head`、フッター |
 | ようこその案内本文・眉見出し | `content/welcome/_index.md` | `/` と `/welcome/`。共通部分テンプレートが `Site.GetPage "/welcome"` で参照 |
 | 「このサイトについて」、ヘルプ、投稿案内など | `content/<section>/*.md` | Hugoの各セクション・記事ページ |
 | ボタン、メニュー、検索・並び替えの短い文言 | `i18n/ja.toml` | Goテンプレートの `i18n`。JavaScriptには `site/ui-translations.html` 経由で渡す |
 | YouTube対象の表示分類、投稿カテゴリID | `data/taxonomy.json`（Backend `config/taxonomy.v1.json` の複製） | カテゴリーツリー。表示名は翻訳テーブル側に分離 |
 | 公開リンク、番組、プレイリスト、所属関係 | `data/public/catalog.json` | Hugoが `/catalog-data/` に全件カードHTMLを生成 |
 | カタログの公開差分・月別更新履歴 | `content/change-log/YYYY-MM.md` | `/change-log/YYYY-MM/` と、サイドバー下部の日付別・種類別件数 |
-| 計測、Googleフォーム、SNSのURL | `hugo.toml` の `params.analytics`、`params.submission`、`params.social` | 設定が有効で、指定した条件を満たす場合のみ出力 |
+| 計測、Googleフォーム、SNSのURL | `config/_default/hugo.toml` の `params.analytics`、`params.submission`、`params.social` | 設定が有効で、指定した条件を満たす場合のみ出力 |
 
 `layouts/index.html`と`layouts/welcome/list.html`は同じ`site/welcome.html`を参照する。案内文の重複管理を避けるため、本文はMarkdownの`.Content`から描画する。
 
@@ -25,7 +25,7 @@ YuruLink Frontendは、Hugoの静的サイトを基盤として、記事・案�
 
 ```mermaid
 flowchart LR
-  CFG["hugo.toml<br/>サイト設定・ブランド"] --> H["Hugo build"]
+  CFG["config/<br/>共通・環境別設定"] --> H["Hugo build"]
   MD["content/*.md<br/>案内・記事"] --> H
   LANG["i18n/ja.toml<br/>UI文言"] --> H
   TAX["data/taxonomy.json<br/>分類ID"] --> H
@@ -60,7 +60,7 @@ flowchart LR
 - 共通UIの短文は`i18n/ja.toml`のキーで参照する。別言語は`i18n/<lang>.toml`を追加する。実際に言語を公開する場合はHugoの`languages`、ルーティング、canonical・`hreflang`、対象言語のコンテンツを併せて設定・検証する。
 - 分類ID、`browse:*`、JSONのキーと列挙値、API識別子は言語によらず維持する。Backendが配信する名称は固有名詞・分類データとして扱い、多言語用の表示名はIDをキーに別定義する。
 - ブラウザ実行時の短文は`site/ui-translations.html`が埋め込むJSONを`site.js`、`onboarding.js`、`ga4-consent.js`で参照する。単体DOMフィクスチャで翻訳データが省略されたときは、現行日本語のフォールバックを使用する。
-- `hugo.toml`の`params.og_locale`とサイト説明、OGPの代替テキスト等も言語別に管理できる。ブランド画像そのものは共通の承認済み素材を参照する。
+- `config/_default/hugo.toml`の`params.og_locale`とサイト説明、OGPの代替テキスト等も言語別に管理できる。ブランド画像そのものは共通の承認済み素材を参照する。
 
 **現時点の対応範囲**：日本語（`ja`）を基準にUIと本文を分離した。別言語の翻訳本文・翻訳テーブル・運用テストは未実装である。
 
@@ -68,7 +68,7 @@ flowchart LR
 
 `title`・`params.brand_logo`・`params.favicon_svg`・`params.favicon_png`・`params.apple_touch_icon`はサイト全体の共通設定である。HTMLの`head`はこれらのパスを参照し、OGP画像は`og_image`と`og_staging_image`を使い分ける。
 
-`scripts/prepare-site-build.mjs`はCloudflare Pagesの`CF_PAGES_BRANCH`に応じ、**ビルド作業ディレクトリ内**の`baseURL`、`noindex`、投稿フォームの公開状態を切り替える。GitHub上の設定ファイルやCloudflareのDNSは更新しない。
+`scripts/prepare-site-build.mjs` は `CF_PAGES_BRANCH` を基準に `config/main/hugo.toml` または `config/staging/hugo.toml` を選び、旧Pagesコマンド向けに追跡対象外の `config/production/hugo.toml` を生成する。環境値の正本・DNSは変更しない。
 
 Backendが検証済み`catalog.json`をFrontend `staging`と`main`の`data/public/catalog.json`へ自動配信する処理は、既存サイトの**定期コンテンツ更新**である。データのみの更新は毎回の個別承認を要しない。Hugoテンプレート・JavaScript・設定を`main`へ変更する行為、初回Production公開、DNS・Pages設定の変更、Backend Blue／Green切替は別途承認を要する。JSONだけのコミットでもCloudflare Pagesの自動ビルドが起動し得る。
 
