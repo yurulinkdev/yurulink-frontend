@@ -37,7 +37,7 @@ instagram = ""
 youtube = ""
 bluesky = ""
 threads = ""
-discord = ""
+discord = "https://discord.gg/nBbd2XPW9"
 
 [params.submission]
 # 専用Google Formの回答用URL（編集URLではない）。
