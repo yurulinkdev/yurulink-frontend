@@ -1,0 +1,15 @@
+# Production環境の公開設定。main/staging両ブランチで保持する。
+baseURL = "https://www.yurulink.com/"
+[params]
+noindex = false
+preview = false
+og_image = "ogp/yurulink-light.png"
+[params.submission]
+# 投稿審査のE2Eと承認までは本番受付を有効化しない。
+enabled = false
+embed_enabled = false
+[params.analytics]
+ga4_measurement_id = "G-8Y659Y3Y8Y"
+ga4_hostnames = ["www.yurulink.com"]
+cloudflare_web_analytics_token = ""
+new_relic_browser_snippet = ""

@@ -68,10 +68,14 @@ test('Stagingは公開するが検索エンジンへは登録しない', async (
   else await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 });
 
-test('GA4設定済みだがStagingホストでは測定しない・公式Xを表示', async ({ page }) => {
+test('GA4はProduction専用・公式Xを表示', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/about/');
-  await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
-  await expect(page.locator('#analytics-consent')).toBeHidden();
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
+  if (production) {
+    await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
+  } else {
+    await expect(page.locator('#analytics-consent')).toHaveCount(0);
+  }
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="cloudflareinsights.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="newrelic.com"]')).toHaveCount(0);
@@ -164,7 +168,12 @@ test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', 
 
 test('GA4 Production専用ホスト制限はページの設定に存在', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/help/');
-  await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
+  if (production) {
+    await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
+  } else {
+    await expect(page.locator('#analytics-consent')).toHaveCount(0);
+  }
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
 });
 

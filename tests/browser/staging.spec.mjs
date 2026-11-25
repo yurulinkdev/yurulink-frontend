@@ -634,8 +634,7 @@ test('branding: approved logo, favicon and OGP candidate are served from staging
   const og=page.locator('head meta[property="og:image"]');
   const host = new URL(page.url()).hostname;
   const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(host);
-  const local = ['127.0.0.1','localhost'].includes(host);
-  await expect(og).toHaveAttribute('content', production || local
+  await expect(og).toHaveAttribute('content', production
     ? /\/ogp\/yurulink-light\.png$/
     : /\/ogp\/yurulink-staging\.png$/);
   await expect(page.locator('head meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');

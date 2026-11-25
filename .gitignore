@@ -4,3 +4,6 @@
 /node_modules/
 .env
 .env.*
+
+# 旧Pagesビルドコマンド用の生成設定（正本はconfig/mainまたはstaging）
+/config/production/hugo.toml

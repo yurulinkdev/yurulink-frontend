@@ -1,5 +1,4 @@
-{{- $pagesBranch := os.Getenv "CF_PAGES_BRANCH" -}}
-{{- $isPreviewOGP := or (and (ne $pagesBranch "") (ne $pagesBranch "main")) (and (eq $pagesBranch "") (eq hugo.Environment "staging")) -}}
+{{- $isPreviewOGP := .Site.Params.preview -}}
 {{- $title := .Site.Title -}}
 {{- if not .IsHome -}}{{- $title = printf "%s | %s" .Title .Site.Title -}}{{- end -}}
 {{- $description := .Description | default (.Summary | plainify | truncate 155) | default (.Site.Params.description | default .Site.Title) -}}
@@ -27,12 +26,6 @@
 <link rel="icon" type="image/png" sizes="32x32" href="{{ .Site.Params.favicon_png | relURL }}">
 <link rel="apple-touch-icon" sizes="180x180" href="{{ .Site.Params.apple_touch_icon | relURL }}">
 {{- $ogImage := .Site.Params.og_image -}}
-{{/* Cloudflare Pagesのビルド設定が「hugo --minify」のままでもブランチで誤配信しない。明示 --environment staging にも対応。 */}}
-{{- if $isPreviewOGP -}}
-  {{- $ogImage = .Site.Params.og_staging_image | default $ogImage -}}
-{{- else if eq $pagesBranch "main" -}}
-  {{- $ogImage = .Site.Params.og_image -}}
-{{- end -}}
 {{- $ogAlt := printf "%s — %s" (.Site.Params.og_alt_text | default .Site.Title) .Site.Title -}}
 {{- if $isPreviewOGP -}}{{- $ogAlt = printf "%s%s" $ogAlt (i18n "previewImageSuffix") -}}{{- end -}}
 <meta property="og:image" content="{{ $ogImage | absURL }}">

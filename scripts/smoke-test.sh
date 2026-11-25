@@ -182,7 +182,9 @@ node --check playwright.config.mjs
 grep -Fq "baseURL: process.env.STAGING_URL || 'https://staging.yurulink-frontend.pages.dev/'" playwright.config.mjs
 test ! -e scripts/compare-staging.mjs
 test ! -e .github/workflows/compare-staging.yml
-! grep -Fq 'yurulink-frontend-staging' .github/workflows/cloudflare-inventory-request.yml
+grep -Fq 'for project in yurulink-frontend; do' .github/workflows/cloudflare-inventory-request.yml
+# 廃止済み旧プロジェクトの読み取り専用確認は維持する。
+grep -Fq 'Retired staging project: correctly absent' .github/workflows/cloudflare-inventory-request.yml
 echo "::endgroup::"
 
 echo "Smoke test passed."
@@ -199,6 +201,6 @@ grep -Fq "ogp/yurulink-light.png" public/index.html
 ! grep -Fq "ogp/yurulink-staging.png" public/index.html
 hugo --minify --environment staging >/dev/null
 grep -Fq "ogp/yurulink-staging.png" public/index.html
-hugo --minify --environment production >/dev/null
+hugo --minify --environment main >/dev/null
 grep -Fq "ogp/yurulink-light.png" public/index.html
 echo "::endgroup::"
