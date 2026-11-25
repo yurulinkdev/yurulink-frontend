@@ -10184,6 +10184,25 @@
       "status": "published"
     },
     {
+      "description": "元動画↓\nhttps://www.youtube.com/watch?v=szwVt9b_erE\n【クイズ】バイトの子が炎上。店長はどうする？",
+      "duration_iso8601": "PT1M25S",
+      "duration_seconds": 85,
+      "like_count": 6,
+      "published_at": "2026-11-25T03:00:34Z",
+      "statistics_fetched_at": "2026-11-25T05:42:18.673037Z",
+      "thumbnail_url": "https://i.ytimg.com/vi/6qX4n28oltw/default.jpg",
+      "video_format": "video",
+      "video_format_source": "standard_or_unknown",
+      "view_count": 882,
+      "id": "youtube:6qX4n28oltw",
+      "title": "暴露系に晒されたのに売上アップ",
+      "url": "https://www.youtube.com/watch?v=6qX4n28oltw",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published"
+    },
+    {
       "description": "【職業：メイド】です\n\n【マシュマロはこちらまで】\nhttps://marshmallow-qa.com/tabehoj?utm_medium=url_text&utm_source=promotion\n\n【Twitter】\nhttps://twitter.com/tabehoJ​",
       "duration_iso8601": "PT2H14M49S",
       "duration_seconds": 8089,
@@ -84655,6 +84674,10 @@
     {
       "item_id": "youtube:6pJsZASpjwU",
       "program_id": "youtube-channel:UCuG0Ay4D67uecldB_G9Ymeg"
+    },
+    {
+      "item_id": "youtube:6qX4n28oltw",
+      "program_id": "youtube-channel:UCaeqaKCdhlDCBvS0J5FWUyQ"
     },
     {
       "item_id": "youtube:6qeaOZ61jzk",
