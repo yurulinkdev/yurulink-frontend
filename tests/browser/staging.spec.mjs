@@ -634,14 +634,16 @@ test('branding: approved logo, favicon and OGP candidate are served from staging
   const og=page.locator('head meta[property="og:image"]');
   const host = new URL(page.url()).hostname;
   const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(host);
-  const local = ['127.0.0.1','localhost'].includes(host);
-  await expect(og).toHaveAttribute('content', production || local
+  await expect(og).toHaveAttribute('content', production
     ? /\/ogp\/yurulink-light\.png$/
     : /\/ogp\/yurulink-staging\.png$/);
   await expect(page.locator('head meta[name="twitter:card"]')).toHaveAttribute('content','summary_large_image');
   const source = await request.get('/brand/yurulink-symbol-master.svg');
   const svg = await source.text();
-  expect((svg.match(/<path /g) || []).length).toBe(6);
+  expect((svg.match(/<path /g) || []).length).toBe(7);
+  expect(svg).toContain('id="inner-fill" fill="#F4EFE7"');
+  const originalGroup = svg.match(/<g fill="#A35B46">([\s\S]*?)<\/g>/)?.[1];
+  expect((originalGroup?.match(/<path /g) || []).length).toBe(6);
   expect(svg).toContain('fill="#A35B46"');
   expect(svg).not.toMatch(/<linearGradient|<radialGradient/);
   for(const asset of ['/brand/yurulink-symbol-master.svg','/brand/yurulink-symbol-flat-1024.png','/favicon-32.png','/apple-touch-icon.png','/ogp/yurulink-light.png','/ogp/yurulink-dark.png','/brand/hero-light-1600x900.png','/brand/form-header-1600x400.png']){

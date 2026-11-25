@@ -94,7 +94,8 @@ title: "2001年1月"
 date: 2001-01-09T00:00:00+09:00
 lastmod: 2001-01-09T00:00:00+09:00
 last_update: "2001-01-09"
-latest_summary: "追加2件"
+latest_summary: "動画1件 / リンク1件追加"
+daily_summaries: [{"date":"2001-01-09","summary":"動画1件 / リンク1件追加"},{"date":"2001-01-08","summary":"動画1件追加"},{"date":"2001-01-02","summary":"動画1件追加"}]
 ---
 ## Week2
 
@@ -102,7 +103,7 @@ latest_summary: "追加2件"
 
 下記のリンクを更新しました。
 
-- テスト番組：動画A
+- テスト番組：[動画A](https://www.youtube.com/watch?v=abcdefghijk)
 - Webサイト：サイトB
 
 ### 2001-01-08
@@ -121,10 +122,10 @@ latest_summary: "追加2件"
 EOF
 npm run build
 test -s public/change-log/2001-01/index.html
-grep -q '追加2件' public/index.html
+grep -q '動画1件 / リンク1件追加' public/index.html
 grep -q '2001-01-09' public/index.html
-grep -q '追加2件' public/change-log/index.html
-grep -q 'テスト番組：動画A' public/change-log/2001-01/index.html
+grep -q '動画1件 / リンク1件追加' public/change-log/index.html
+grep -q 'https://www.youtube.com/watch?v=abcdefghijk' public/change-log/2001-01/index.html
 node --input-type=module <<'EOF'
 import {readFileSync} from 'node:fs';
 import assert from 'node:assert/strict';
@@ -133,6 +134,12 @@ const headings = Array.from(html.matchAll(/<h[23](?:\s[^>]*)?>([^<]+)<\/h[23]>/g
 assert.deepEqual(headings.filter(text => /^(Week\d|2001-01-\d\d)$/.test(text)),
   ['Week2', '2001-01-09', '2001-01-08', 'Week1', '2001-01-02']);
 assert.ok(html.includes('Webサイト：サイトB'));
+assert.match(html, /<a[^>]*href=["']?https:\/\/www\.youtube\.com\/watch\?v=abcdefghijk["']?[^>]*>動画A<\/a>/);
+for (const path of ['public/index.html','public/change-log/index.html']) {
+  const page = readFileSync(path, 'utf8');
+  assert.match(page, /2001-01-09<\/time>：動画1件 \/ リンク1件追加/);
+  assert.match(page, /2001-01-08<\/time>：動画1件追加/);
+}
 assert.ok(html.includes('下記のリンクを更新しました。'));
 EOF
 rm content/change-log/2001-01.md
@@ -175,7 +182,9 @@ node --check playwright.config.mjs
 grep -Fq "baseURL: process.env.STAGING_URL || 'https://staging.yurulink-frontend.pages.dev/'" playwright.config.mjs
 test ! -e scripts/compare-staging.mjs
 test ! -e .github/workflows/compare-staging.yml
-! grep -Fq 'yurulink-frontend-staging' .github/workflows/cloudflare-inventory-request.yml
+grep -Fq 'for project in yurulink-frontend; do' .github/workflows/cloudflare-inventory-request.yml
+# 廃止済み旧プロジェクトの読み取り専用確認は維持する。
+grep -Fq 'Retired staging project: correctly absent' .github/workflows/cloudflare-inventory-request.yml
 echo "::endgroup::"
 
 echo "Smoke test passed."
@@ -192,6 +201,6 @@ grep -Fq "ogp/yurulink-light.png" public/index.html
 ! grep -Fq "ogp/yurulink-staging.png" public/index.html
 hugo --minify --environment staging >/dev/null
 grep -Fq "ogp/yurulink-staging.png" public/index.html
-hugo --minify --environment production >/dev/null
+hugo --minify --environment main >/dev/null
 grep -Fq "ogp/yurulink-light.png" public/index.html
 echo "::endgroup::"

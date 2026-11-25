@@ -1,3 +1,14 @@
-# 明示的なHugo staging環境（hugo --environment staging）で使用。
+# Preview環境の公開設定。main/staging両ブランチで保持する。
+baseURL = "https://staging.yurulink.com/"
 [params]
+noindex = true
+preview = true
 og_image = "ogp/yurulink-staging.png"
+[params.submission]
+enabled = true
+embed_enabled = true
+[params.analytics]
+ga4_measurement_id = ""
+ga4_hostnames = []
+cloudflare_web_analytics_token = ""
+new_relic_browser_snippet = ""

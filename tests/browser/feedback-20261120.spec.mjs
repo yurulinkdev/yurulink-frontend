@@ -68,10 +68,14 @@ test('Stagingは公開するが検索エンジンへは登録しない', async (
   else await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 });
 
-test('GA4設定済みだがStagingホストでは測定しない・公式Xを表示', async ({ page }) => {
+test('GA4はProduction専用・公式Xを表示', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/about/');
-  await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
-  await expect(page.locator('#analytics-consent')).toBeHidden();
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
+  if (production) {
+    await expect(page.locator('#analytics-consent')).toHaveAttribute('data-ga4-id', 'G-8Y659Y3Y8Y');
+  } else {
+    await expect(page.locator('#analytics-consent')).toHaveCount(0);
+  }
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="cloudflareinsights.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="newrelic.com"]')).toHaveCount(0);
@@ -82,7 +86,23 @@ test('GA4設定済みだがStagingホストでは測定しない・公式Xを表
   await expect(xLink).toHaveAccessibleName('YuruLinkのXを開く');
   await expect(xLink.locator('img')).toHaveAttribute('src', /\/icons\/social\/x\.svg$/);
   const updates = page.locator('aside section[aria-label="最近の更新履歴"] li');
-  expect(await updates.count()).toBe(0);
+  // Published catalog history can contain entries; validate the sidebar contract, not a fixed empty state.
+  const recent = await updates.evaluateAll(items => items.map(li => ({
+    date: li.querySelector('time')?.getAttribute('datetime'),
+    href: li.querySelector('a')?.getAttribute('href'),
+    text: li.textContent.trim()
+  })));
+  expect(recent.length).toBeLessThanOrEqual(5);
+  for (const item of recent) {
+    expect(item.date).toMatch(/^\d{4}-\d{2}-\d{2}$/);
+    expect(item.href).toMatch(/\/change-log\//);
+    expect(item.text.length).toBeGreaterThan(10);
+  }
+  expect(recent.map(item => item.date)).toEqual(recent.map(item => item.date).sort().reverse());
+  if (recent.length) {
+    const response = await page.request.get(recent[0].href);
+    expect(response.ok()).toBe(true);
+  }
   await expect(page.getByRole('link',{name:'すべての更新履歴'})).toHaveAttribute('href',/change-log\//);
 });
 
@@ -148,7 +168,12 @@ test('リンク集の選択カテゴリはヘルプ・About遷移後も保持', 
 
 test('GA4 Production専用ホスト制限はページの設定に存在', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/help/');
-  await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
+  const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
+  if (production) {
+    await expect(page.locator('#analytics-consent')).toHaveAttribute('data-allowed-hostnames','www.yurulink.com');
+  } else {
+    await expect(page.locator('#analytics-consent')).toHaveCount(0);
+  }
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
 });
 

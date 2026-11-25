@@ -54,3 +54,8 @@ PreviewのCIとOGPタグ配信の確認は実行後に別途報告する。OGP�
 - 公開 `static/ogp/yurulink-light.png` とGoogle Drive YuruLink_Assetsの2026-11-23版を同一PNGバイト列で同期。アクセント `#A35B46`、背景 `#FBF9F6`、主文字 `#342B28`。
 - [運営方針（運営者側GitHub）](https://github.com/Halhira/WebSite/blob/main/docs/yurulink/principle.md)に基づく非公式の統合リンク集としての表現。
 - `og:image`、`twitter:image`、`og:image:alt`、`twitter:image:alt`、`theme-color` を更新。Production `main` は未変更。
+
+
+## 2026-11-24 B案マスターと画像管理
+
+内側補色 #F4EFE7、外形 #A35B46 の7パスSVGを採用。採用JPEG・補色前単色マスターは保持。Driveの `01-main/` と `02-usage/` に最新版を、`90-history/` に制作履歴を、`00-toolkit/` に制作キットを保存する。Frontendの管理素材は `assets/brand-library/`（制作履歴を含めない）。`static/` の既存URLは変更せず、同一Git blobに同期する。詳細は [素材マニフェスト](../assets/brand-library/manifest.json)。B案を用いて32/180/256/512/1024px、ヒーロー、OGP、フォーム、SNS用アイコン、XヘッダーをHTML-to-Imageで再生成。外部SNS・Google Formへの実適用とProduction反映は別工程。
