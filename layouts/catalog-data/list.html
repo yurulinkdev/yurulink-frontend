@@ -196,7 +196,7 @@
                           {{ $socialKey := lower (.platform | default "") }}
                           {{ if eq $socialKey "twitter" }}{{ $socialKey = "x" }}{{ end }}
                           {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}
-                            <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-panel-muted" aria-hidden="true"><img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" alt="" width="32" height="32" class="h-8 w-8 dark:invert" loading="lazy"></span>
+                            <span class="inline-flex h-16 w-16 items-center justify-center rounded-full bg-panel-muted" aria-hidden="true"><img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" alt="" width="32" height="32" class="h-8 w-8 social-platform-icon" loading="lazy"></span>
                           {{ else }}
                             <span class="social-avatar-placeholder inline-flex h-16 w-16 items-center justify-center rounded-full bg-panel-muted text-sm font-bold text-accent" aria-hidden="true">{{ i18n "typeSocial" }}</span>
                           {{ end }}
@@ -260,7 +260,7 @@
                         {{ end }}
                       {{ end }}
                       <a class="catalog-social-account mt-2 flex items-center gap-1.5 text-xs text-accent hover:underline" href="{{ $url.String | safeURL }}" target="_blank" rel="noopener noreferrer">
-                        {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}<img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" width="16" height="16" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 dark:invert" loading="lazy">{{ end }}
+                        {{ if in (slice "x" "instagram" "youtube" "bluesky" "threads" "discord" "tiktok" "facebook") $socialKey }}<img src="{{ printf "icons/social/%s.svg" $socialKey | relURL }}" width="16" height="16" alt="" aria-hidden="true" class="h-4 w-4 shrink-0 social-platform-icon" loading="lazy">{{ end }}
                         <span>{{ $account }}</span>
                       </a>
                     {{ end }}

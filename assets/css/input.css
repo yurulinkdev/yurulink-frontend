@@ -145,7 +145,14 @@ body { background: var(--page); color: var(--text); }
 .content-type-disclosure .content-type-chevron { transition: transform .15s ease; }
 .content-type-disclosure[open] .content-type-chevron { transform: rotate(180deg); }
 
-/* 初回訪問時だけ表示する分類導線。視線誘導は控えめにし、操作を妨げない。 */
+/* SNSロゴはサイトの有効テーマに合わせる。OSテーマは未初期化時だけ参照。 */
+.social-platform-icon { display: block; object-fit: contain; filter: none; }
+[data-theme="dark"] .social-platform-icon { filter: invert(1); }
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme]) .social-platform-icon { filter: invert(1); }
+}
+
+/* 初回訪問ガイドは通常のレイアウト内に置き、本文・ナビと重ねない。 */
 .onboarding-highlight {
   outline: 3px solid var(--accent);
   outline-offset: 3px;
@@ -153,49 +160,55 @@ body { background: var(--page); color: var(--text); }
   background: var(--panel-muted);
 }
 .onboarding-hint {
-  z-index: 60;
+  position: relative;
   display: flex;
-  gap: 12px;
-  align-items: start;
+  flex: 0 0 auto;
+  gap: .5rem;
+  align-items: center;
   border: 1px solid var(--accent);
-  border-radius: 12px;
+  border-radius: .625rem;
   background: var(--panel);
-  color: var(--ink);
-  box-shadow: 0 12px 32px rgb(0 0 0 / .18);
-  pointer-events: none; /* 既存ナビゲーションのクリックを妨げない */
-  padding: 12px 14px;
+  color: var(--text);
+  padding: .4rem .65rem;
   font-size: .875rem;
   line-height: 1.5;
+  box-shadow: 0 3px 10px rgb(0 0 0 / .12);
 }
-.onboarding-hint--mobile {
-  position: absolute;
-  top: calc(100% + 9px);
-  left: 12px;
-  right: 12px;
-  width: auto;
-  max-width: none;
-}
-.onboarding-hint--mobile::before {
+.onboarding-hint::before {
   content: "";
   position: absolute;
-  top: -7px;
-  left: 28px;
-  width: 12px;
-  height: 12px;
+  top: -5px;
+  left: 18px;
+  width: 8px;
+  height: 8px;
   background: var(--panel);
   transform: rotate(45deg);
   border-top: 1px solid var(--accent);
   border-left: 1px solid var(--accent);
   pointer-events: none;
 }
-.onboarding-hint--desktop {
-  position: relative;
-  width: min(21rem, 100%);
+.onboarding-hint--mobile {
+  width: max-content;
   max-width: 100%;
+  margin-top: 10px;
+}
+.onboarding-hint--desktop {
+  width: 100%;
   margin: 0 0 12px;
 }
-.onboarding-hint p { margin: 0; flex: 1; }
-.onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; pointer-events: auto; }
+.onboarding-hint p { margin: 0; flex: 1; min-width: 0; overflow-wrap: anywhere; }
+.onboarding-hint button {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 28px;
+  min-height: 28px;
+  border-radius: .375rem;
+  font-size: 1.25rem;
+  line-height: 1;
+}
+.onboarding-hint button:hover { background: var(--panel-muted); }
 
 /* モバイルのドロワー起動ジェスチャーは縦スクロールを維持して横パンを使わない。 */
 @media (max-width: 1023px) {
