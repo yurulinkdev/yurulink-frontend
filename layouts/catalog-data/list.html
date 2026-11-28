@@ -121,8 +121,15 @@
           {{ with $tax }}{{ range .categories }}{{ $categories = merge $categories (dict .id .label) }}{{ range .children }}{{ $categories = merge $categories (dict .id .label) }}{{ end }}{{ end }}{{ end }}
           {{/* 公開カタログが信頼できる出演者マスターを持つ場合だけ選択肢を表示。 */}}
           <div id="people-definitions" hidden>
+            {{ $directoryIDs := dict }}
+            {{ range ($catalog.people_directory | default (slice)) }}
+              {{ $directoryIDs = merge $directoryIDs (dict .id true) }}
+              <span data-person-id="{{ .id }}" data-label="{{ .label | default .name }}" data-person-directory="true"></span>
+            {{ end }}
             {{ range ($catalog.people | default (slice)) }}
-              <span data-person-id="{{ .id }}" data-label="{{ .name }}"></span>
+              {{ if not (isset $directoryIDs .id) }}
+                <span data-person-id="{{ .id }}" data-label="{{ .name }}"></span>
+              {{ end }}
             {{ end }}
           </div>
           <ul class="grid list-none grid-cols-1 gap-3 p-0 sm:grid-cols-2 xl:grid-cols-3" id="catalog">

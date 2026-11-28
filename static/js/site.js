@@ -98,6 +98,12 @@ const ylText = (key, fallback) => typeof ylUITexts[key] === 'string' && ylUIText
       p.className = 'text-muted-ink';
       personFilterOptions.append(p);
     } else {
+      if (document.querySelector('[data-person-directory="true"]')) {
+        const note = document.createElement('p');
+        note.className = 'w-full text-xs text-muted-ink';
+        note.textContent = '🔵 公式 ／ 🟢 関連 ／ ⚪ 非公式（YuruLink内の分類）。未確認・未登録の人物との紐付けは検索結果に含まれません。';
+        personFilterOptions.append(note);
+      }
       for (const person of peopleDefinitions) {
         const label = document.createElement('label');
         label.className = 'flex items-center gap-2';
