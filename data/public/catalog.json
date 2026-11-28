@@ -140610,5 +140610,187 @@
       "item_id": "youtube:zzb_HVNpFnE",
       "collection_id": "youtube-playlist:UUuG0Ay4D67uecldB_G9Ymeg"
     }
+  ],
+  "people_directory": [
+    {
+      "id": "person-001",
+      "name": "堀元見",
+      "affiliation": "official",
+      "label": "🔵 公式｜堀元見"
+    },
+    {
+      "id": "person-002",
+      "name": "水野太貴",
+      "affiliation": "official",
+      "label": "🔵 公式｜水野太貴"
+    },
+    {
+      "id": "person-003",
+      "name": "黒川晝車",
+      "affiliation": "official",
+      "label": "🔵 公式｜黒川晝車"
+    },
+    {
+      "id": "person-004",
+      "name": "佐東かたりや",
+      "affiliation": "official",
+      "label": "🔵 公式｜佐東かたりや"
+    },
+    {
+      "id": "person-005",
+      "name": "たゐき ゐけだ",
+      "affiliation": "official",
+      "label": "🔵 公式｜たゐき ゐけだ"
+    },
+    {
+      "id": "person-006",
+      "name": "和田竜征",
+      "affiliation": "official",
+      "label": "🔵 公式｜和田竜征"
+    },
+    {
+      "id": "person-007",
+      "name": "藤井亮輔",
+      "affiliation": "official",
+      "label": "🔵 公式｜藤井亮輔"
+    },
+    {
+      "id": "person-008",
+      "name": "浦下拓巳",
+      "affiliation": "official",
+      "label": "🔵 公式｜浦下拓巳"
+    },
+    {
+      "id": "person-009",
+      "name": "越山嘉祈",
+      "affiliation": "official",
+      "label": "🔵 公式｜越山嘉祈"
+    },
+    {
+      "id": "person-010",
+      "name": "平田トキヒロ",
+      "affiliation": "official",
+      "label": "🔵 公式｜平田トキヒロ"
+    },
+    {
+      "id": "person-011",
+      "name": "谷口",
+      "affiliation": "official",
+      "label": "🔵 公式｜谷口"
+    },
+    {
+      "id": "person-012",
+      "name": "高宮康太",
+      "affiliation": "official",
+      "label": "🔵 公式｜高宮康太"
+    },
+    {
+      "id": "person-013",
+      "name": "ももたん",
+      "affiliation": "official",
+      "label": "🔵 公式｜ももたん"
+    },
+    {
+      "id": "person-014",
+      "name": "よくいる佐藤",
+      "affiliation": "official",
+      "label": "🔵 公式｜よくいる佐藤"
+    },
+    {
+      "id": "person-015",
+      "name": "飯田光平",
+      "affiliation": "official",
+      "label": "🔵 公式｜飯田光平"
+    },
+    {
+      "id": "person-016",
+      "name": "よしのぶ",
+      "affiliation": "related",
+      "label": "🟢 関連｜よしのぶ"
+    },
+    {
+      "id": "person-017",
+      "name": "夏生嵐彩",
+      "affiliation": "related",
+      "label": "🟢 関連｜夏生嵐彩"
+    },
+    {
+      "id": "person-018",
+      "name": "安東暁史",
+      "affiliation": "related",
+      "label": "🟢 関連｜安東暁史"
+    },
+    {
+      "id": "person-019",
+      "name": "LE0_jp",
+      "affiliation": "related",
+      "label": "🟢 関連｜LE0_jp"
+    },
+    {
+      "id": "person-020",
+      "name": "あんとれ",
+      "affiliation": "related",
+      "label": "🟢 関連｜あんとれ"
+    },
+    {
+      "id": "person-021",
+      "name": "uraQ",
+      "affiliation": "related",
+      "label": "🟢 関連｜uraQ"
+    },
+    {
+      "id": "person-022",
+      "name": "今井むつみ",
+      "affiliation": "related",
+      "label": "🟢 関連｜今井むつみ"
+    },
+    {
+      "id": "person-023",
+      "name": "鈴木俊貴",
+      "affiliation": "related",
+      "label": "🟢 関連｜鈴木俊貴"
+    },
+    {
+      "id": "person-024",
+      "name": "福田純也",
+      "affiliation": "related",
+      "label": "🟢 関連｜福田純也"
+    },
+    {
+      "id": "person-025",
+      "name": "川原繁人",
+      "affiliation": "related",
+      "label": "🟢 関連｜川原繁人"
+    },
+    {
+      "id": "person-026",
+      "name": "堀田隆一",
+      "affiliation": "related",
+      "label": "🟢 関連｜堀田隆一"
+    },
+    {
+      "id": "person-027",
+      "name": "井上逸兵",
+      "affiliation": "related",
+      "label": "🟢 関連｜井上逸兵"
+    },
+    {
+      "id": "person-028",
+      "name": "高田祥司",
+      "affiliation": "related",
+      "label": "🟢 関連｜高田祥司"
+    },
+    {
+      "id": "person-029",
+      "name": "秋田喜美",
+      "affiliation": "related",
+      "label": "🟢 関連｜秋田喜美"
+    },
+    {
+      "id": "person-030",
+      "name": "福岡太朗",
+      "affiliation": "related",
+      "label": "🟢 関連｜福岡太朗"
+    }
   ]
 }
