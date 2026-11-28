@@ -19607,6 +19607,25 @@
       "status": "published"
     },
     {
+      "description": "元動画↓\nhttps://www.youtube.com/watch?v=szwVt9b_erE\n【クイズ】バイトの子が炎上。店長はどうする？",
+      "duration_iso8601": "PT1M22S",
+      "duration_seconds": 82,
+      "like_count": 5,
+      "published_at": "2026-11-28T09:00:10Z",
+      "statistics_fetched_at": "2026-11-28T10:18:23.245110Z",
+      "thumbnail_url": "https://i.ytimg.com/vi/EIBK_nCft-g/default.jpg",
+      "video_format": "video",
+      "video_format_source": "standard_or_unknown",
+      "view_count": 645,
+      "id": "youtube:EIBK_nCft-g",
+      "title": "卓上で寝落ちした客の奥さんが慣れすぎ",
+      "url": "https://www.youtube.com/watch?v=EIBK_nCft-g",
+      "kind": "video",
+      "platform": "youtube",
+      "provenance": "unknown",
+      "status": "published"
+    },
+    {
       "description": "大喜利みたいなあだ名ですね。\n\n【オススメ動画】\n哲学クイズ！\nhttps://youtu.be/tduWcItukIY?si=Csa6r67cpOgjreR5\n8人で分かる哲学史\nhttps://youtu.be/N9yLjHLhIgQ?si=MryBKj3K1KjCfDYs\nアリストテレスは、MBTIにハマる\nhttps://youtu.be/8zuGD-fj6ng?si=VuEpdsqs4Dpfbz1p\n\n#ゆる哲学ラジオ #ゆる哲学ラジオ_哲学 #アリストテレス #クイズ",
       "duration_iso8601": "PT35S",
       "duration_seconds": 35,
@@ -88521,6 +88540,10 @@
     {
       "item_id": "youtube:EGvTeHkY66s",
       "program_id": "youtube-channel:UCQdLfGZnFG-YpcWby-FIcFA"
+    },
+    {
+      "item_id": "youtube:EIBK_nCft-g",
+      "program_id": "youtube-channel:UCaeqaKCdhlDCBvS0J5FWUyQ"
     },
     {
       "item_id": "youtube:EJTKc7ABHXY",
