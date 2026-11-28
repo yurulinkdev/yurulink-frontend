@@ -197,8 +197,8 @@ body { background: var(--page); color: var(--text); }
 .onboarding-hint p { margin: 0; flex: 1; }
 .onboarding-hint button { padding: 0 4px; font-size: 1.25rem; line-height: 1; pointer-events: auto; }
 
-/* モバイルのドロワー起動ジェスチャーは縦スクロールを維持して横パンを使わない。 */
+/* 画面全体ではブラウザの履歴ナビゲーション・スクロール・ズームを制限しない。
+   開いたドロワー内だけ縦スクロールとピンチズームを維持する。 */
 @media (max-width: 1023px) {
-  html, body { overscroll-behavior-x: none; }
-  #main-content, #category-drawer { touch-action: pan-y; }
+  #category-drawer { touch-action: pan-y pinch-zoom; }
 }

@@ -95,34 +95,69 @@ test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page 
   }
 });
 
-test('スマホの左端右スワイプはtouchmove時に開き、縦スワイプでは開かず、左スワイプで閉じる', async ({ page }) => {
+test('スマホのスワイプはブラウザの左端を避け、水平操作を指離しで確定する', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoAndWaitForCatalog(page,'/change-log/');
   const trigger = page.locator('#open-categories');
   const drawer = page.locator('#category-drawer');
-  const swipe = (from, to, target) => page.evaluate(({from,to,target}) => {
-    const node = target === 'drawer' ? document.getElementById('category-drawer') : document;
-    const fire = (type,x,y) => {
-      const point = {clientX:x,clientY:y};
-      const event = new Event(type,{bubbles:true,cancelable:true});
-      Object.defineProperty(event,'touches',{value:type==='touchend'?[]:[point]});
-      Object.defineProperty(event,'changedTouches',{value:[point]});
-      node.dispatchEvent(event);
-    };
-    fire('touchstart',from[0],from[1]);
-    fire('touchmove',to[0],to[1]);
-    fire('touchend',to[0],to[1]);
-  }, {from,to,target});
-  await swipe([17,150],[33,255],'document');
+  const touch = (type, x, y, selector = '#main-content', count = 1) => page.evaluate(({type,x,y,selector,count}) => {
+    const node = document.querySelector(selector);
+    const point = {clientX:x,clientY:y};
+    const event = new Event(type,{bubbles:true,cancelable:true});
+    Object.defineProperty(event,'touches',{value:type==='touchend'||type==='touchcancel'?[]:Array(count).fill(point)});
+    Object.defineProperty(event,'changedTouches',{value:[point]});
+    node.dispatchEvent(event);
+    return event.defaultPrevented;
+  }, {type,x,y,selector,count});
+  const swipe = async (from, to, selector) => {
+    expect(await touch('touchstart',...from,selector)).toBe(false);
+    expect(await touch('touchmove',...to,selector)).toBe(false);
+    expect(await touch('touchend',...to,selector)).toBe(false);
+  };
+  // 画面端はOS・ブラウザの戻る操作に委ねる。
+  await swipe([5,150],[110,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([120,150],[230,154],'document');
+  await swipe([31,150],[130,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([16,210],[106,216],'document');
+  await swipe([120,150],[230,154]);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 垂直操作・斜め操作・短い操作では開かない。
+  await swipe([48,150],[60,255]);
+  await swipe([48,150],[123,220]);
+  await swipe([48,150],[85,152]);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await touch('touchstart',48,210);
+  await touch('touchmove',130,216);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await touch('touchcancel',130,216);
+  await touch('touchend',130,216);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 複数指・途中の縦方向ロック・ボタン操作を優先。
+  await touch('touchstart',48,210);
+  await touch('touchmove',60,215,'#main-content',2);
+  await touch('touchend',140,215);
+  await touch('touchstart',48,210);
+  await touch('touchmove',51,245);
+  await touch('touchmove',145,215);
+  await touch('touchend',145,215);
+  await swipe([48,26],[140,26],'#open-categories');
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 内側の補助スワイプで開く。touchmove時は表示を変えない。
+  await touch('touchstart',48,210);
+  await touch('touchmove',138,216);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await touch('touchend',138,216);
   await expect(trigger).toHaveAttribute('aria-expanded','true');
   await expect(drawer).not.toHaveClass(/-translate-x-full/);
-  await swipe([220,220],[122,223],'drawer');
+  await swipe([220,220],[122,223],'#category-drawer');
   await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // ボタン・Escape・背景クリックも維持。ページ全体で横パンを禁止しない。
+  expect(await page.locator('html').evaluate(el => getComputedStyle(el).overscrollBehaviorX)).toBe('auto');
+  expect(await page.locator('#main-content').evaluate(el => getComputedStyle(el).touchAction)).toBe('auto');
   await trigger.click();
   await page.keyboard.press('Escape');
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await trigger.click();
+  await page.locator('#drawer-backdrop').click({position:{x:350,y:300}});
   await expect(trigger).toHaveAttribute('aria-expanded','false');
 });
