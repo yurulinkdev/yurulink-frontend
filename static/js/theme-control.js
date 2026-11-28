@@ -8,9 +8,10 @@
   const mobileQuery = window.matchMedia('(max-width: 1023px)');
   const touchQuery = window.matchMedia('(any-pointer: coarse)');
   const isMobile = () => mobileQuery.matches;
-  const browserEdge = 24;
-  const swipeGuideKey = 'yurulink-swipe-guide-completed-v1';
-  const swipeGuideAnimationKey = 'yurulink-swipe-guide-animated-v1';
+  const browserEdge = 12;
+  // ガイドの寸法と開始位置を改訂したため、旧版の完了済み端末でも新版を一度案内する。
+  const swipeGuideKey = 'yurulink-swipe-guide-completed-v2';
+  const swipeGuideAnimationKey = 'yurulink-swipe-guide-animated-v2';
   let drawerOpen = false;
   let restoreFocus = null;
   let guideCompleted = false;

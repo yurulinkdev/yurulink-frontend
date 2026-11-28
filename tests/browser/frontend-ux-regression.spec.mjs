@@ -117,7 +117,7 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   // 画面端はOS・ブラウザの戻る操作に委ねる。
   await swipe([5,150],[110,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([23,150],[130,153]);
+  await swipe([11,150],[130,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   await swipe([97,150],[230,154]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
@@ -160,8 +160,8 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   await expect(trigger).toHaveAttribute('aria-expanded','true');
   await touch('touchend',122,223,'#category-drawer');
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  // 開始範囲の両端（24px、96px）も有効。開いた後のcancelは開閉を取り消さない。
-  for (const x of [24,96]) {
+  // 開始範囲の両端（12px、96px）も有効。開いた後のcancelは開閉を取り消さない。
+  for (const x of [12,96]) {
     await touch('touchstart',x,210);
     await touch('touchmove',x+64,216);
     await expect(trigger).toHaveAttribute('aria-expanded','true');
@@ -190,6 +190,9 @@ test.describe('スマホのスワイプガイド', () => {
   test.use({ viewport: {width:390,height:844}, hasTouch:true, isMobile:true });
   test('操作の邪魔をせず、初回の成功したスワイプで消え、再訪時も表示しない', async ({ page }) => {
     await page.addInitScript(() => {
+      // 旧ガイドを完了したブラウザでも変更版を一度だけ案内する。
+      localStorage.setItem('yurulink-swipe-guide-completed-v1','1');
+      sessionStorage.setItem('yurulink-swipe-guide-animated-v1','1');
       document.addEventListener('animationstart', e => {
         if (e.animationName !== 'swipe-guide-nudge') return;
         const style = getComputedStyle(e.target);
@@ -208,9 +211,9 @@ test.describe('スマホのスワイプガイド', () => {
     const geometry = await guide.evaluate(el => {
       const r = el.getBoundingClientRect();
       const hit = document.elementFromPoint(r.left+4,r.top+20);
-      return {left:r.left, right:r.right, height:r.height, blocks:el.contains(hit)};
+      return {left:r.left, right:r.right, height:r.height, barWidth:getComputedStyle(el,'::before').flexBasis, blocks:el.contains(hit)};
     });
-    expect(geometry).toEqual({left:24,right:80,height:88,blocks:false});
+    expect(geometry).toEqual({left:12,right:68,height:132,barWidth:'14px',blocks:false});
     const color = await guide.evaluate(el => getComputedStyle(el).color);
     await page.locator('#theme-toggle').click();
     expect(await guide.evaluate(el => getComputedStyle(el).color)).not.toBe(color);
@@ -227,16 +230,16 @@ test.describe('スマホのスワイプガイド', () => {
         Object.defineProperty(event,'changedTouches',{value:[{clientX:x,clientY:y}]});
         document.getElementById('main-content').dispatchEvent(event);
       }
-      dispatch('touchstart',24,300);
-      dispatch('touchmove',87,302); // 63pxは閾値未満
-      dispatch('touchend',87,302);
+      dispatch('touchstart',12,300);
+      dispatch('touchmove',75,302); // 63pxは閾値未満
+      dispatch('touchend',75,302);
     });
     await expect(trigger).toHaveAttribute('aria-expanded','false');
     await expect(guide).toBeVisible();
-    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v1'))).toBeNull();
+    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v2'))).toBeNull();
     await guide.evaluate(() => {
       const node = document.getElementById('main-content');
-      for (const [type,x] of [['touchstart',24],['touchmove',88]]) {
+      for (const [type,x] of [['touchstart',12],['touchmove',76]]) {
         const event = new Event(type,{bubbles:true,cancelable:true});
         Object.defineProperty(event,'touches',{value:[{clientX:x,clientY:300}]});
         Object.defineProperty(event,'changedTouches',{value:[{clientX:x,clientY:300}]});
@@ -245,7 +248,7 @@ test.describe('スマホのスワイプガイド', () => {
     });
     await expect(trigger).toHaveAttribute('aria-expanded','true');
     await expect(guide).toBeHidden();
-    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v1'))).toBe('1');
+    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v2'))).toBe('1');
     await page.keyboard.press('Escape');
     await expect(guide).toBeHidden();
     await page.reload({waitUntil:'domcontentloaded'});
