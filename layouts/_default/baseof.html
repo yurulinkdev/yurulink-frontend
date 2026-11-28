@@ -19,6 +19,10 @@
 <body class="min-h-screen bg-page text-ink">
   {{ partial "site/ui-translations.html" . }}
   <a href="#main-content" class="sr-only focus:not-sr-only focus:absolute focus:z-50 focus:bg-panel focus:p-3">本文へ移動</a>
+  {{/* 補助ジェスチャーの視覚案内。Heroicons 24 outline arrow-right (MIT)。 */}}
+  <div id="swipe-guide" class="swipe-guide" aria-hidden="true" hidden>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" aria-hidden="true" focusable="false"><path stroke-linecap="round" stroke-linejoin="round" d="M13.5 4.5L21 12M21 12L13.5 19.5M21 12H3"/></svg>
+  </div>
   <div class="min-h-screen lg:grid lg:grid-cols-[17rem_minmax(0,1fr)]">
     {{ partial "site/sidebar.html" . }}
     <main id="main-content" class="min-w-0">

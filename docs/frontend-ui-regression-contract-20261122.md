@@ -33,10 +33,12 @@
 
 ## 4. スマホのカテゴリー・ドロワー（2026-11-28改訂）
 
-- 1023px以下でヘッダーのメニューボタンを主操作とする。ボタンは最低44×44 CSS pxを確保する。画面端から32 CSS px未満はブラウザ・OSの戻る操作に譲る。32〜96 CSS pxの内側から右方向64 CSS px以上、かつ水平移動が垂直移動の1.5倍を超える操作を補助ジェスチャーとする。初期値は実機受入で調整する。
-- 2026-11-28の運営者による実機受入では指離しまで反応がない仕様が直感的でないとの指摘があったため、開始範囲・距離・角度は変更せず、開く操作を `touchmove` 中に閾値を満たした時点で確定する。同じ指の後続イベントで再度開閉しない。閉じる操作は従来どおり `touchend` で確定する。確定前のtouchcancel、複数指、先に縦方向へ移動した操作、反対方向へ移動した操作は中止する。ピンチズーム中、文字選択中、フォーム・ボタン・横スクロール領域は既存操作を優先する。
+- 1023px以下でヘッダーのメニューボタンを主操作とする。ボタンは最低44×44 CSS pxを確保する。画面端から24 CSS px未満はブラウザ・OSの戻る操作に譲る。24〜96 CSS pxの内側から右方向64 CSS px以上、かつ水平移動が垂直移動の1.5倍を超える操作を補助ジェスチャーとする。初期値は実機受入で調整する。
+- 2026-11-28の運営者による実機受入では指離しまで反応がない仕様が直感的でないとの指摘があったため、距離・角度は維持し、開く操作を `touchmove` 中に閾値を満たした時点で確定する。同じ指の後続イベントで再度開閉しない。閉じる操作は従来どおり `touchend` で確定する。確定前のtouchcancel、複数指、先に縦方向へ移動した操作、反対方向へ移動した操作は中止する。ピンチズーム中、文字選択中、フォーム・ボタン・横スクロール領域は既存操作を優先する。
 - ページ全体の overscroll-behavior-x:none と touch-action:pan-y を撤去し、イベントをpassiveにする。ドロワー内の縦スクロールとピンチズームは保持する。ドロワー内の左スワイプ、閉じるボタン、Backdrop、Escape、フォーカストラップ、aria-expanded、inertを維持する。
-- 画面端の競合回避とスワイプに依存しない操作の根拠：[Apple HIG Gestures](https://developer.apple.com/design/human-interface-guidelines/gestures/)、[WCAG 2.2 2.5.1](https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures)。32〜96px等はYuruLinkの暫定設定であり、OS仕様の保証値ではない。
+- 画面端の競合回避とスワイプに依存しない操作の根拠：[Apple HIG Gestures](https://developer.apple.com/design/human-interface-guidelines/gestures/)、[WCAG 2.2 2.5.1](https://www.w3.org/WAI/WCAG22/Understanding/pointer-gestures)。24〜96px等はYuruLinkの暫定設定であり、OS仕様の保証値ではない。
+- 初回のスワイプ案内はタッチ可能な1023px以下でのみ表示する。開始位置と同じ左24pxにテーマアクセント色（ライト #a35b46／ダーク #efb49c、バー不透明度20%）の9×88pxの縦バーと既存[Heroicons outline arrow-right](https://github.com/tailwindlabs/heroicons/blob/master/src/24/outline/arrow-right.svg)を配置する。矢印は右10pxに動く1.3秒×3回（計3.9秒）のアニメーション後に静止する。タブ内は初回だけアニメーションし、prefers-reduced-motionでは静止表示する。[WCAG 2.2 2.2.2](https://www.w3.org/WAI/WCAG22/Understanding/pause-stop-hide)を参照。ガイドはpointer-events:none、aria-hidden、レイアウトを占有しない。
+- 正常な右スワイプでドロワーが開いた時点にlocalStorageへ完了を記録し、以後同じブラウザで案内を表示しない。タップで開いた間は一時非表示にし、スワイプ未完了のまま閉じると静止ガイドを表示する。既存の初回ヘッダー案内も成功したスワイプで閉じる。
 - モバイルではスクロールで消える通常のヘッダーにブランドアイコン＋文字を表示する。PCの左サイドバーは常時表示する。
 - PlaywrightはDOM上のジェスチャー判定と非干渉条件を検証する。iOS Safari実機のネイティブ戻る動作は別途受入確認する。
 

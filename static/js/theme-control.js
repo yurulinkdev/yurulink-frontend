@@ -4,9 +4,44 @@
   const backdrop = document.getElementById('drawer-backdrop');
   const open = document.getElementById('open-categories');
   const close = document.getElementById('close-categories');
+  const guide = document.getElementById('swipe-guide');
+  const mobileQuery = window.matchMedia('(max-width: 1023px)');
+  const touchQuery = window.matchMedia('(any-pointer: coarse)');
+  const isMobile = () => mobileQuery.matches;
+  const browserEdge = 24;
+  const swipeGuideKey = 'yurulink-swipe-guide-completed-v1';
+  const swipeGuideAnimationKey = 'yurulink-swipe-guide-animated-v1';
   let drawerOpen = false;
   let restoreFocus = null;
-  const isMobile = () => window.matchMedia('(max-width: 1023px)').matches;
+  let guideCompleted = false;
+  let guideAnimated = false;
+  try { guideCompleted = localStorage.getItem(swipeGuideKey) === '1'; } catch { /* 保存不可 */ }
+  try { guideAnimated = sessionStorage.getItem(swipeGuideAnimationKey) === '1'; } catch { /* 保存不可 */ }
+  guide?.style.setProperty('--swipe-guide-start', `${browserEdge}px`);
+  const updateSwipeGuide = () => {
+    if (!guide) return;
+    const visible = isMobile() && touchQuery.matches && !drawerOpen && !guideCompleted && (window.visualViewport?.scale || 1) <= 1.01;
+    if (guide.hidden === !visible) return;
+    guide.hidden = !visible;
+    if (!visible) { guide.classList.remove('swipe-guide--animate'); return; }
+    // スワイプを覚えるまでは静止ガイドを残す。アニメーションはタブ内の初回のみ。
+    if (!guideAnimated) {
+      guideAnimated = true;
+      guide.classList.add('swipe-guide--animate');
+      try { sessionStorage.setItem(swipeGuideAnimationKey, '1'); } catch { /* 保存不可 */ }
+    }
+  };
+  const completeSwipeGuide = () => {
+    guideCompleted = true;
+    try { localStorage.setItem(swipeGuideKey, '1'); } catch { /* このページ内では非表示 */ }
+    updateSwipeGuide();
+  };
+  guide?.addEventListener('animationend', () => guide.classList.remove('swipe-guide--animate'));
+  touchQuery.addEventListener?.('change', updateSwipeGuide);
+  window.visualViewport?.addEventListener('resize', updateSwipeGuide);
+  window.addEventListener('storage', event => {
+    if (event.key === swipeGuideKey && event.newValue === '1') { guideCompleted = true; updateSwipeGuide(); }
+  });
   const focusables = () => [...(drawer?.querySelectorAll('a[href], button:not([disabled]), [tabindex]:not([tabindex="-1"])') || [])].filter(element => element.getClientRects().length > 0);
   const toggle = visible => {
     if (!isMobile() && visible) return;
@@ -20,14 +55,15 @@
     if (drawer) drawer.inert = !visible && isMobile();
     open?.setAttribute('aria-expanded', String(visible));
     document.body.classList.toggle('overflow-hidden', visible);
+    updateSwipeGuide();
     if (visible) close?.focus();
     else if (restoreFocus?.isConnected) restoreFocus.focus();
   };
   if (drawer) drawer.inert = isMobile();
+  updateSwipeGuide();
   // 画面の物理端はOS・ブラウザの戻る操作に譲る。内側だけを補助ジェスチャーにする。
   // 開く操作は移動中に閾値を満たした時点で確定する。閉じる操作は指を離した時点で確定する。
   // touchイベントの既定動作は止めず、画面端のブラウザ操作を優先する。
-  const browserEdge = 32;
   const menuEdge = 96;
   const swipeDistance = 64;
   const directionSlop = 12;
@@ -54,6 +90,8 @@
       // 一度開いた操作は消費済みとし、同じ指の後続イベントで再度開閉しない。
       resetSwipe();
       toggle(true);
+      completeSwipeGuide();
+      document.dispatchEvent(new Event('yurulink:drawer-swipe-opened'));
     }
   };
   document.addEventListener('touchstart', event => {
@@ -96,9 +134,10 @@
       event.preventDefault(); first.focus();
     }
   });
-  window.matchMedia('(min-width: 1024px)').addEventListener?.('change', event => {
-    if (event.matches && drawerOpen) toggle(false);
-    if (drawer) drawer.inert = !event.matches && !drawerOpen;
+  mobileQuery.addEventListener?.('change', event => {
+    if (!event.matches && drawerOpen) toggle(false);
+    if (drawer) drawer.inert = event.matches && !drawerOpen;
+    updateSwipeGuide();
   });
   const button = document.getElementById('theme-toggle');
   const autoButton = document.getElementById('theme-auto');

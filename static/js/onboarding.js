@@ -36,6 +36,7 @@
     target.classList.remove('onboarding-highlight');
     target.removeAttribute('aria-describedby');
     document.removeEventListener('keydown', onKey);
+    document.removeEventListener('yurulink:drawer-swipe-opened', clear);
   };
   const onKey = e => { if (e.key === 'Escape') clear(); };
 
@@ -46,6 +47,7 @@
   // 案内の下にあるリンクも通常どおり押せるようにし、操作開始時に案内を閉じる。
   document.getElementById('category-buttons')?.addEventListener('click', clear, { once: true });
   document.addEventListener('keydown', onKey);
+  if (mobile) document.addEventListener('yurulink:drawer-swipe-opened', clear, { once: true });
 
   try { localStorage.setItem(key, '1'); } catch { /* 次回も案内表示の可能性あり */ }
 })();

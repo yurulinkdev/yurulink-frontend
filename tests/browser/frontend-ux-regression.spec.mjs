@@ -117,7 +117,7 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   // 画面端はOS・ブラウザの戻る操作に委ねる。
   await swipe([5,150],[110,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([31,150],[130,153]);
+  await swipe([23,150],[130,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   await swipe([97,150],[230,154]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
@@ -160,8 +160,8 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   await expect(trigger).toHaveAttribute('aria-expanded','true');
   await touch('touchend',122,223,'#category-drawer');
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  // 開始範囲の両端（32px、96px）も有効。開いた後のcancelは開閉を取り消さない。
-  for (const x of [32,96]) {
+  // 開始範囲の両端（24px、96px）も有効。開いた後のcancelは開閉を取り消さない。
+  for (const x of [24,96]) {
     await touch('touchstart',x,210);
     await touch('touchmove',x+64,216);
     await expect(trigger).toHaveAttribute('aria-expanded','true');
@@ -183,4 +183,85 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   await trigger.click();
   await page.locator('#drawer-backdrop').click({position:{x:350,y:300}});
   await expect(trigger).toHaveAttribute('aria-expanded','false');
+});
+
+// タッチ端末だけに表示する初回スワイプ案内の回帰検証。
+test.describe('スマホのスワイプガイド', () => {
+  test.use({ viewport: {width:390,height:844}, hasTouch:true, isMobile:true });
+  test('操作の邪魔をせず、初回の成功したスワイプで消え、再訪時も表示しない', async ({ page }) => {
+    await page.addInitScript(() => {
+      document.addEventListener('animationstart', e => {
+        if (e.animationName !== 'swipe-guide-nudge') return;
+        const style = getComputedStyle(e.target);
+        window.swipeGuideAnimation = {duration:style.animationDuration, iterations:style.animationIterationCount};
+      });
+    });
+    await page.goto('/', { waitUntil:'domcontentloaded' });
+    const guide = page.locator('#swipe-guide');
+    const trigger = page.locator('#open-categories');
+    await expect(guide).toBeVisible();
+    await expect(guide).toHaveAttribute('aria-hidden','true');
+    await expect(guide).toHaveCSS('pointer-events','none');
+    await expect.poll(() => page.evaluate(() => window.swipeGuideAnimation)).toEqual({duration:'1.3s',iterations:'3'});
+    await expect(guide).not.toHaveClass(/swipe-guide--animate/, {timeout:6000});
+    await expect(guide).toBeVisible();
+    const geometry = await guide.evaluate(el => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left+4,r.top+20);
+      return {left:r.left, right:r.right, height:r.height, blocks:el.contains(hit)};
+    });
+    expect(geometry).toEqual({left:24,right:80,height:88,blocks:false});
+    const color = await guide.evaluate(el => getComputedStyle(el).color);
+    await page.locator('#theme-toggle').click();
+    expect(await guide.evaluate(el => getComputedStyle(el).color)).not.toBe(color);
+    // タップで開く間は非表示。スワイプ未習得のまま閉じると静止ガイドを再表示する。
+    await trigger.click();
+    await expect(guide).toBeHidden();
+    await page.keyboard.press('Escape');
+    await expect(guide).toBeVisible();
+    await expect(guide).not.toHaveClass(/swipe-guide--animate/);
+    await page.evaluate(() => {
+      function dispatch(type, x, y){
+        const event = new Event(type,{bubbles:true,cancelable:true});
+        Object.defineProperty(event,'touches',{value:type==='touchend'?[]:[{clientX:x,clientY:y}]});
+        Object.defineProperty(event,'changedTouches',{value:[{clientX:x,clientY:y}]});
+        document.getElementById('main-content').dispatchEvent(event);
+      }
+      dispatch('touchstart',24,300);
+      dispatch('touchmove',87,302); // 63pxは閾値未満
+      dispatch('touchend',87,302);
+    });
+    await expect(trigger).toHaveAttribute('aria-expanded','false');
+    await expect(guide).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v1'))).toBeNull();
+    await guide.evaluate(() => {
+      const node = document.getElementById('main-content');
+      for (const [type,x] of [['touchstart',24],['touchmove',88]]) {
+        const event = new Event(type,{bubbles:true,cancelable:true});
+        Object.defineProperty(event,'touches',{value:[{clientX:x,clientY:300}]});
+        Object.defineProperty(event,'changedTouches',{value:[{clientX:x,clientY:300}]});
+        node.dispatchEvent(event);
+      }
+    });
+    await expect(trigger).toHaveAttribute('aria-expanded','true');
+    await expect(guide).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v1'))).toBe('1');
+    await page.keyboard.press('Escape');
+    await expect(guide).toBeHidden();
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect(guide).toBeHidden();
+  });
+  test('視差・アニメーション軽減設定では静止し、デスクトップ幅では表示しない', async ({ page }) => {
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.goto('/', {waitUntil:'domcontentloaded'});
+    const guide = page.locator('#swipe-guide');
+    await expect(guide).toBeVisible();
+    await expect(guide.locator('svg')).toHaveCSS('animation-name','none');
+    await page.screenshot({path:'test-results/evidence/swipe-guide-mobile.png'});
+    await page.setViewportSize({width:1280,height:800});
+    await expect(guide).toBeHidden();
+    await page.setViewportSize({width:390,height:844});
+    await expect(guide).toBeVisible();
+    await expect(guide.locator('svg')).toHaveCSS('animation-name','none');
+  });
 });
