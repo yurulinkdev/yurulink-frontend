@@ -95,34 +95,176 @@ test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page 
   }
 });
 
-test('スマホの左端右スワイプはtouchmove時に開き、縦スワイプでは開かず、左スワイプで閉じる', async ({ page }) => {
+test('スマホのスワイプはブラウザの左端を避け、水平操作を移動中に確定する', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoAndWaitForCatalog(page,'/change-log/');
   const trigger = page.locator('#open-categories');
   const drawer = page.locator('#category-drawer');
-  const swipe = (from, to, target) => page.evaluate(({from,to,target}) => {
-    const node = target === 'drawer' ? document.getElementById('category-drawer') : document;
-    const fire = (type,x,y) => {
-      const point = {clientX:x,clientY:y};
-      const event = new Event(type,{bubbles:true,cancelable:true});
-      Object.defineProperty(event,'touches',{value:type==='touchend'?[]:[point]});
-      Object.defineProperty(event,'changedTouches',{value:[point]});
-      node.dispatchEvent(event);
-    };
-    fire('touchstart',from[0],from[1]);
-    fire('touchmove',to[0],to[1]);
-    fire('touchend',to[0],to[1]);
-  }, {from,to,target});
-  await swipe([17,150],[33,255],'document');
+  const touch = (type, x, y, selector = '#main-content', count = 1) => page.evaluate(({type,x,y,selector,count}) => {
+    const node = document.querySelector(selector);
+    const point = {clientX:x,clientY:y};
+    const event = new Event(type,{bubbles:true,cancelable:true});
+    Object.defineProperty(event,'touches',{value:type==='touchend'||type==='touchcancel'?[]:Array(count).fill(point)});
+    Object.defineProperty(event,'changedTouches',{value:[point]});
+    node.dispatchEvent(event);
+    return event.defaultPrevented;
+  }, {type,x,y,selector,count});
+  const swipe = async (from, to, selector) => {
+    expect(await touch('touchstart',...from,selector)).toBe(false);
+    expect(await touch('touchmove',...to,selector)).toBe(false);
+    expect(await touch('touchend',...to,selector)).toBe(false);
+  };
+  // 画面端はOS・ブラウザの戻る操作に委ねる。
+  await swipe([5,150],[110,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([120,150],[230,154],'document');
+  await swipe([11,150],[130,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([16,210],[106,216],'document');
+  await swipe([97,150],[230,154]);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 垂直操作・斜め操作・短い操作では開かない。
+  await swipe([48,150],[60,255]);
+  await swipe([48,150],[123,220]);
+  await swipe([48,150],[85,152]);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await touch('touchstart',48,210);
+  await touch('touchmove',90,216);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await touch('touchcancel',90,216);
+  await touch('touchmove',138,216);
+  await touch('touchend',138,216);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 複数指・途中の縦方向ロック・ボタン操作を優先。
+  await touch('touchstart',48,210);
+  await touch('touchmove',60,215,'#main-content',2);
+  await touch('touchend',140,215);
+  await touch('touchstart',48,210);
+  await touch('touchmove',51,245);
+  await touch('touchmove',145,215);
+  await touch('touchend',145,215);
+  await swipe([48,26],[140,26],'#open-categories');
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 内側の補助スワイプで開く。閾値未満は閉じたまま、64px到達時点で開く。
+  expect(await touch('touchstart',48,210)).toBe(false);
+  expect(await touch('touchmove',111,216)).toBe(false);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  expect(await touch('touchmove',112,216)).toBe(false);
   await expect(trigger).toHaveAttribute('aria-expanded','true');
   await expect(drawer).not.toHaveClass(/-translate-x-full/);
-  await swipe([220,220],[122,223],'drawer');
+  // 同じ指の後続moveやendで再度開閉しない。
+  await touch('touchmove',48,210);
+  await touch('touchend',48,210);
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
+  // 閉じる操作は従来どおり指離しで確定する。
+  await touch('touchstart',220,220,'#category-drawer');
+  await touch('touchmove',122,223,'#category-drawer');
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
+  await touch('touchend',122,223,'#category-drawer');
   await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 開始範囲の両端（12px、96px）も有効。開いた後のcancelは開閉を取り消さない。
+  for (const x of [12,96]) {
+    await touch('touchstart',x,210);
+    await touch('touchmove',x+64,216);
+    await expect(trigger).toHaveAttribute('aria-expanded','true');
+    await touch('touchcancel',x+64,216);
+    await expect(trigger).toHaveAttribute('aria-expanded','true');
+    await page.keyboard.press('Escape');
+    await expect(trigger).toHaveAttribute('aria-expanded','false');
+  }
+  // touchendのみで閾値に達しても開かない。
+  await touch('touchstart',48,210);
+  await touch('touchend',138,216);
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // ボタン・Escape・背景クリックも維持。ページ全体で横パンを禁止しない。
+  expect(await page.locator('html').evaluate(el => getComputedStyle(el).overscrollBehaviorX)).toBe('auto');
+  expect(await page.locator('#main-content').evaluate(el => getComputedStyle(el).touchAction)).toBe('auto');
   await trigger.click();
   await page.keyboard.press('Escape');
   await expect(trigger).toHaveAttribute('aria-expanded','false');
+  await trigger.click();
+  await page.locator('#drawer-backdrop').click({position:{x:350,y:300}});
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+});
+
+// タッチ端末だけに表示する初回スワイプ案内の回帰検証。
+test.describe('スマホのスワイプガイド', () => {
+  test.use({ viewport: {width:390,height:844}, hasTouch:true, isMobile:true });
+  test('操作の邪魔をせず、初回の成功したスワイプで消え、再訪時も表示しない', async ({ page }) => {
+    await page.addInitScript(() => {
+      // 旧ガイドを完了したブラウザでも変更版を一度だけ案内する。
+      localStorage.setItem('yurulink-swipe-guide-completed-v1','1');
+      sessionStorage.setItem('yurulink-swipe-guide-animated-v1','1');
+      document.addEventListener('animationstart', e => {
+        if (e.animationName !== 'swipe-guide-nudge') return;
+        const style = getComputedStyle(e.target);
+        window.swipeGuideAnimation = {duration:style.animationDuration, iterations:style.animationIterationCount};
+      });
+    });
+    await page.goto('/', { waitUntil:'domcontentloaded' });
+    const guide = page.locator('#swipe-guide');
+    const trigger = page.locator('#open-categories');
+    await expect(guide).toBeVisible();
+    await expect(guide).toHaveAttribute('aria-hidden','true');
+    await expect(guide).toHaveCSS('pointer-events','none');
+    await expect.poll(() => page.evaluate(() => window.swipeGuideAnimation)).toEqual({duration:'1.3s',iterations:'3'});
+    await expect(guide).not.toHaveClass(/swipe-guide--animate/, {timeout:6000});
+    await expect(guide).toBeVisible();
+    const geometry = await guide.evaluate(el => {
+      const r = el.getBoundingClientRect();
+      const hit = document.elementFromPoint(r.left+4,r.top+20);
+      return {left:r.left, right:r.right, height:r.height, barWidth:getComputedStyle(el,'::before').flexBasis, blocks:el.contains(hit)};
+    });
+    expect(geometry).toEqual({left:12,right:68,height:132,barWidth:'14px',blocks:false});
+    const color = await guide.evaluate(el => getComputedStyle(el).color);
+    await page.locator('#theme-toggle').click();
+    expect(await guide.evaluate(el => getComputedStyle(el).color)).not.toBe(color);
+    // タップで開く間は非表示。スワイプ未習得のまま閉じると静止ガイドを再表示する。
+    await trigger.click();
+    await expect(guide).toBeHidden();
+    await page.keyboard.press('Escape');
+    await expect(guide).toBeVisible();
+    await expect(guide).not.toHaveClass(/swipe-guide--animate/);
+    await page.evaluate(() => {
+      function dispatch(type, x, y){
+        const event = new Event(type,{bubbles:true,cancelable:true});
+        Object.defineProperty(event,'touches',{value:type==='touchend'?[]:[{clientX:x,clientY:y}]});
+        Object.defineProperty(event,'changedTouches',{value:[{clientX:x,clientY:y}]});
+        document.getElementById('main-content').dispatchEvent(event);
+      }
+      dispatch('touchstart',12,300);
+      dispatch('touchmove',75,302); // 63pxは閾値未満
+      dispatch('touchend',75,302);
+    });
+    await expect(trigger).toHaveAttribute('aria-expanded','false');
+    await expect(guide).toBeVisible();
+    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v2'))).toBeNull();
+    await guide.evaluate(() => {
+      const node = document.getElementById('main-content');
+      for (const [type,x] of [['touchstart',12],['touchmove',76]]) {
+        const event = new Event(type,{bubbles:true,cancelable:true});
+        Object.defineProperty(event,'touches',{value:[{clientX:x,clientY:300}]});
+        Object.defineProperty(event,'changedTouches',{value:[{clientX:x,clientY:300}]});
+        node.dispatchEvent(event);
+      }
+    });
+    await expect(trigger).toHaveAttribute('aria-expanded','true');
+    await expect(guide).toBeHidden();
+    expect(await page.evaluate(() => localStorage.getItem('yurulink-swipe-guide-completed-v2'))).toBe('1');
+    await page.keyboard.press('Escape');
+    await expect(guide).toBeHidden();
+    await page.reload({waitUntil:'domcontentloaded'});
+    await expect(guide).toBeHidden();
+  });
+  test('視差・アニメーション軽減設定では静止し、デスクトップ幅では表示しない', async ({ page }) => {
+    await page.emulateMedia({reducedMotion:'reduce'});
+    await page.goto('/', {waitUntil:'domcontentloaded'});
+    const guide = page.locator('#swipe-guide');
+    await expect(guide).toBeVisible();
+    await expect(guide.locator('svg')).toHaveCSS('animation-name','none');
+    await page.screenshot({path:'test-results/evidence/swipe-guide-mobile.png'});
+    await page.setViewportSize({width:1280,height:800});
+    await expect(guide).toBeHidden();
+    await page.setViewportSize({width:390,height:844});
+    await expect(guide).toBeVisible();
+    await expect(guide.locator('svg')).toHaveCSS('animation-name','none');
+  });
 });

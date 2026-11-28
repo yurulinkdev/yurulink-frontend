@@ -1,6 +1,6 @@
 <header class="relative z-20 border-b border-line bg-panel/95 px-4 py-3 backdrop-blur sm:px-7 lg:sticky lg:top-0">
   <div class="flex flex-wrap items-center gap-3">
-    <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">{{ i18n "menuOpen" }}</span></button>
+    <button id="open-categories" type="button" aria-controls="category-drawer" aria-expanded="false" class="inline-flex min-h-11 min-w-11 shrink-0 items-center justify-center rounded-lg border border-line px-3 py-2 lg:hidden">☰ <span class="sr-only">{{ i18n "menuOpen" }}</span></button>
     <a class="inline-flex min-w-0 items-center gap-2 text-lg font-bold tracking-tight text-accent lg:hidden" href="{{ "" | relURL }}" data-reset-category aria-label="{{ i18n "siteHome" .Site.Title }}">
       <img src="{{ .Site.Params.brand_logo | relURL }}" alt="" width="36" height="36" class="h-9 w-9 shrink-0 object-contain" decoding="async">
       <span class="brand-wordmark">{{ .Site.Title }}</span>

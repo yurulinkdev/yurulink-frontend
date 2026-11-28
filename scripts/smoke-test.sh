@@ -1,8 +1,20 @@
 #!/usr/bin/env bash
 set -euo pipefail
 
+restore_changelog() {
+  if [[ -d "${CHANGELOG_BACKUP_DIR:-}" ]]; then
+    for file in "$CHANGELOG_BACKUP_DIR"/*.md; do
+      [[ -f "$file" ]] || continue
+      mv -- "$file" content/change-log/
+    done
+    rmdir "$CHANGELOG_BACKUP_DIR"
+    unset CHANGELOG_BACKUP_DIR
+  fi
+}
+
 cleanup() {
   rm -f content/about/smoke-ci.md content/change-log/2001-01.md
+  restore_changelog
   if [[ -d "${BACKUP_DIR:-}" ]]; then
     for file in catalog.json videos.json; do
       if [[ -f "$BACKUP_DIR/$file" ]]; then
@@ -86,8 +98,14 @@ grep -q 'og:title' public/about/smoke-ci/index.html
 echo "::endgroup::"
 
 echo "::group::Monthly changelog and sidebar"
-# テスト用記事は実公開の変更履歴に含めない。
+# 実データがあると古いテスト記事はサイドバーの最新5日から除外される。
+# CI作業ツリー内で月別記事のみ退避し、フィクスチャの順序・リンク・件数を検証する。
 test ! -e content/change-log/2001-01.md
+CHANGELOG_BACKUP_DIR="$(mktemp -d)"
+for file in content/change-log/[0-9][0-9][0-9][0-9]-[0-9][0-9].md; do
+  [[ -f "$file" ]] || continue
+  mv -- "$file" "$CHANGELOG_BACKUP_DIR/"
+done
 cat > content/change-log/2001-01.md <<'EOF'
 ---
 title: "2001年1月"
@@ -144,6 +162,7 @@ assert.ok(html.includes('下記のリンクを更新しました。'));
 EOF
 rm content/change-log/2001-01.md
 rm -rf public/change-log/2001-01
+restore_changelog
 npm run build
 test ! -e public/change-log/2001-01/index.html
 echo "::endgroup::"

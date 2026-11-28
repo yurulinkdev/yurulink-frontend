@@ -68,7 +68,7 @@ test('Stagingは公開するが検索エンジンへは登録しない', async (
   else await expect(page.locator('meta[name="robots"]')).toHaveAttribute('content', 'noindex, nofollow');
 });
 
-test('GA4はProduction専用・公式Xを表示', async ({ page }) => {
+test('GA4はProduction専用・公式XとサポートDiscordを表示', async ({ page }) => {
   await gotoAndWaitForCatalog(page,'/about/');
   const production = ['yurulink-frontend.pages.dev','www.yurulink.com'].includes(new URL(page.url()).hostname);
   if (production) {
@@ -79,8 +79,12 @@ test('GA4はProduction専用・公式Xを表示', async ({ page }) => {
   await expect(page.locator('script[src*="googletagmanager.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="cloudflareinsights.com"]')).toHaveCount(0);
   await expect(page.locator('script[src*="newrelic.com"]')).toHaveCount(0);
-  await expect(page.locator('footer nav[aria-label*="SNS"] a')).toHaveCount(1);
-  await expect(page.locator('footer nav[aria-label*="SNS"] a')).toHaveAttribute('href','https://x.com/YuruLinkDev');
+  const footerSocial = page.locator('footer nav[aria-label*="SNS"] a');
+  await expect(footerSocial).toHaveCount(2);
+  const discordLink = page.locator('footer nav[aria-label*="SNS"] a[href="https://discord.gg/nBbd2XPW9"]');
+  await expect(discordLink).toHaveText('サポートDiscord');
+  await expect(discordLink).toHaveAccessibleName('YuruLinkのDiscordを開く');
+  await expect(discordLink.locator('img')).toHaveAttribute('src', /\/icons\/social\/discord\.svg$/);
   const xLink = page.locator('footer nav[aria-label*="SNS"] a[href="https://x.com/YuruLinkDev"]');
   await expect(xLink).toHaveText('@YuruLinkDev');
   await expect(xLink).toHaveAccessibleName('YuruLinkのXを開く');
