@@ -472,7 +472,7 @@ test('type filter: multi-select and URL restoration', async ({ page }) => {
   await expect(page).not.toHaveURL(/types=/);
 });
 
-test('mobile header and swipe: inset gesture opens navigation and escape closes it', async ({ page }) => {
+test('mobile header and swipe: inset touchmove opens navigation and escape closes it', async ({ page }) => {
   await page.setViewportSize({ width: 390, height: 844 });
   await openCatalog(page);
   await expect(page.locator('header').getByRole('link', { name: 'YuruLink トップページ' })).toBeVisible();
@@ -489,7 +489,7 @@ test('mobile header and swipe: inset gesture opens navigation and escape closes 
       document.getElementById('main-content').dispatchEvent(event);
     };
     dispatch('touchstart', 48, 240);
-    dispatch('touchend', 124, 246);
+    dispatch('touchmove', 124, 246);
   });
   await expect(page.locator('#open-categories')).toHaveAttribute('aria-expanded', 'true');
   await expect(page.locator('#category-drawer')).not.toHaveClass(/-translate-x-full/);

@@ -25,7 +25,8 @@
   };
   if (drawer) drawer.inert = isMobile();
   // 画面の物理端はOS・ブラウザの戻る操作に譲る。内側だけを補助ジェスチャーにする。
-  // touchstart/moveではブラウザの既定動作を止めず、指を離した時点で確定する。
+  // 開く操作は移動中に閾値を満たした時点で確定する。閉じる操作は指を離した時点で確定する。
+  // touchイベントの既定動作は止めず、画面端のブラウザ操作を優先する。
   const browserEdge = 32;
   const menuEdge = 96;
   const swipeDistance = 64;
@@ -42,13 +43,18 @@
   };
   let swipe = null;
   const resetSwipe = () => { swipe = null; };
-  const cancelSwipe = event => {
+  const moveSwipe = event => {
     if (!swipe || event.touches.length !== 1 || !isMobile()) { resetSwipe(); return; }
     const touch = event.touches[0];
     const dx = (touch.clientX - swipe.x) * swipe.direction;
     const dy = Math.abs(touch.clientY - swipe.y);
     // 先に縦方向へ動いた操作や、反対方向へ動いた操作は途中から開閉へ変えない。
-    if (dx < -directionSlop || (dy > directionSlop && dy >= Math.abs(dx))) resetSwipe();
+    if (dx < -directionSlop || (dy > directionSlop && dy >= Math.abs(dx))) { resetSwipe(); return; }
+    if (swipe.direction === 1 && !drawerOpen && dx >= swipeDistance && mostlyHorizontal(dx, dy)) {
+      // 一度開いた操作は消費済みとし、同じ指の後続イベントで再度開閉しない。
+      resetSwipe();
+      toggle(true);
+    }
   };
   document.addEventListener('touchstart', event => {
     resetSwipe();
@@ -62,16 +68,15 @@
       swipe = {x:touch.clientX, y:touch.clientY, direction:1};
     }
   }, {passive:true});
-  document.addEventListener('touchmove', cancelSwipe, {passive:true});
+  document.addEventListener('touchmove', moveSwipe, {passive:true});
   document.addEventListener('touchend', event => {
     const start = swipe;
     resetSwipe();
-    if (!start || !isMobile() || event.touches.length !== 0 || event.changedTouches.length !== 1) return;
+    if (!start || start.direction !== -1 || !drawerOpen || !isMobile() || event.touches.length !== 0 || event.changedTouches.length !== 1) return;
     const touch = event.changedTouches[0];
     const dx = touch.clientX - start.x;
     const dy = touch.clientY - start.y;
-    if (mostlyHorizontal(dx,dy) && dx * start.direction >= swipeDistance &&
-        drawerOpen === (start.direction === -1)) toggle(start.direction === 1);
+    if (mostlyHorizontal(dx, dy) && dx <= -swipeDistance) toggle(false);
   }, {passive:true});
   document.addEventListener('touchcancel', resetSwipe, {passive:true});
   window.addEventListener('pagehide', resetSwipe);

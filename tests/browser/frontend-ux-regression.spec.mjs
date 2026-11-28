@@ -95,7 +95,7 @@ test('更新履歴の正規URLは/change-log/、旧URLは廃止', async ({ page 
   }
 });
 
-test('スマホのスワイプはブラウザの左端を避け、水平操作を指離しで確定する', async ({ page }) => {
+test('スマホのスワイプはブラウザの左端を避け、水平操作を移動中に確定する', async ({ page }) => {
   await page.setViewportSize({width:390,height:844});
   await gotoAndWaitForCatalog(page,'/change-log/');
   const trigger = page.locator('#open-categories');
@@ -119,7 +119,7 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   await swipe([31,150],[130,153]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await swipe([120,150],[230,154]);
+  await swipe([97,150],[230,154]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   // 垂直操作・斜め操作・短い操作では開かない。
   await swipe([48,150],[60,255]);
@@ -127,10 +127,11 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   await swipe([48,150],[85,152]);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   await touch('touchstart',48,210);
-  await touch('touchmove',130,216);
+  await touch('touchmove',90,216);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await touch('touchcancel',130,216);
-  await touch('touchend',130,216);
+  await touch('touchcancel',90,216);
+  await touch('touchmove',138,216);
+  await touch('touchend',138,216);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   // 複数指・途中の縦方向ロック・ボタン操作を優先。
   await touch('touchstart',48,210);
@@ -142,14 +143,36 @@ test('スマホのスワイプはブラウザの左端を避け、水平操作�
   await touch('touchend',145,215);
   await swipe([48,26],[140,26],'#open-categories');
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  // 内側の補助スワイプで開く。touchmove時は表示を変えない。
-  await touch('touchstart',48,210);
-  await touch('touchmove',138,216);
+  // 内側の補助スワイプで開く。閾値未満は閉じたまま、64px到達時点で開く。
+  expect(await touch('touchstart',48,210)).toBe(false);
+  expect(await touch('touchmove',111,216)).toBe(false);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
-  await touch('touchend',138,216);
+  expect(await touch('touchmove',112,216)).toBe(false);
   await expect(trigger).toHaveAttribute('aria-expanded','true');
   await expect(drawer).not.toHaveClass(/-translate-x-full/);
-  await swipe([220,220],[122,223],'#category-drawer');
+  // 同じ指の後続moveやendで再度開閉しない。
+  await touch('touchmove',48,210);
+  await touch('touchend',48,210);
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
+  // 閉じる操作は従来どおり指離しで確定する。
+  await touch('touchstart',220,220,'#category-drawer');
+  await touch('touchmove',122,223,'#category-drawer');
+  await expect(trigger).toHaveAttribute('aria-expanded','true');
+  await touch('touchend',122,223,'#category-drawer');
+  await expect(trigger).toHaveAttribute('aria-expanded','false');
+  // 開始範囲の両端（32px、96px）も有効。開いた後のcancelは開閉を取り消さない。
+  for (const x of [32,96]) {
+    await touch('touchstart',x,210);
+    await touch('touchmove',x+64,216);
+    await expect(trigger).toHaveAttribute('aria-expanded','true');
+    await touch('touchcancel',x+64,216);
+    await expect(trigger).toHaveAttribute('aria-expanded','true');
+    await page.keyboard.press('Escape');
+    await expect(trigger).toHaveAttribute('aria-expanded','false');
+  }
+  // touchendのみで閾値に達しても開かない。
+  await touch('touchstart',48,210);
+  await touch('touchend',138,216);
   await expect(trigger).toHaveAttribute('aria-expanded','false');
   // ボタン・Escape・背景クリックも維持。ページ全体で横パンを禁止しない。
   expect(await page.locator('html').evaluate(el => getComputedStyle(el).overscrollBehaviorX)).toBe('auto');
